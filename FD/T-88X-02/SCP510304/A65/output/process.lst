@@ -1,0 +1,39 @@
+C51 COMPILER V9.52.0.0   PROCESS                                                           12/19/2018 22:22:37 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE PROCESS
+OBJECT MODULE PLACED IN .\output\process.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE src\process.c ROM(SMALL) BROWSE INCDIR(.\inc;.\src) DEBUG OBJECTEXTEND P
+                    -RINT(.\output\process.lst) TABS(2) OBJECT(.\output\process.obj)
+
+line level    source
+
+   1          #include "mytype.h"
+   2          #include "process.h"
+   3          
+   4          
+   5          S_IR g_Ir;
+   6          void Time1_Close(void)
+   7          {
+   8   1          if (TF1)
+   9   1          {
+  10   2              TF1 = 0;
+  11   2              TR1 = 0;
+  12   2              g_Ir.Buff = 0;
+  13   2              g_Ir.LastCount = 0;
+  14   2          }
+  15   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     13    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

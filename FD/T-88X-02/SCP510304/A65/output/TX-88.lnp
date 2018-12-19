@@ -1,0 +1,10 @@
+".\output\STARTUP.obj",
+".\output\init.obj",
+".\output\interrupt.obj",
+".\output\process.obj",
+".\output\main.obj",
+".\output\key.obj",
+".\output\PowerUp.obj",
+".\output\hdmidet.obj" 
+TO ".\output\TX-88" 
+PRINT(".\output\TX-88.m51")

@@ -1,0 +1,90 @@
+C51 COMPILER V9.52.0.0   HDMIDET                                                           12/19/2018 22:22:38 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE HDMIDET
+OBJECT MODULE PLACED IN .\output\hdmidet.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE src\hdmidet.c ROM(SMALL) BROWSE INCDIR(.\inc;.\src) DEBUG OBJECTEXTEND P
+                    -RINT(.\output\hdmidet.lst) TABS(2) OBJECT(.\output\hdmidet.obj)
+
+line level    source
+
+   1          #include "mytype.h"
+   2          #include "process.h"
+   3          #include "key.h"
+   4          #include "powerup.h"
+   5          #include "hdmidet.h"
+   6          
+   7          UINT8  hdmi_wkup = 0;
+   8          UINT8  hdmi_wkup_cnt = 0;
+   9          UINT16 hdmi_cec_det_delay = 0;
+  10          UINT16 hdmi_cec_pulse_interval = 0;
+  11          
+  12          
+  13          void CEC_init(void)
+  14          {
+  15   1        P1MDL &= 0xFC;//P10
+  16   1        P1MDL |= 0x01;//P10上拉输入
+  17   1      }
+  18          
+  19          void HDMI_CEC_Det(void)
+  20          {
+  21   1        if(hdmi_cec_det_delay>0)
+  22   1          return;
+  23   1        if(!HDMI_CEC_DET_PIN)
+  24   1        {
+  25   2          if(hdmi_wkup == 0)
+  26   2          {
+  27   3            hdmi_wkup = 1;
+  28   3            if(hdmi_cec_pulse_interval <= 0)
+  29   3            {
+  30   4              hdmi_wkup_cnt = 0;
+  31   4            }
+  32   3            hdmi_wkup_cnt ++;
+  33   3            if(hdmi_wkup_cnt > 12)
+  34   3            {
+  35   4              hdmi_wkup_cnt = 0;
+  36   4              hdmi_cec_det_delay = 58;//7s:140
+  37   4              //PowerOn
+  38   4              HDMIPower();
+  39   4            }
+  40   3          }
+  41   2        }
+  42   1        else
+  43   1        {
+  44   2          hdmi_wkup = 0;
+  45   2          hdmi_cec_pulse_interval = 5;
+  46   2        }
+  47   1      }
+  48          
+  49          void DelayEnableHdmiDet(void)
+  50          {
+  51   1        if(!POWER_ON_OFF)
+  52   1        {
+  53   2          if(hdmi_cec_det_delay > 0)
+  54   2          {
+C51 COMPILER V9.52.0.0   HDMIDET                                                           12/19/2018 22:22:38 PAGE 2   
+
+  55   3            hdmi_cec_det_delay--;
+  56   3          }
+  57   2      
+  58   2          if(hdmi_cec_pulse_interval > 0)
+  59   2          {
+  60   3            hdmi_cec_pulse_interval --;
+  61   3          }
+  62   2        }
+  63   1      }
+  64          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    113    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

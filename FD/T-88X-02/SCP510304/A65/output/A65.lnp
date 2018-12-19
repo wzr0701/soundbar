@@ -1,0 +1,9 @@
+".\output\STARTUP.obj",
+".\output\init.obj",
+".\output\interrupt.obj",
+".\output\process.obj",
+".\output\main.obj",
+".\output\key.obj",
+".\output\PowerUp.obj" 
+TO ".\output\A65" 
+PRINT(".\output\A65.m51")

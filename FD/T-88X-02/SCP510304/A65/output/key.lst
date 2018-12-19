@@ -1,0 +1,402 @@
+C51 COMPILER V9.52.0.0   KEY                                                               12/19/2018 22:22:38 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE KEY
+OBJECT MODULE PLACED IN .\output\key.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE src\key.c ROM(SMALL) BROWSE INCDIR(.\inc;.\src) DEBUG OBJECTEXTEND PRINT
+                    -(.\output\key.lst) TABS(2) OBJECT(.\output\key.obj)
+
+line level    source
+
+   1          #include "key.h"
+   2          #include "powerup.h"
+   3          #include "hdmidet.h"
+   4          KeyForm keyattr;
+   5          SysRun run;
+   6          
+   7          
+   8          
+   9          /****************************************************************************
+  10           * Name: led_init
+  11           *
+  12           * Description:
+  13           *   按键初始化
+  14           *
+  15           * Parameters:
+  16           *
+  17           * Returned Value:
+  18           *
+  19           * Assumptions:
+  20           *
+  21           ****************************************************************************/
+  22          void key_init(void)
+  23          {
+  24   1        P1MDL &= 0x3f;
+  25   1        P1MDL |= 0x40;//P13上拉输入
+  26   1      }
+  27          void RunScan(void)
+  28          {
+  29   1        run.cnt++;
+  30   1        run.f1ms = 1;
+  31   1        if(run.cnt%10==0)
+  32   1        {
+  33   2          run.f10ms = 1;
+  34   2        }
+  35   1      
+  36   1        if(run.cnt%20==0)
+  37   1        {
+  38   2          run.f20ms = 1;
+  39   2      
+  40   2        }
+  41   1      
+  42   1        if(run.cnt%50==0)
+  43   1        {
+  44   2          run.f50ms = 1;
+  45   2        }
+  46   1      
+  47   1        if(run.cnt%100==0)
+  48   1        {
+  49   2          run.f100ms = 1;
+  50   2        }
+  51   1      
+  52   1        if(run.cnt%1000==0)
+  53   1        {
+  54   2          run.f1000ms = 1;
+C51 COMPILER V9.52.0.0   KEY                                                               12/19/2018 22:22:38 PAGE 2   
+
+  55   2        }
+  56   1      
+  57   1        if(run.cnt==5000)
+  58   1        {//10s
+  59   2          run.cnt = 0;
+  60   2        }
+  61   1      
+  62   1      }
+  63          void RunHandler(void)
+  64          {
+  65   1        if(run.f1ms)
+  66   1        {
+  67   2          run.f1ms = 0;
+  68   2          IrPower();
+  69   2        }
+  70   1      
+  71   1        if(run.f10ms)
+  72   1        {
+  73   2          run.f10ms = 0;
+  74   2          KeyScan();
+  75   2        }
+  76   1      
+  77   1        if(run.f20ms)
+  78   1        {
+  79   2          run.f20ms = 0;
+  80   2          DelayEnablePowerOFF();//定时减去延时间值
+  81   2          ProcessPowerUp();
+  82   2          ProcessPowerDown();
+  83   2        }
+  84   1      
+  85   1        if(run.f50ms)
+  86   1        {
+  87   2          run.f50ms = 0;
+  88   2          DelayEnableHdmiDet();
+  89   2        }
+  90   1      
+  91   1        if(run.f100ms)
+  92   1        {
+  93   2          run.f100ms = 0;
+  94   2        }
+  95   1      
+  96   1        if(run.f1000ms)
+  97   1        {
+  98   2          run.f1000ms = 0;
+  99   2          //AutoPowerUp();
+ 100   2        }
+ 101   1      }
+ 102          /****************************************************************************
+ 103           * Name: led_init
+ 104           *
+ 105           * Description:
+ 106           *   按键解析
+ 107           *
+ 108           * Parameters:
+ 109           *
+ 110           * Returned Value:
+ 111           *
+ 112           * Assumptions:
+ 113           *
+ 114           ****************************************************************************/
+ 115          
+ 116          void KeyAnalysis(UINT8 key)
+C51 COMPILER V9.52.0.0   KEY                                                               12/19/2018 22:22:38 PAGE 3   
+
+ 117          {
+ 118   1      
+ 119   1        UINT8 i;
+ 120   1        for(i=0;i<KEY_NUM;i++)//KEY_MAX_CHN按键通道数
+ 121   1        {
+ 122   2          if(key & (1<<i))
+ 123   2          {// 按下
+ 124   3              if(keyattr.key[i].cnt==0)
+ 125   3              {
+ 126   4                keyattr.key[i].state = 1;
+ 127   4                //keyattr.key[i].ShortPressDownEvent= 1;
+ 128   4              }
+ 129   3          }
+ 130   2          else
+ 131   2          {//弹起
+ 132   3            if(keyattr.key[i].state)
+ 133   3            {
+ 134   4              if(keyattr.key[i].cnt>=1&&keyattr.key[i].cnt<=100)
+ 135   4              {
+ 136   5                keyattr.key[i].ShortPressUpEvent= 1;
+ 137   5              }
+ 138   4              else if(keyattr.key[i].cnt>100&&keyattr.key[i].cnt<=500)
+ 139   4              {
+ 140   5      
+ 141   5              }
+ 142   4              keyattr.key[i].state = 0;
+ 143   4              keyattr.key[i].cnt = 0;
+ 144   4            }
+ 145   3          }
+ 146   2        }
+ 147   1      }
+ 148          /****************************************************************************
+ 149           * Name: led_init
+ 150           *
+ 151           * Description:
+ 152           *   读取按键
+ 153           *
+ 154           * Parameters:
+ 155           *
+ 156           * Returned Value:
+ 157           *
+ 158           * Assumptions:
+ 159           *
+ 160           ****************************************************************************/
+ 161          
+ 162          UINT8 key_read(void)
+ 163          {
+ 164   1        UINT8 value = 0;
+ 165   1        UINT8 key = 0;
+ 166   1      
+ 167   1        if(POWER_KEY)
+ 168   1        {
+ 169   2          value |= 1<<0;
+ 170   2        }
+ 171   1        return value;
+ 172   1      }
+ 173          UINT8 Debounce(UINT8 *key)
+ 174          {
+ 175   1        static UINT8 step = 0;
+ 176   1        static UINT8 keyold = 0;
+ 177   1        UINT8 value = 0;
+ 178   1        switch(step)
+C51 COMPILER V9.52.0.0   KEY                                                               12/19/2018 22:22:38 PAGE 4   
+
+ 179   1        {
+ 180   2          case 0:
+ 181   2            keyold = key_read();
+ 182   2            step = 1;
+ 183   2            break;
+ 184   2          case 1:
+ 185   2            if(keyold == key_read())
+ 186   2            {
+ 187   3              step = 2;
+ 188   3            }
+ 189   2            else
+ 190   2            {
+ 191   3              keyold = 0;
+ 192   3              step = 0;
+ 193   3            }
+ 194   2            break;
+ 195   2          case 2:
+ 196   2            step = 0;
+ 197   2            if(keyold==key_read())
+ 198   2            {
+ 199   3              *key = keyold;
+ 200   3              keyold = 0;
+ 201   3              value = 1;
+ 202   3            }
+ 203   2            else
+ 204   2            {
+ 205   3              keyold = 0;
+ 206   3            }
+ 207   2            break;
+ 208   2          default:
+ 209   2            break;
+ 210   2        }
+ 211   1        return value;
+ 212   1      }
+ 213          /****************************************************************************
+ 214           * Name: led_init
+ 215           *
+ 216           * Description:
+ 217           *   按键扫描
+ 218           *
+ 219           * Parameters:
+ 220           *
+ 221           * Returned Value:
+ 222           *
+ 223           * Assumptions:
+ 224           *
+ 225           ****************************************************************************/
+ 226          
+ 227          void KeyScan(void)
+ 228          {
+ 229   1        UINT8 key=0,keytmp=0;
+ 230   1        static UINT8 keyold =0;
+ 231   1      
+ 232   1        if(Debounce(&key))
+ 233   1        {
+ 234   2          keytmp = key^keyold;
+ 235   2          if(keytmp)
+ 236   2          {
+ 237   3            KeyAnalysis(key);
+ 238   3          }
+ 239   2          keyold = key;
+ 240   2        }
+C51 COMPILER V9.52.0.0   KEY                                                               12/19/2018 22:22:38 PAGE 5   
+
+ 241   1        KeyPressCnt();
+ 242   1        KeyHandler();
+ 243   1      }
+ 244          /****************************************************************************
+ 245           * Name: led_init
+ 246           *
+ 247           * Description:
+ 248           *   按键计数
+ 249           *
+ 250           * Parameters:
+ 251           *
+ 252           * Returned Value:
+ 253           *
+ 254           * Assumptions:
+ 255           *
+ 256           ****************************************************************************/
+ 257          
+ 258          void KeyPressCnt(void)
+ 259          {
+ 260   1        UINT8 i;
+ 261   1        for(i=0;i<KEY_NUM;i++)//KEY_MAX_CHN按键通道数
+ 262   1        {
+ 263   2          if(keyattr.key[i].state)
+ 264   2          {
+ 265   3            keyattr.key[i].cnt++;
+ 266   3            if(keyattr.key[i].cnt==40)
+ 267   3            {
+ 268   4              keyattr.key[i].LongPressDownEvent = 1;
+ 269   4            }
+ 270   3            else if(keyattr.key[i].cnt >= 201)
+ 271   3            {
+ 272   4              keyattr.key[i].cnt = 201;
+ 273   4            }
+ 274   3          }
+ 275   2          else
+ 276   2          {
+ 277   3            keyattr.key[i].cnt = 0;
+ 278   3          }
+ 279   2        }
+ 280   1      }
+ 281          /****************************************************************************
+ 282           * Name: led_init
+ 283           *
+ 284           * Description:
+ 285           *   按键触发事件
+ 286           *
+ 287           * Parameters:
+ 288           *
+ 289           * Returned Value:
+ 290           *
+ 291           * Assumptions:
+ 292           *
+ 293           ****************************************************************************/
+ 294          
+ 295          void KeyHandler(void)
+ 296          {
+ 297   1        if(keyattr.key[0].ShortPressUpEvent)
+ 298   1        {
+ 299   2          keyattr.key[0].ShortPressUpEvent = 0;
+ 300   2        }
+ 301   1      
+ 302   1        if(keyattr.key[0].LongPressDownEvent)
+C51 COMPILER V9.52.0.0   KEY                                                               12/19/2018 22:22:38 PAGE 6   
+
+ 303   1        {//长按开机 关机
+ 304   2          keyattr.key[0].LongPressDownEvent = 0;
+ 305   2          if(POWER_ON_OFF)
+ 306   2          {//刚才已经开机了
+ 307   3            if(DelayON)
+ 308   3            {
+ 309   4              return;
+ 310   4            }
+ 311   3            ENABLE_POWER_ON = 0; //如果在开机则退出
+ 312   3            ENABLE_POWER_OFF = 1; //关机使能
+ 313   3            DelayOFF = DELAY_OFF_TIME;// 延时关机
+ 314   3      
+ 315   3            //PowerLED(0);
+ 316   3            //hdmi_cec_det_delay = 0;
+ 317   3          }
+ 318   2          else
+ 319   2          {//刚才已经关机了
+ 320   3            if(DelayOFF)
+ 321   3            {//刚关机不久，不运行太快触发开机，否则soundbar出现po声
+ 322   4              return;
+ 323   4            }
+ 324   3            ENABLE_POWER_ON = 1; //开机使能
+ 325   3            ENABLE_POWER_OFF = 0; //在开机时则退出关机
+ 326   3            //PowerLED(1);
+ 327   3            //hdmi_cec_det_delay = 1;
+ 328   3          }
+ 329   2          step = 0;
+ 330   2          cnt = 0;
+ 331   2        }
+ 332   1      }
+ 333          
+ 334          
+ 335          
+ 336          
+ 337          
+ 338          
+ 339          
+ 340          
+ 341          
+ 342          
+ 343          
+ 344          
+ 345          
+ 346          
+ 347          
+ 348          
+ 349          
+ 350          
+ 351          
+ 352          
+ 353          
+ 354          
+ 355          
+ 356          
+ 357          
+ 358          
+ 359          
+ 360          
+ 361          
+ 362          
+ 363          
+ 364          
+C51 COMPILER V9.52.0.0   KEY                                                               12/19/2018 22:22:38 PAGE 7   
+
+ 365          
+ 366          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    571    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     11       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

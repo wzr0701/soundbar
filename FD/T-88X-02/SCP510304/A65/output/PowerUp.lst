@@ -1,0 +1,234 @@
+C51 COMPILER V9.52.0.0   POWERUP                                                           12/19/2018 22:22:38 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE POWERUP
+OBJECT MODULE PLACED IN .\output\PowerUp.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE src\PowerUp.c ROM(SMALL) BROWSE INCDIR(.\inc;.\src) DEBUG OBJECTEXTEND P
+                    -RINT(.\output\PowerUp.lst) TABS(2) OBJECT(.\output\PowerUp.obj)
+
+line level    source
+
+   1          #include "PowerUp.h"
+   2          #include "process.h"
+   3          #include "hdmidet.h"
+   4          #include <string.h>
+   5          UINT8 ENABLE_POWER_ON = 0;
+   6          UINT8 ENABLE_POWER_OFF = 0;
+   7          UINT8 POWER_ON_OFF = 0; //开机或者关机标志 1 开机 0 关机
+   8          UINT16 DelayOFF = 0; //检测到按键长按时，启动延时触发关机任务，目的是等soundbar 处理关机任务，否则出现PO声
+   9          UINT16 DelayON = 0;
+  10          UINT8 step = 0;
+  11          UINT16 cnt = 0;
+  12          UINT8 AutoPowerUpFlag = 1;
+  13          
+  14          
+  15          void AutoPowerUp(void)
+  16          {
+  17   1        if(AutoPowerUpFlag)
+  18   1        {
+  19   2          ENABLE_POWER_ON = 1;
+  20   2          AutoPowerUpFlag = 0;
+  21   2        }
+  22   1      }
+  23          void HDMIPower(void)
+  24          {
+  25   1        if(!POWER_ON_OFF)
+  26   1        {//已经关机机，现在开机
+  27   2          if(DelayOFF)
+  28   2          {//刚关机丢弃本次操作
+  29   3            return;
+  30   3          }
+  31   2          DelayON = 100;//开机时延时一段时间，关机键按下时才有效
+  32   2          ENABLE_POWER_ON = 1; //开机使能
+  33   2          ENABLE_POWER_OFF = 0; //在开机时则退出关机
+  34   2          //PowerLED(1);
+  35   2          step = 0;
+  36   2          cnt = 0;
+  37   2        }
+  38   1      }
+  39          void IrPower(void)
+  40          {
+  41   1        if(g_Ir.OK)
+  42   1        {//红外有接收
+  43   2          memset((char*)&g_Ir,0,sizeof(g_Ir));
+  44   2          if(POWER_ON_OFF)
+  45   2          {//已经开机，现在关机
+  46   3            if(DelayON>0)
+  47   3            {//刚开机不久，不能这么快关机
+  48   4              return;
+  49   4            }
+  50   3            DelayOFF = DELAY_OFF_TIME; //延时关机
+  51   3            ENABLE_POWER_ON = 0; //如果在开机则退出
+  52   3            ENABLE_POWER_OFF = 1; //关机
+  53   3            //PowerLED(0);
+  54   3            step = 0;
+C51 COMPILER V9.52.0.0   POWERUP                                                           12/19/2018 22:22:38 PAGE 2   
+
+  55   3            cnt = 0;
+  56   3          }
+  57   2          else
+  58   2          {//已经关机机，现在开机
+  59   3            if(DelayOFF)
+  60   3            {//刚关机丢弃本次操作
+  61   4              return;
+  62   4            }
+  63   3            DelayON = 100;//开机时延时一段时间，关机键按下时才有效
+  64   3            ENABLE_POWER_ON = 1; //开机使能
+  65   3            ENABLE_POWER_OFF = 0; //在开机时则退出关机
+  66   3            //PowerLED(1);
+  67   3            step = 0;
+  68   3            cnt = 0;
+  69   3          }
+  70   2        }
+  71   1      }
+  72          void DelayEnablePowerOFF(void)
+  73          {
+  74   1        if(DelayON>0)
+  75   1        {
+  76   2          DelayON--;
+  77   2        }
+  78   1      }
+  79          void ProcessPowerUp(void)
+  80          {
+  81   1        if(!ENABLE_POWER_ON)
+  82   1        {//不是开机返回
+  83   2          return;
+  84   2        }
+  85   1        POWER_ON_OFF = 1;//已经开机
+  86   1        switch(step)
+  87   1        {
+  88   2          case 0:
+  89   2          {
+  90   3            if(++cnt<DELAY_TIME+10)
+  91   3            {
+  92   4              //PowerLED(1);
+  93   4              Power1_2V(1);//高电平导通
+  94   4              Power3_3V(1);
+  95   4              Reset(0);
+  96   4            }
+  97   3            else
+  98   3            {
+  99   4              cnt = 0;
+ 100   4              step = 1;
+ 101   4            }
+ 102   3            break;
+ 103   3          }
+ 104   2          case 1:
+ 105   2          {
+ 106   3            if(++cnt<DELAY_TIME+11)
+ 107   3            {
+ 108   4              Power3_3V(0);
+ 109   4            }
+ 110   3            else
+ 111   3            {
+ 112   4              cnt = 0;
+ 113   4              step =2;
+ 114   4            }
+ 115   3            break;
+ 116   3          }
+C51 COMPILER V9.52.0.0   POWERUP                                                           12/19/2018 22:22:38 PAGE 3   
+
+ 117   2          case 2:
+ 118   2          {
+ 119   3            if(++cnt<DELAY_TIME)
+ 120   3            {
+ 121   4              Reset(1);
+ 122   4            }
+ 123   3            else
+ 124   3            {
+ 125   4              cnt = 0;
+ 126   4              step =3;
+ 127   4            }
+ 128   3            break;
+ 129   3          }
+ 130   2          case 3:
+ 131   2          {
+ 132   3            if(++cnt<DELAY_TIME)
+ 133   3            {
+ 134   4              Reset(0);
+ 135   4            }
+ 136   3            else
+ 137   3            {
+ 138   4              cnt = 0;
+ 139   4              step =4;
+ 140   4            }
+ 141   3            break;
+ 142   3          }
+ 143   2          case 4:
+ 144   2          {
+ 145   3            if(++cnt<DELAY_TIME)
+ 146   3            {
+ 147   4              Reset(1);
+ 148   4            }
+ 149   3            else
+ 150   3            {//上电时序完成
+ 151   4              //Power14V(1);
+ 152   4              cnt = 0;
+ 153   4              step =6;
+ 154   4      
+ 155   4            }
+ 156   3            break;
+ 157   3          }
+ 158   2        }
+ 159   1      }
+ 160          void ProcessPowerDown(void)
+ 161          {
+ 162   1        if(!ENABLE_POWER_OFF)
+ 163   1        {//不是开机返回
+ 164   2          return;
+ 165   2        }
+ 166   1        if(DelayOFF>0)
+ 167   1        {//延时关机，等soundbar 处理完关机任务
+ 168   2          DelayOFF--;
+ 169   2          return;
+ 170   2        }
+ 171   1        switch(step)
+ 172   1        {
+ 173   2          case 0:
+ 174   2          {
+ 175   3            if(++cnt<DELAY_TIME)
+ 176   3            {
+ 177   4              //PowerLED(0);
+ 178   4              Power3_3V(1); //关闭电源
+C51 COMPILER V9.52.0.0   POWERUP                                                           12/19/2018 22:22:38 PAGE 4   
+
+ 179   4              Reset(0);
+ 180   4            }
+ 181   3            else
+ 182   3            {//上电时序完成
+ 183   4              cnt = 0;
+ 184   4              step =1;
+ 185   4            }
+ 186   3            break;
+ 187   3          }
+ 188   2          case 1:
+ 189   2          {
+ 190   3            Power1_2V(0);
+ 191   3            step =2;
+ 192   3            break;
+ 193   3          }
+ 194   2          case 2:
+ 195   2          {
+ 196   3            step =3;
+ 197   3            ENABLE_POWER_OFF = 0; //关机完成 ，取消使能标志
+ 198   3            POWER_ON_OFF = 0;//已经关机
+ 199   3            hdmi_cec_det_delay = 58;
+ 200   3            //Power14V(0);
+ 201   3            break;
+ 202   3          }
+ 203   2        }
+ 204   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    399    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     11    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
