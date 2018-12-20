@@ -1,4 +1,4 @@
-BL51 BANKED LINKER/LOCATER V6.22                                                        12/20/2018  13:55:13  PAGE 1
+BL51 BANKED LINKER/LOCATER V6.22                                                        12/20/2018  15:54:06  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
@@ -59,7 +59,7 @@ LINK MAP OF MODULE:  .\output\TX-88 (?C_STARTUP)
             CODE    0573H     0039H     UNIT         ?C_INITSEG
             CODE    05ACH     0039H     INBLOCK      ?PR?KEYHANDLER?KEY
             CODE    05E5H     002BH     INBLOCK      ?PR?DELAYENABLEHDMIDET?HDMIDET
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 2
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 2
 
 
             CODE    0610H     0027H     INBLOCK      ?PR?SYSTEM_INIT?INIT
@@ -119,7 +119,7 @@ SEGMENT                                   DATA_GROUP
   +--> ?PR?KEYHANDLER?KEY
 
 ?PR?_DEBOUNCE?KEY                       -----    -----
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 3
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 3
 
 
   +--> ?PR?KEY_READ?KEY
@@ -179,7 +179,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   D:0084H         PUBLIC        WDTCLR0
   D:00B0H         PUBLIC        P3
   D:00EBH         PUBLIC        WDTCLR1
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 4
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 4
 
 
   C:06E0H         PUBLIC        INIT_WDT
@@ -239,7 +239,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   C:06A0H         LINE#         32
   C:06A2H         LINE#         33
   C:06A5H         LINE#         34
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 5
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 5
 
 
   C:06A8H         LINE#         35
@@ -299,7 +299,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   D:0090H         PUBLIC        P1
   D:00A0H         PUBLIC        P2
   D:00B0H         PUBLIC        P3
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 6
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 6
 
 
   B:0088H.7       PUBLIC        TF1
@@ -359,7 +359,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   C:00BCH         LINE#         55
   C:00BEH         LINE#         56
   C:00D4H         LINE#         57
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 7
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 7
 
 
   C:00D4H         LINE#         58
@@ -419,7 +419,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   -------         ENDPROC       MAIN
   -------         ENDMOD        MAIN
 
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 8
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 8
 
 
   -------         MODULE        KEY
@@ -479,7 +479,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   C:03B9H         LINE#         60
   C:03B9H         LINE#         62
   -------         ENDPROC       RUNSCAN
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 9
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 9
 
 
   -------         PROC          RUNHANDLER
@@ -539,7 +539,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   C:0304H         LINE#         134
   C:0322H         LINE#         135
   C:0322H         LINE#         136
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 10
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 10
 
 
   C:032CH         LINE#         137
@@ -599,7 +599,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   C:04DDH         LINE#         196
   C:04E0H         LINE#         197
   C:04E6H         LINE#         198
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 11
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 11
 
 
   C:04E6H         LINE#         199
@@ -659,7 +659,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   C:0402H         LINE#         274
   C:0404H         LINE#         276
   C:0404H         LINE#         277
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 12
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 12
 
 
   C:0410H         LINE#         278
@@ -719,7 +719,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   D:001AH         PUBLIC        DelayOFF
   D:001CH         PUBLIC        ENABLE_POWER_OFF
   B:0080H.5       PUBLIC        P_1V2_POWER
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 13
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 13
 
 
   B:0090H.1       PUBLIC        P_3V3_POWER
@@ -779,7 +779,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   C:04AFH         LINE#         68
   C:04B3H         LINE#         69
   C:04B3H         LINE#         70
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 14
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 14
 
 
   C:04B3H         LINE#         71
@@ -839,7 +839,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   C:0166H         LINE#         126
   C:0169H         LINE#         127
   C:0169H         LINE#         128
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 15
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 15
 
 
   C:016AH         LINE#         129
@@ -899,7 +899,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   C:0458H         LINE#         189
   C:0458H         LINE#         190
   C:045AH         LINE#         191
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 16
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 16
 
 
   C:045DH         LINE#         192
@@ -959,7 +959,7 @@ SYMBOL TABLE OF MODULE:  .\output\TX-88 (?C_STARTUP)
   C:0526H         LINE#         36
   C:052BH         LINE#         38
   C:052DH         LINE#         39
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  13:55:13  PAGE 17
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/20/2018  15:54:06  PAGE 17
 
 
   C:052DH         LINE#         40
