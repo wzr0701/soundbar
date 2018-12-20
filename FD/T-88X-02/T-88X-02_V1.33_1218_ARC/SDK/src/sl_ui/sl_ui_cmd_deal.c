@@ -1319,9 +1319,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_EQ_BASS_ADD:
 				bass_vol++;
 
-				if(bass_vol >= 15)
+				if(bass_vol >= BASS_TREBLE_LEVEL_MAX)
 				{
-					bass_vol = 15;
+					bass_vol = BASS_TREBLE_LEVEL_MAX;
 				}
 				printf("UI_CMD_EQ_BASS_ADD:%d\n",bass_vol);
 				set_bass_treble_vol(0,bass_vol);
@@ -1330,9 +1330,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 			case UI_CMD_EQ_BASS_SUB:
 				bass_vol--;
-				if(bass_vol <= -15)
+				if(bass_vol <= BASS_TREBLE_LEVEL_MIN)
 				{
-					bass_vol = -15;
+					bass_vol = BASS_TREBLE_LEVEL_MIN;
 				}
 				printf("UI_CMD_EQ_BASS_SUB:%d\n",bass_vol);
 				set_bass_treble_vol(0,bass_vol);
