@@ -39,7 +39,7 @@
 
 
 int mic_vol = 15;
-int echo_vol_lev = 15;
+int echo_vol_lev = 5;
 int mic_vol_lev = 15;
 extern int mute_state;
 
@@ -60,7 +60,7 @@ int reverb_table[16]={
 
 
 #define MIC_LEV_CNT 30
-
+#define MIC_ECHOLEV_CNT 15
 
 static const int mic_vol_table[31]={
 	0, 3, 6, 9, 12, 15,
@@ -548,10 +548,14 @@ void set_echo_vol(int vol)
 
 void set_bass_treble_vol(int mode,int vol)//mode=0:bass  mode = 2:treble
 {
-	if (vol < -15)
-		vol = -15;
-	else if (vol > 15)
-		vol = 15;
+	if (vol < BASS_TREBLE_LEVEL_MIN)
+	{
+		vol = BASS_TREBLE_LEVEL_MIN;
+	}		
+	else if (vol > BASS_TREBLE_LEVEL_MAX)
+	{
+		vol = BASS_TREBLE_LEVEL_MAX;
+	}		
 	handle_bass_treble(mode, vol);
 }
 
@@ -575,6 +579,7 @@ void set_micvol_level(void)
 			set_adc_channel_vol(0,mic_vol);
 		}
 }
+
 #endif
 
 /****************************************************************
@@ -1071,10 +1076,12 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 	if(cmd->cmd!=UI_CMD_NULL)
 	printf("\n %s:cmd:%d \n", __func__, cmd->cmd);
 	unsigned char ret=0;
-
+	
 	int arg1 = cmd->arg2;
 	int arg2 = cmd->mode;
 	int arg3 = cmd->arg.url;
+
+	int value;
 
 	if(test_mode_flag == false)
 	{
@@ -1287,9 +1294,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 				treble_vol++;
 
-				if(treble_vol >= 15)
+				if(treble_vol >= BASS_TREBLE_LEVEL_MAX)
 				{
-					treble_vol = 15;
+					treble_vol = BASS_TREBLE_LEVEL_MAX;
 				}
 				printf("UI_CMD_EQ_TRB_ADD:%d\n",treble_vol);
 				set_bass_treble_vol(2,treble_vol);
@@ -1300,9 +1307,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 				treble_vol--;
 
-				if(treble_vol <= -15)
+				if(treble_vol <= BASS_TREBLE_LEVEL_MIN)
 				{
-					treble_vol = -15;
+					treble_vol = BASS_TREBLE_LEVEL_MIN;
 				}
 				printf("UI_CMD_EQ_TRB_SUB:%d\n",treble_vol);
 				set_bass_treble_vol(2,treble_vol);
@@ -1436,6 +1443,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 #if(MIC_ENABLE_ADC0==1)
 			case UI_CMD_MIC_CONNECT:
+				printf("mic conncect!\n");
 				if(mic_on_flag)
 				{
 					mic_open(true);
@@ -1447,6 +1455,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_MIC_DISCONNECT:
+				printf("mic disconnect!\n");
 				mic_open(false);
 				break;
 
@@ -1457,7 +1466,6 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					if(mic_detect_online)
 					{
 						mic_open(true);
-						set_adc_channel_vol(0,mic_vol);
 						set_echo_vol(echo_vol_lev);
 					}
 					else
@@ -1524,9 +1532,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					{
 						mic_echo_flag = true;
 						mic_vol_flag = false;
-						if(echo_vol_lev >= 15)
+						if(echo_vol_lev >= MIC_ECHOLEV_CNT)
 						{
-							echo_vol_lev = 15;
+							echo_vol_lev = MIC_ECHOLEV_CNT;
 						}
 						else
 						{

@@ -170,9 +170,13 @@ int folder_index_dis = 0;
 
 unsigned char bt_version_num = 0;
 
+bool take_micmute_flag = false;
 
 extern bool bt_wait_flag;
 extern int bt_wait_cnt;
+
+extern char mic_on_flag;
+extern bool mic_detect_online;
 
 
 unsigned char power_on_usb_sd_auto_play;
@@ -316,35 +320,6 @@ static void update_bass_treble(int * pLevel, bool bass_or_treble)
     	int para[7] = {1, 0, 1, 0, 100, 300, 6};
 
 		para[3] = (*pLevel) * BASS_TREBLE_GAIN_STEP;
-
-		/*if(bass_or_treble)
-		{
-			para[3] = (*pLevel) * BASS_GAIN_STEP;
-		}
-		else
-		{
-			para[3] = (*pLevel) * TREBLE_GAIN_STEP;
-		}*/
-
-
-        /*if (*pLevel <= 0)
-        {
-            para[3] = (*pLevel) * BASS_TREBLE_GAIN_STEP;
-        }
-        else
-        {
-            int i;
-            int gain_max = BASS_TREBLE_GAIN_MAX;
-			for(i=0;i<bass_treble_gains_size;++i)
-            {
-                if (mix_vol <= bass_treble_gains[i][0])
-                {
-                    gain_max = bass_treble_gains[i][1];
-                    break;
-                }
-            }
-            para[3] = (*pLevel) * (gain_max / 15);
-        }*/
 
         //����EQֵ
         //if(!loaded)
@@ -1967,10 +1942,14 @@ void ui_handle_mute(void)
 			usleep(100000);
 			sc8836_action_hdmi_soundbar_adj_tv_vol();
 		}
+		
 		if (ui_source_select == SOURCE_SELECT_USB)
 		{
 			save_usb_play_time();
 		}
+
+		take_micmute_flag = true;
+		mic_open(false);
 
         #if BYPASS_MODE
         if(ui_source_select != SOURCE_SELECT_SPDIFIN)
@@ -2016,6 +1995,28 @@ void ui_handle_mute(void)
 		{
 			save_usb_play_time();
 		}
+
+		if(take_micmute_flag ==        true)
+		{
+			take_micmute_flag = false;
+			if(mic_on_flag)
+			{
+				if(mic_detect_online)
+				{
+					mic_open(true);
+				}
+				else
+				{
+					mic_open(false);
+				}
+			}
+			else
+			{
+				mic_open(false);
+			}
+		}
+		
+		
         #if BYPASS_MODE
         if(ui_source_select != SOURCE_SELECT_SPDIFIN && bypass_in_vol > BYPASS_VOL_IN_MIN)
         {
@@ -2283,7 +2284,12 @@ static void ui_process_vol_dec(void)
 		bt_mix_vol -= 1;
 
 		if(bt_mix_vol <=0)
+		{
 			bt_mix_vol = 0;
+			take_micmute_flag = true;
+			mic_open(false);
+		}
+			
 
 		select_mixvol_table();
 #if 1
@@ -2309,6 +2315,11 @@ static void ui_process_vol_dec(void)
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 #endif
 
+		if(ui_source_select == SOURCE_SELECT_HDMI)
+		{
+			sc8836_action_hdmi_soundbar_adj_tv_vol();
+		}
+		
 		printf("%s:mix_vol = %d\n", __func__, mix_vol);
 
 
@@ -2428,7 +2439,26 @@ static void ui_process_vol_inc(void)
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 #endif
 
-
+		if(take_micmute_flag ==        true)
+		{
+			take_micmute_flag = false;
+			if(mic_on_flag)
+			{
+				if(mic_detect_online)
+				{
+					mic_open(true);
+				}
+				else
+				{
+					mic_open(false);
+				}
+			}
+			else
+			{
+				mic_open(false);
+			}
+		}
+		
 		if(ui_source_select == SOURCE_SELECT_HDMI)
 		{
 			sc8836_action_hdmi_soundbar_adj_tv_vol();
@@ -2742,7 +2772,17 @@ int sc8836_ui_handle_cec_mute_key(struct ui_cmd_s *cmd)
 int sc8836_action_hdmi_soundbar_adj_tv_vol(void)
 {
 	int cur_volum;
-	cur_volum = bt_mix_vol*2;
+	
+	if(bt_mix_vol <= 20)
+	{
+		cur_volum = bt_mix_vol*3;
+	}
+	else
+	{
+		//cur_volum = 60+(bt_mix_vol - 20)*4;
+		cur_volum = (4*bt_mix_vol)-20;
+	}
+	
 #ifdef SL_UI_DBG
 	printf("%s %d\n", __func__, __LINE__);
 #endif

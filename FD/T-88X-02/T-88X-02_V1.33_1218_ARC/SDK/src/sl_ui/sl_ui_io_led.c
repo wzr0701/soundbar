@@ -153,7 +153,7 @@ extern bool frist_hdmi_init;
 	printf("SILAN_PADMUX_CTRL2=0x%x\n", value);
 
 
-	zhuque_bsp_gpio_set_mode(MIC_DET_PIN, GPIO_IN, PULLING_HIGH);
+	zhuque_bsp_gpio_set_mode(MIC_DET_PIN, GPIO_IN, PULLING_DOWN);
 	zhuque_bsp_gpio_set_mode(PA_CLIP_OTW_PIN, GPIO_IN, PULLING_HIGH);
 	zhuque_bsp_gpio_set_mode(SL_HDMI_CEC_DET_PIN, GPIO_IN, PULLING_HIGH);
 

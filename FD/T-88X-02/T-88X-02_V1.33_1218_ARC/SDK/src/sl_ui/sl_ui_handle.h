@@ -129,8 +129,8 @@ static const int mix_vol_aux_table[31]={
 static const int bass_treble_gains_size = (sizeof(bass_treble_gains)/sizeof(bass_treble_gains[0]));
 
 
-#define Frist_MIX_VOL 45
-#define Frist_MIX_LEV 15
+#define Frist_MIX_VOL 20
+#define Frist_MIX_LEV 10
 #define MIX_LEV_CNT 30
 
 
@@ -140,15 +140,16 @@ static const int bass_treble_gains_size = (sizeof(bass_treble_gains)/sizeof(bass
 
 
 //BASS/TREBLE��???��y
-#define BASS_TREBLE_LEVEL_MAX                 15
-#define BASS_TREBLE_LEVEL_MIN -15
+#define BASS_TREBLE_LEVEL_MAX                 5
+#define BASS_TREBLE_LEVEL_MIN -5
+#define BASS_TREBLE_LEVEL_CNT 5
 
 //BASS/TREBLE��?2????��
 #define BASS_TREBLE_STEP  1
 //BASS/TREBLE��???��?2????��
-#define BASS_TREBLE_GAIN_STEP  (BASS_TREBLE_GAIN_MAX/15)
-#define BASS_GAIN_STEP  (BASS_GAIN_MAX/15)
-#define TREBLE_GAIN_STEP  (TREBLE_GAIN_MAX/15)
+#define BASS_TREBLE_GAIN_STEP  (BASS_TREBLE_GAIN_MAX/BASS_TREBLE_LEVEL_CNT)
+#define BASS_GAIN_STEP  (BASS_GAIN_MAX/BASS_TREBLE_LEVEL_CNT)
+#define TREBLE_GAIN_STEP  (TREBLE_GAIN_MAX/BASS_TREBLE_LEVEL_CNT)
 
 
 
