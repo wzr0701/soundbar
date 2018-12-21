@@ -2259,9 +2259,9 @@ static void ui_process_vol_dec(void)
     {
 		tre_bass_cnt = 0;
 		treble_vol--;
-		if(treble_vol <= -15)
+		if(treble_vol <= BASS_TREBLE_LEVEL_MIN)
 		{
-			treble_vol = -15;
+			treble_vol = BASS_TREBLE_LEVEL_MIN;
 		}
 		printf("UI_CMD_EQ_TRB_SUB:%d\n",treble_vol);
 		set_bass_treble_vol(2,treble_vol);
@@ -2271,9 +2271,9 @@ static void ui_process_vol_dec(void)
     {
 		tre_bass_cnt = 0;
 		bass_vol--;
-		if(bass_vol <= -15)
+		if(bass_vol <= BASS_TREBLE_LEVEL_MIN)
 		{
-			bass_vol = -15;
+			bass_vol = BASS_TREBLE_LEVEL_MIN;
 		}
 		printf("UI_CMD_EQ_BASS_SUB:%d\n",bass_vol);
 		set_bass_treble_vol(0,bass_vol);
@@ -2378,9 +2378,9 @@ static void ui_process_vol_inc(void)
 		tre_bass_cnt = 0;
 
 		treble_vol++;
-		if(treble_vol >= 15)
+		if(treble_vol >= BASS_TREBLE_LEVEL_MAX)
 		{
-			treble_vol = 15;
+			treble_vol = BASS_TREBLE_LEVEL_MAX;
 		}
 		printf("UI_CMD_EQ_TRB_ADD:%d\n",treble_vol);
 		set_bass_treble_vol(2,treble_vol);
@@ -2391,9 +2391,9 @@ static void ui_process_vol_inc(void)
 		tre_bass_cnt = 0;
 
 		bass_vol++;
-		if(bass_vol >= 15)
+		if(bass_vol >= BASS_TREBLE_LEVEL_MAX)
 		{
-			bass_vol = 15;
+			bass_vol = BASS_TREBLE_LEVEL_MAX;
 		}
 		printf("UI_CMD_EQ_BASS_ADD:%d\n",bass_vol);
 		set_bass_treble_vol(0,bass_vol);
@@ -2578,7 +2578,7 @@ void sl_ui_system_reset(void)
 	bass_vol = 0;
 	treble_vol = 0;
 	mic_vol = 27;
-	echo_vol_lev = 15;
+	echo_vol_lev = 5;
 	mic_vol_lev = 15;
 
 	save_mix_vol();
