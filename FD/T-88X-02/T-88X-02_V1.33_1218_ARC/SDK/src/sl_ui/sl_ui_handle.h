@@ -81,7 +81,7 @@ static const int mix_vol_opt_table[31]={
 
 #endif
 
-#if 1
+#if 0
 static const int mix_vol_usb_table[31]={
 	0, 3, 6, 9, 12, 15,
 	18, 21, 24, 27,30,
@@ -92,12 +92,12 @@ static const int mix_vol_usb_table[31]={
 };
 #else
 static const int mix_vol_usb_table[31]={
-	0, 2, 4, 6, 8, 10,
-	12, 14, 16, 18, 20,
-	22, 24, 26, 28, 30,
-	32, 34, 36, 38, 40, 
-	42, 44, 46, 48, 51,
-	53, 56, 59, 62, 65
+	0, 1, 2, 3, 5, 7,
+	9, 11, 13, 15,17,
+	19, 21,23, 25, 27,
+	29,31,33, 35, 38,
+	40, 42,44, 46, 48,
+	50, 53, 56, 58, 88
 };
 
 #endif

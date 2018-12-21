@@ -658,7 +658,7 @@ void set_channel_vol_by_mode(int mode)
 #define ADC_CHANNEL_MIXVOL_BT 39
 #define ADC_CHANNEL_MIXVOL_MIX 39
 #define ADC_CHANNEL_MIXVOL_USB 39
-#define ADC_CHANNEL_MIXVOL_AUX 39
+#define ADC_CHANNEL_MIXVOL_AUX 50
 
 void set_channel_mixvol_by_mode(int mode)
 {
