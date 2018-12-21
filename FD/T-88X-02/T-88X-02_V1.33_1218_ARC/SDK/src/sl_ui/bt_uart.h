@@ -53,9 +53,34 @@ typedef enum {
     AT_IS,
     AT_DS,
     AT_GET_VERSION,             //查看版本号
+	AT_MODE_COA,
+	AT_MODE_HDMI,
+	AT_MODE_FM,
+	AT_MODE_BT,
+	AT_MODE_USB,
+	AT_MODE_AUX,
+	AT_MODE_OPT,
+	AT_PLAY_PAUSE,           //播放/暂停
+    AT_PLAY_NEXT,              //下一曲
+    AT_PLAY_PREV,              //上一曲
+    AT_MIC_ON,
+    AT_MIC_OFF,
+    AT_MOVIE_ON,
+    AT_MOVIE_OFF,
+	
     //带参数命令
     AT_SET_MODE,                //模式设置
     AT_VERSION,                //版本号
+    AT_SET_MAINVOL,
+    AT_SET_TREBLE,
+    AT_SET_BASS,
+    AT_SET_ECHO,
+    AT_SET_MICVOL,
+    AT_CUR_MAINVOL,
+    AT_CUR_TREBLE,
+    AT_CUR_BASS,
+    AT_CUR_ECHO,
+    AT_CUR_MICVOL,
     AT_MODE_NUMBER,             //数字
     AT_SET_VOL,                 //音量设置
     AT_EQ,                      //音效设置

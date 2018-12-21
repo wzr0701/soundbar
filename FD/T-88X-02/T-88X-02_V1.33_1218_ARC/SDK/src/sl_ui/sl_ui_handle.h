@@ -735,6 +735,13 @@ void ui_handle_unload_eq(void);
 
 
 void bt_read_state(void);
+void bt_cmd_current_mainvol(void);
+void bt_cmd_current_treble(void);
+void bt_cmd_current_bass(void);
+void bt_cmd_current_echo(void);
+void bt_cmd_current_micvol(void);
+
+void bt_cmd_source_select(int source);
 void bt_cmd_reset_iis(void);
 void bt_cmd_play_pause(void);
 void bt_cmd_next_song(void);

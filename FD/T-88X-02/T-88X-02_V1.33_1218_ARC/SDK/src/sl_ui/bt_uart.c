@@ -73,9 +73,34 @@ static const char * AT_CMDS[] = {
 	"ATIS\r\n",            //复位I2S
 	"ATDS\r\n",            //关闭I2S
 	"ATVE\r\n",            //查看版本号
+	"MATCA\r\n",            //COA
+	"MATHI\r\n",           //HDMI
+	"MATFM\r\n",            //FM
+	"MATBT\r\n"  ,          //BT
+	"MATUB\r\n" ,           //USB
+	"MATAX\r\n" ,           //AUX
+	"MATOT\r\n",            //OPT
+	"CATPA\r\n",            //播放/暂停
+	"CATPN\r\n",            //下一曲
+	"CATPV\r\n",            //上一曲
+	"MTMIO\r\n"  ,          
+	"MTMIC\r\n" ,           
+	"MTMOVO\r\n" ,           
+	"MTMOVC\r\n",           
+	
 	//带参数命令
 	"AT+WM+",               //特定模式设置
 	"ATVER",              //版本号
+	"VBTVOL",
+	"VBTTRE",
+	"VBTBAS",
+	"VBTECH",
+	"VBTMIC",
+	"VATVOL",
+	"VATTRE",
+	"VATBAS",
+	"VATECH",
+	"VATMIC",
 	"AT+NUM+",              //数字
 	"AT+VOL+",              //音量
 	"AT+EQ+",               //音效
@@ -181,6 +206,21 @@ int bt_chk_AT_cmd(char *cmd, int *pVal)
     return ret;
 }
 
+int check_str_resv_over(char *buf,int count)
+{
+	int ret = -1;
+	if(buf[count - 1] == '\n')
+	{
+		buf[count] = '\0';
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}	
+}
+
+
 /****************************************************************************
  * Name: bt_read
  *
@@ -201,6 +241,12 @@ int bt_chk_AT_cmd(char *cmd, int *pVal)
 int bt_read(char *buf, int buf_szie)
 {
     int ret = -1;
+    int  i   = 0;
+    int  count   = 0;
+	int  number = 0;
+	int  delay_time = 0;
+    char buf_receive[64];
+	bool read_end = false;
 
     if (bt_fd < 0)
     {   //无效串口文件描述符
@@ -234,20 +280,38 @@ int bt_read(char *buf, int buf_szie)
         {
             if (FD_ISSET(bt_fd, &fds) > 0)
             {   ///有数据可以从串口读取
-                memset(buf, 0, buf_szie);
-                int count = read(bt_fd, buf, buf_szie);
-                if (count <= 0)
-                {   //串口中没有数据
-                    #if BT_DEBUG
-                    printf("%s:Read nothing from UART\n", __func__);
-                    #endif
-                    ret = 0;
-                }
-                else
-                {   //从串口读到了数据
-                    ret = count;
-                    printf("%s:buf_rev %s count:%d\r\n", __func__, buf, count);
-                }
+				memset(buf,0,buf_szie);
+				buf[0] = '\0';
+				while (!read_end)
+				{
+					memset(buf_receive,0,64);
+			
+					number = read(bt_fd, buf_receive, buf_szie);
+					if (number <= 0)
+					{
+						//read_end = true;
+					}
+					else//从串口读到了数据
+					{
+						strcat(buf,buf_receive);
+						count += number;
+			
+						ret = check_str_resv_over(buf,count);
+			
+						if(ret)
+						{
+							buf[count] = '\0';
+							continue;
+						}
+						else
+						{
+							read_end = true;
+						}
+					}
+				}
+				#if BT_DEBUG
+				printf("buf_rev %s count:%d\r\n",buf, count);
+				#endif
             }
             else
             {   //串口中无数据可读
@@ -258,7 +322,7 @@ int bt_read(char *buf, int buf_szie)
         }
     }
 
-    return ret;
+    return count;
 }
 
 /****************************************************************************
@@ -381,9 +445,9 @@ bool bt_uart_close(void)
  ****************************************************************************/
 int handle_bt_cmd(AT_CMD cmd, int value)
 {
-    sem_wait(&bt_state_sem);
     int ret = -1;
     char buf[16] = {0};
+	int len = 0;
 
     if (bt_fd < 0)
     {
@@ -396,13 +460,14 @@ int handle_bt_cmd(AT_CMD cmd, int value)
             bool execute = true;
 
             memcpy(buf, AT_CMDS[cmd], 16);
+			len = strlen(AT_CMDS[cmd]);
 
             if(cmd >= AT_SET_MODE)
             {
                 if(value >= 0 && value < 100)
                 {
-                    int len = strlen(AT_CMDS[cmd]);
-                    sprintf(buf+len, "%02d\r\n" , value);
+                    sprintf(buf+len, "%02d\n" , value);
+					len = len +3;
                 }
                 else
                 {
@@ -412,15 +477,16 @@ int handle_bt_cmd(AT_CMD cmd, int value)
 
             if(execute)
             {
-                write(bt_fd, buf, 6);
+				sem_wait(&bt_state_sem);
+                write(bt_fd, buf, len);
+				sem_post(&bt_state_sem);
+
                 printf("%s: buf:%s\n", __func__, buf);
             }
 
             ret = 0;
         }
     }
-
-    sem_post(&bt_state_sem);
 
     return ret;
 }

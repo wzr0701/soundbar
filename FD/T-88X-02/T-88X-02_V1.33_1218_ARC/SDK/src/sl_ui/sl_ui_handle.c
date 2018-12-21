@@ -779,6 +779,104 @@ enum ui_cmd_e bt_cmd_translate(AT_CMD cmd)
     return UI_CMD_NULL;
 }
 
+
+typedef struct app_value_s
+{
+    char app_value[20];
+    enum ui_cmd_e cmd;
+    enum ui_cmd_e cmd_dn;
+    enum ui_cmd_e cmd_up;
+} APP_VALUE_S;
+
+APP_VALUE_S APP_CMD[] =
+{
+	{"MBTBT\r\n",UI_CMD_GO_TO_BT},      //BT
+	{"MBTCA\r\n",UI_CMD_GO_TO_COA},      //COA
+	{"MBTHI\r\n",UI_CMD_GO_TO_HDMI},      //HDMI
+	{"MBTFM\r\n",UI_CMD_GO_TO_FM},      //FM
+	{"MBTUB\r\n",UI_CMD_GO_TO_USB},      //USB
+	{"MBTAX\r\n",UI_CMD_GO_TO_AUX},      //AUX
+	{"MBTOT\r\n",UI_CMD_GO_TO_SPDIF},      //OPT
+	{"MTMIO\r\n",UI_CMD_MIC_ON},      //MIC ON
+	{"MTMIC\r\n",UI_CMD_MIC_ON},      //MIC OFF
+	{"MTMOVO\r\n",UI_CMD_MOVIE_ON},      //MOVIE ON
+	{"MTMOVC\r\n",UI_CMD_MOVIE_ON},      //MOVIE OFF
+#if 0
+    {"AT+IRf30cdf20\r\n",UI_CMD_POWER},      //POWER
+    {"AT+IRf708df20\r\n",UI_CMD_VOLUME_MUTE},        //MUTE
+    {"AT+IRf00fdf20\r\n",UI_CMD_GO_TO_BT},        //WIFI
+    {"AT+IRe916df20\r\n",UI_CMD_GO_TO_SPDIF},        //OPTICAL
+    {"AT+IRf807df20\r\n",UI_CMD_GO_TO_HDMI},        //HDMI
+    {"AT+IRf609df20\r\n",UI_CMD_GO_TO_RCA},  //AUX
+    {"AT+IRf906df20\r\n",UI_CMD_GO_TO_AUX},  //LINEIN
+    {"AT+IRef10df20\r\n",UI_CMD_EQ_MUSIC},        //MUSIC
+    {"AT+IRf40bdf20\r\n",UI_CMD_EQ_MOVIE}, //MOVIE
+    {"AT+IReb14df20\r\n",UI_CMD_EQ_DIALOG},      //DIALOG
+    {"AT+IRff00df20\r\n",UI_CMD_PREV},    //上一曲
+    {"AT+IRfd02df20\r\n",UI_CMD_NEXT},     //下一曲
+    {"AT+IRfe01df20\r\n",UI_CMD_PLAY_PAUSE},  // 播放/暂停
+    {"AT+IRfc03df20\r\n",UI_CMD_VOLUME_DEC},  // -
+    {"AT+IRfa05df20\r\n",UI_CMD_VOLUME_INC},  // +
+#endif
+};
+
+int str_cmp_80(char *str1,char *str2)
+{
+	int i = 0;
+	int count_ss1 = 0;
+	int count_ss2 = 0;
+	int len1 = strlen(str1);
+	int len2 = strlen(str2);
+
+	if(len1 == len2)
+	{
+		if(strstr(str1,str2) != NULL)
+			return 1;
+		else
+			return 0;
+	}
+	else if(len1 < len2)
+	{
+		while(count_ss2 < len2)
+		{
+			if(str1[count_ss1] == str2[count_ss2])
+			{
+				count_ss1++;
+				i++;
+			}
+			count_ss2++;
+		}
+		
+		if(i > 12)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	return 0;
+}
+
+enum ui_cmd_e app_cmd_translate(char *cmd)
+{
+    int i;
+
+    for(i = 0; i< sizeof(APP_CMD)/sizeof(APP_CMD[0]); i++)
+    {
+        //if(strstr(cmd,BT_CMD[i].bt_value) != NULL)
+        if(str_cmp_80(cmd,APP_CMD[i].app_value))
+        {
+			//printf("cmd = %d\n",BT_CMD[i].cmd);
+			return APP_CMD[i].cmd;
+        }
+    }
+
+    return UI_CMD_NULL;
+}
+
+
 /****************************************************************************
  * Name: bt_init_sem
  *
@@ -799,6 +897,86 @@ void bt_init_sem(void)
     sem_init(&bt_start_check_sem, 0, 1);
 }
 
+int bt_cmd_check(char *buf_recv)
+{
+    ui_cmd_t cmd = {0};
+    cmd.cmd = UI_CMD_NULL;
+    int value;
+    int index = bt_chk_AT_cmd(buf_recv, &value);
+
+	if(index > AT_START && index < AT_MAX)
+    {
+		printf("%s:cmd.arg2=%d\n",__func__, value);
+        //int ui_cmd = bt_cmd_translate(index);
+        if ((index == AT_PLAY_OR_PAUSE)||(index == AT_PLAY_PAUSE))
+        {
+            cmd.cmd = UI_CMD_PLAY_PAUSE;
+        }
+		else if((index == AT_NEXT_TRACE)||(index == AT_PLAY_NEXT)) 
+		{
+			cmd.cmd = UI_CMD_NEXT;
+		}
+		else if((index == AT_PREV_TRACE)||(index == AT_PLAY_PREV))  
+		{
+			cmd.cmd = UI_CMD_PREV;
+		}
+        else if (index == AT_DEVICE_CONNECTED)
+        {//设备连接
+        	printf("BT conneted\n");
+			cmd.cmd = UI_CMD_BLUETOOTH_CONNECT;
+        }
+        else if (index == AT_DEVICE_DISCONNECTED)
+        {//设备断开连接
+        	bt_wait_cnt = 0;
+			bt_wait_flag = false;
+			cmd.cmd = UI_CMD_BLUETOOTH_DISCONNECT;
+        	printf("BT disconneted\n");
+        }  
+		else if(index == AT_VERSION)
+        {
+			//BT 版本号
+			bt_version_num = value;
+            printf("bt_version_num = %d\n", value);
+        }
+		else if(index == AT_SET_MAINVOL)
+        {
+			cmd.cmd = UI_CMD_VOLUME_SET;
+			cmd.arg2 = value;
+        }
+		else if(index == AT_SET_TREBLE)
+        {
+			cmd.cmd = UI_CMD_TREBLE_SET;
+			cmd.arg2 = value;
+        }
+		else if(index == AT_SET_BASS)
+        {
+			cmd.cmd = UI_CMD_BASS_SET;
+			cmd.arg2 = value;
+        }
+		else if(index == AT_SET_ECHO)
+        {
+			cmd.cmd = UI_CMD_ECHO_SET;
+			cmd.arg2 = value;
+        }
+		else if(index == AT_SET_MICVOL)
+        {
+			cmd.cmd = UI_CMD_MICVOL_SET;
+			cmd.arg2 = value;
+        }
+		 
+		if(cmd.cmd != UI_CMD_NULL)
+        {
+            send_cmd_2_ui(&cmd);
+			cmd.cmd = UI_CMD_NULL;
+        }
+    }
+	return cmd.cmd;
+}
+
+int app_cmd_check(char *buf_recv)
+{
+    return app_cmd_translate(buf_recv);
+}
 
 
 
@@ -820,103 +998,38 @@ void bt_read_state(void)
 {
     const int buf_szie = 64;
     int ret;
+	int long_time_count = 0;
     char buf_recv[65] = {0};
     char * ptr = buf_recv;
+    ui_cmd_t cmd = {0};
+    cmd.cmd = UI_CMD_NULL;
 
     while (1)
     {
         if(ui_power == POWER_ON)
         {
             ret = bt_read(ptr, buf_szie);
-
-            ui_cmd_t cmd = {0};
-            cmd.cmd = UI_CMD_NULL;
-            int value;
-            int index = bt_chk_AT_cmd(buf_recv, &value);
-            if(index > AT_START && index < AT_MAX)
-            {
-                int ui_cmd = bt_cmd_translate(index);
-                if (index == AT_NEXT_MODE)
-                {//下一个模式
-                    cmd.arg2 = -2;
-                    cmd.mode = true;
-                }
-                else if (index == AT_DEVICE_CONNECTED)
-                {//设备连接
-                	printf("BT conneted\n");
-                    cmd.arg2 = true;
-                }
-                else if (index == AT_DEVICE_DISCONNECTED)
-                {//设备断开连接
-                	bt_wait_cnt = 0;
-					bt_wait_flag = false;
-                	printf("BT disconneted\n");
-                    cmd.arg2 = false;
-                }
-                else if (index == AT_AUX_CONNECTED)
-                {
-                    cmd.arg2 = true;
-                    printf("AUX connected\n");
-                }
-                else if (index == AT_AUX_DISCONNECTED)
-                {
-                    cmd.arg2 = false;
-                    printf("AUX disconnected\n");
-                }
-                else if(index == AT_BT)
-                {//进入蓝牙模式
-                    cmd.arg2 = SOURCE_SELECT_BT;
-                    cmd.mode = true;
-                }
-                else if(index == AT_AUX)
-                {//进入AUX模式
-                    cmd.arg2 = SOURCE_SELECT_LINEIN;
-                    cmd.mode = true;
-                }
-				else if(index == AT_VERSION)
-                {
-					//BT 版本号
-					bt_version_num = value;
-                    printf("bt_version_num = %d\n", value);
-                }
-                /*else if(index >= AT_SET_MODE)
-                {//模式设置
-                    printf("cmd.arg2=%d\n", value);
-                    cmd.arg2 = value;
-                }*/
-
-
-                if(ui_cmd != UI_CMD_NULL)
-                {
-                    cmd.cmd = ui_cmd;
-                    send_cmd_2_ui(&cmd);
-                }
-            }
-
             if (ret > 0)
             {
-                //printf("uart buffer: %s\n", buf_recv);
-
-                ptr += ret;
-                if(buf_recv - ptr + buf_szie < 16)
-                {   //超出当前存储范围
-                    ptr = buf_recv;
-                    memset(buf_recv, 0, buf_szie);
+				printf("%s:%s",__func__,buf_recv);
+                int ui_cmd = bt_cmd_check(buf_recv);
+                if(ui_cmd == UI_CMD_NULL)
+                {
+                    ui_cmd = app_cmd_check(buf_recv);
+					if(ui_cmd != UI_CMD_NULL)
+	                {
+	                    cmd.cmd = ui_cmd;
+	                    send_cmd_2_ui(&cmd);
+						ui_cmd = UI_CMD_NULL;
+	                }
                 }
             }
 
             usleep(1000);
         }
-        else
-        {
-            bt_uart_close();
-            sem_wait(&bt_start_check_sem);
-            printf("%s:Recover from semaphore\n", __func__);
-            bt_uart_init();
-            usleep(100000);
-        }
     }
 }
+
 
 /****************************************************************************
  * Name: bt_set_connect_state
@@ -936,6 +1049,109 @@ void bt_set_connect_state(bool state)
 {
     bt_connected = state;
 }
+
+void bt_cmd_mic_status(char status)
+{
+	if(status)//on
+	{
+		handle_bt_cmd(AT_MIC_ON, 0);
+	}
+	else//off
+	{
+		handle_bt_cmd(AT_MIC_OFF, 0);
+	}
+	usleep(60000);
+}
+
+void bt_cmd_movie_status(char status)
+{
+	if(status)//on
+	{
+		handle_bt_cmd(AT_MOVIE_ON, 0);
+	}
+	else//off
+	{
+		handle_bt_cmd(AT_MOVIE_OFF, 0);
+	}
+	usleep(60000);
+}
+
+
+void bt_cmd_current_mainvol(void)
+{
+    //通知bt当前的音量
+    handle_bt_cmd(AT_CUR_MAINVOL, bt_mix_vol);
+	usleep(60000);
+}
+
+void bt_cmd_current_treble(void)
+{
+    //通知bt当前的音量
+    handle_bt_cmd(AT_CUR_TREBLE, treble_vol+5);
+	usleep(60000);
+}
+
+void bt_cmd_current_bass(void)
+{
+    //通知bt当前的音量
+    handle_bt_cmd(AT_CUR_BASS, bass_vol+5);
+	usleep(60000);
+}
+
+void bt_cmd_current_echo(void)
+{
+    //通知bt当前的音量
+    handle_bt_cmd(AT_CUR_ECHO, echo_vol_lev);
+	usleep(60000);
+}
+
+
+void bt_cmd_current_micvol(void)
+{
+    //通知bt当前的音量
+    handle_bt_cmd(AT_CUR_MICVOL, mic_vol_lev);
+	usleep(60000);
+}
+
+
+
+
+void bt_cmd_source_select(int source)
+{
+	switch(source)
+	{
+		case SOURCE_SELECT_COA:
+			handle_bt_cmd(AT_MODE_COA, 0);
+			break;
+
+		case SOURCE_SELECT_FM:
+			handle_bt_cmd(AT_MODE_FM, 0);
+			break;
+
+		case SOURCE_SELECT_BT:
+			handle_bt_cmd(AT_MODE_BT, 0);
+			break;
+
+		case SOURCE_SELECT_USB:
+			handle_bt_cmd(AT_MODE_USB, 0);
+			break;
+
+		case SOURCE_SELECT_LINEIN:
+			handle_bt_cmd(AT_MODE_AUX, 0);
+			break;
+
+		case SOURCE_SELECT_SPDIFIN:
+			handle_bt_cmd(AT_MODE_OPT, 0);
+			break;
+
+		case SOURCE_SELECT_HDMI:
+			handle_bt_cmd(AT_MODE_HDMI, 0);
+			break;
+	}
+
+	usleep(60000);
+}
+
 
 void bt_cmd_dis_connect(void)
 {
