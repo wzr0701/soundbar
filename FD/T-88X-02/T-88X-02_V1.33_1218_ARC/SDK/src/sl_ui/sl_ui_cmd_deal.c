@@ -765,6 +765,11 @@ void enter_mode( int mode)
 
 	set_ui_media(ui_source_select);
 
+	if(bt_version_num == 0)
+	{
+		bt_cmd_get_version();
+	}
+	
 	save_player_info();
 	save_mix_vol();
 	////////////////////////////////////

@@ -137,6 +137,7 @@ bool bt_connected_flag = false;
 bool mute_state_flag = false;
 bool frist_hdmi_det_online = false;
 
+bool action_hdmi_off_flag = false;
 
 unsigned short ui_select_fm_freq = 0;	//
 
@@ -1667,6 +1668,7 @@ void ui_handle_mode(void)
 			//�ر�hdmi
 			action_hdmi_off();
 			usleep(1000);
+			zhuque_bsp_gpio_unregister_interrupt(11);
 		}
 	}
 
@@ -2278,7 +2280,7 @@ void ui_handle_power(void)
 		{
 			printf("read flash fail !\n");
 		}
-#if 0
+#if 1
 		usleep(200000);
 		zhuque_bsp_gpio_set_mode(HDMI_DET, GPIO_IN, PULLING_HIGH);
 		zhuque_bsp_gpio_get_value(HDMI_DET, &value);
@@ -2298,11 +2300,11 @@ void ui_handle_power(void)
 				ui_source_select = SOURCE_SELECT_HDMI - 1;
 			}
 		}
-		/*else if(aux_in_status == true)
+		else if(aux_in_status == true)
 		{
 			printf("\n[AUX] detected hdmi insert");
 			ui_source_select = SOURCE_SELECT_LINEIN - 1;
-		}*/
+		}
 		else
 		{
 			if (ui_source_select <= SOURCE_SELECT_START || ui_source_select >= SOURCE_SELECT_END)
@@ -2959,6 +2961,7 @@ const int eq_table_3[]={
 #else
 #define eq_set_ch		6 
 //music
+#if 0
 const int eq_table_1[]={
 	 //flt_id, type, onoff, gain, fc, q, ch 
 	 1, 0, 1, -1100, 100, 100, eq_set_ch,//band1 
@@ -2966,8 +2969,18 @@ const int eq_table_1[]={
 	 3, 0, 1, 0, 1000, 100, eq_set_ch,//band3 
 	 4, 0, 1, -800, 3000, 300, eq_set_ch,//band4 
 	 5, 0, 1, -1200, 8000, 300, eq_set_ch,//band5 
-
 };
+#else
+const int eq_table_1[]={
+	 //flt_id, type, onoff, gain, fc, q, ch 
+	 1, 0, 1, 500, 100, 100, eq_set_ch,//band1 
+	 2, 0, 1, 600, 300, 100, eq_set_ch,//band2 
+	 3, 0, 1, 0, 1000, 300, eq_set_ch,//band3 
+	 4, 0, 1, 200, 3000, 300, eq_set_ch,//band4 
+	 5, 0, 1, 0, 8063, 300, eq_set_ch,//band5 
+};
+
+#endif
 
 //movie
 const int eq_table_2[]={
@@ -3346,11 +3359,13 @@ int action_hdmi_off(void)
 #endif
 
 	cec_process_cmd(CEC_CMD_ARCOFF, NULL);
-	usleep(1000);
+	//usleep(1000);
 	//player_process_cmd(NP_CMD_SPDIFIN_STOP, NULL, 0, NULL, NULL);
+	//usleep(1000);
 
 	return SL_UI_ERROR_NULL;
 }
+
 int action_hdmi_standby(void)
 {
 #ifdef SL_UI_DBG
@@ -3361,6 +3376,7 @@ int action_hdmi_standby(void)
 	player_process_cmd(NP_CMD_SPDIFIN_STOP, NULL, 0, NULL, NULL);
 	return SL_UI_ERROR_NULL;
 }
+
 int action_hdmi_poweron(void)
 {
 #ifdef SL_UI_DBG

@@ -911,25 +911,30 @@ int bt_cmd_check(char *buf_recv)
         if ((index == AT_PLAY_OR_PAUSE)||(index == AT_PLAY_PAUSE))
         {
             cmd.cmd = UI_CMD_PLAY_PAUSE;
+			cmd.arg2 = 0;
         }
 		else if((index == AT_NEXT_TRACE)||(index == AT_PLAY_NEXT)) 
 		{
 			cmd.cmd = UI_CMD_NEXT;
+			cmd.arg2 = 0;
 		}
 		else if((index == AT_PREV_TRACE)||(index == AT_PLAY_PREV))  
 		{
 			cmd.cmd = UI_CMD_PREV;
+			cmd.arg2 = 0;
 		}
         else if (index == AT_DEVICE_CONNECTED)
         {//设备连接
         	printf("BT conneted\n");
 			cmd.cmd = UI_CMD_BLUETOOTH_CONNECT;
+			cmd.arg2 = true;
         }
         else if (index == AT_DEVICE_DISCONNECTED)
         {//设备断开连接
         	bt_wait_cnt = 0;
 			bt_wait_flag = false;
 			cmd.cmd = UI_CMD_BLUETOOTH_DISCONNECT;
+			cmd.arg2 = false;
         	printf("BT disconneted\n");
         }  
 		else if(index == AT_VERSION)

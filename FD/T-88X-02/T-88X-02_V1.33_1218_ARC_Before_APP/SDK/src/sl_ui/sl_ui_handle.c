@@ -485,7 +485,7 @@ void ui_handle_power(int power_on_off)
 		change_mode_unmute();
 
 		read_player_info();
-		read_mix_vol();
+		//read_mix_vol();
 		// ui_source_select = SOURCE_SELECT_START;
 		ui_handle_mode(ui_source_select, false);
 
@@ -2574,52 +2574,32 @@ void sl_ui_system_reset(void)
 	pa_mute_ctrl(true);
 	mute_state = UNMUTE;
 	bt_mix_vol = Frist_MIX_LEV;
-	mix_vol = Frist_MIX_VOL;
+	select_mixvol_table();
 	bass_vol = 0;
 	treble_vol = 0;
-	mic_vol = 27;
 	echo_vol_lev = 5;
 	mic_vol_lev = 15;
 
 	save_mix_vol();
 
-	#if 0
-	if (ui_source_select == SOURCE_SELECT_SPDIFIN ||
-		ui_source_select == SOURCE_SELECT_USB ||
-		ui_source_select == SOURCE_SELECT_SD ||
-		ui_source_select == SOURCE_SELECT_HDMI ||
-		ui_source_select == SOURCE_SELECT_COA)
-	{
-		set_adc_channel_vol(3,(int)mix_vol);
-	}
-	else if (ui_source_select == SOURCE_SELECT_BT)
-	{
-		set_adc_channel_vol(2,(int)mix_vol);
-	}
-	else if (ui_source_select == SOURCE_SELECT_FM ||
-		ui_source_select == SOURCE_SELECT_LINEIN)
-	{
-		set_adc_channel_vol(1,(int)mix_vol);
-	}
-	#endif
 	player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 
-	save_mix_vol();
-
 	usleep(10000);
+	set_channel_vol_by_mode(ui_source_select);
+
 	set_bass_treble_vol(0,bass_vol);
 	usleep(10000);
 	set_bass_treble_vol(2,treble_vol);
 	//display_ui_clear();
 	//display_str(reset_clear_str);
 	//ht1633_updata_display();
-	usleep(500000);
+	usleep(10000);
 	pa_mute_ctrl(false);
 	usleep(500000);
 	usleep(500000);
 	set_channel_mixvol_by_mode(ui_source_select);
 	//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
-	display_set_source(ui_source_select);
+	//display_set_source(ui_source_select);
 }
 
 /*****************************************************

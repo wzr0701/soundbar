@@ -149,6 +149,7 @@ void display_str( char *dis_str)
 void display_ui_power(char on_off)
 {
 	display_ui_clear();
+	ht1633_updata_display();
 
 	if(on_off==1)
 		display_str(power_on_str);
@@ -167,6 +168,8 @@ void display_ui_power(char on_off)
 ****************************************************/
 void display_ui_main_sys(char wm_mode)
 {
+	display_ui_clear();
+	ht1633_updata_display();
 	display_ui_device(wm_mode);
 	ui_goback_source(400);
 }
@@ -435,6 +438,7 @@ void display_ui_vol(int vol)
 	}
 	else
 	{
+		dis_other_mode=1;
 		display_set_source(ui_source_select);
 	}
 }
@@ -477,6 +481,7 @@ void display_mic_vol(int vol)
 	}
 	else
 	{
+		dis_other_mode=1;
 		display_set_source(ui_source_select);
 	}
 
