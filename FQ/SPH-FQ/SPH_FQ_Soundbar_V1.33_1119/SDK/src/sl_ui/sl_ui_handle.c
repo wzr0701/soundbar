@@ -1797,6 +1797,11 @@ void ui_handle_mute(void)
 
 		mute_state = MUTE;
 
+		sem_wait(&bt_state_sem);
+	    handle_bt_cmd(AT_MUTE);
+	    sem_post(&bt_state_sem);
+		usleep(20000);
+
 		//Hw_Amp_Mute();
 
         //mute_led_on();
@@ -1808,11 +1813,16 @@ void ui_handle_mute(void)
         }
         #endif
     }
-    else						//取消静音
+    else//取消静音
     {
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, (int)mix_vol, NULL, NULL);
 
         mute_state = UNMUTE;
+
+		sem_wait(&bt_state_sem);
+	    handle_bt_cmd(AT_UNMUTE);
+	    sem_post(&bt_state_sem);
+		usleep(20000);		
 
 		//Hw_Amp_UnMute();
 
@@ -2961,14 +2971,15 @@ const int eq_table_3[]={
 #else
 #define eq_set_ch		6 
 //music
-#if 0
+#if 1
 const int eq_table_1[]={
 	 //flt_id, type, onoff, gain, fc, q, ch 
 	 1, 0, 1, -1100, 100, 100, eq_set_ch,//band1 
-	 2, 0, 1, -800, 300, 100, eq_set_ch,//band2 
-	 3, 0, 1, 0, 1000, 100, eq_set_ch,//band3 
-	 4, 0, 1, -800, 3000, 300, eq_set_ch,//band4 
-	 5, 0, 1, -1200, 8000, 300, eq_set_ch,//band5 
+	 2, 0, 1, 400, 150, 100, eq_set_ch,//band2
+	 3, 0, 1, -800, 300, 100, eq_set_ch,//band3 
+	 4, 0, 1, 0, 1000, 100, eq_set_ch,//band4 
+	 5, 0, 1, -800, 3000, 300, eq_set_ch,//band5 
+	 6, 0, 1, -1200, 8000, 300, eq_set_ch,//band6
 };
 #else
 const int eq_table_1[]={
@@ -3012,7 +3023,7 @@ void ui_handle_eq_music(void)
 	char set_eq_text[64];
 	swa_audio_audproc_load(AUDPROC_LIST_MIX, AUDPROC_EQ);
 	usleep(10);
-	for (i = 0, j = 0; i < 5; i++, j += 7)
+	for (i = 0, j = 0; i < 6; i++, j += 7)
 	{
 		swa_audio_audproc_eq(AUDPROC_LIST_MIX, (ae_eq_para *)&eq_table_1[j]);
 		swa_audio_audproc_set(AUDPROC_LIST_MIX, AUDPROC_EQ);
