@@ -183,9 +183,9 @@ static void silan_platform_init(void)
     /*----------------------------------------------*/
     //gpio drive strength
     //value = 0xaaaaaaaa; //8mA; 0x55555555: 4mA
-    REG32(KSEG1(SILAN_SYSTEM_CTL_REG17)) = 0;
-    REG32(KSEG1(SILAN_SYSTEM_CTL_REG18)) = 0;
-    REG32(KSEG1(SILAN_SYSTEM_CTL_REG19)) = 0;
+    REG32(KSEG1(SILAN_SYSTEM_CTL_REG17)) = 0xaaaaaaaa;
+    REG32(KSEG1(SILAN_SYSTEM_CTL_REG18)) = 0xaaaaaaaa;
+    REG32(KSEG1(SILAN_SYSTEM_CTL_REG19)) = 0xaaaaaaaa;
 
 	/*----------------------------------------------*/
 	value = REG32(KSEG1(SILAN_PADMUX_CTRL2));

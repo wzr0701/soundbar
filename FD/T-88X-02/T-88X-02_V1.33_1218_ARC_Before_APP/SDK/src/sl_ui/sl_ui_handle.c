@@ -484,9 +484,9 @@ void ui_handle_power(int power_on_off)
 		enter_othermode_check();
 		change_mode_unmute();
 
-		read_player_info();
+		//read_player_info();
 		//read_mix_vol();
-		// ui_source_select = SOURCE_SELECT_START;
+		ui_source_select = SOURCE_SELECT_TEST;
 		ui_handle_mode(ui_source_select, false);
 
 #if 0

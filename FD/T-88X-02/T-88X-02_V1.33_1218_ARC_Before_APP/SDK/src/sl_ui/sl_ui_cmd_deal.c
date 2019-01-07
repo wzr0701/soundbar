@@ -2152,6 +2152,7 @@ void source_mode_test(void)
 	ui_cmd_t cmd;
 	unsigned char ret=0;
 
+	test_mode_flag = true;
 	set_adc_channel_vol(1,0);
 	set_adc_channel_vol(2,0);
 	set_adc_channel_vol(3,0);
@@ -2159,6 +2160,8 @@ void source_mode_test(void)
 	pa_mute_ctrl(true);
 
 	ui_source_select = SOURCE_SELECT_BT;
+	save_player_info();
+	ui_source_select = SOURCE_SELECT_TEST;
 	usleep(100000);
 
 	fm_clear();
@@ -2170,10 +2173,8 @@ void source_mode_test(void)
 	handle_bt_cmd(AT_CLEAR_LIST, 0);
 	usleep(200000);
     bt_mix_vol = Frist_MIX_LEV;
-	select_mixvol_table();
-
-	save_player_info();
-	usleep(10000);
+	select_mixvol_table();	
+	usleep(10000);	
 	save_mix_vol();
 	usleep(10000);
 	display_ui_init();
