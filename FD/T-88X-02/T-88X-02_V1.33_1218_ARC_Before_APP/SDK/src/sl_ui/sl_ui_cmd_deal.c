@@ -1237,6 +1237,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_ENTER:
+				enter_tre_set = false;
+				enter_bass_set = false;
+			
 				auto_input_cnt = 100;
 				if(ui_source_select == SOURCE_SELECT_USB ||ui_source_select == SOURCE_SELECT_SD)
 				{
@@ -1895,15 +1898,19 @@ void source_mode_fm(void)
 				break;
 
 			case UI_CMD_FM_SCAN:
-				FmScan(1);
+				FmScan(1,1);
 				break;
 
-			case UI_CMD_FM_HALF_SCAN:
-				FmScan(0);
+			case UI_CMD_FM_HALF_SCAN_SUB:
+				FmScan(0,0);
+				break;
+
+			case UI_CMD_FM_HALF_SCAN_ADD:
+				FmScan(0,1);
 				break;
 
 			case UI_CMD_BT_PAIR:
-				FmScan(1);
+				FmScan(1,1);
 				break;
 
 			/*

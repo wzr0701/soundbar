@@ -484,9 +484,9 @@ void ui_handle_power(int power_on_off)
 		enter_othermode_check();
 		change_mode_unmute();
 
-		//read_player_info();
+		read_player_info();
 		//read_mix_vol();
-		ui_source_select = SOURCE_SELECT_TEST;
+		//ui_source_select = SOURCE_SELECT_START;
 		ui_handle_mode(ui_source_select, false);
 
 #if 0
@@ -1493,13 +1493,13 @@ void ui_handle_play_num(int num)
         {
 			*p_index = num-1;
 			*p_playtime = 0;
-			handle_local_music_play(*p_index, *p_playtime);
+			handle_local_music_play(*p_index, *p_playtime);	
         }
 		else if(num>total)
 		{
 			*p_index = total-1;
 			*p_playtime = 0;
-			handle_local_music_play(*p_index, *p_playtime);
+			handle_local_music_play(*p_index, *p_playtime);	
 		}
 		usleep(500000);
 		usleep(500000);
@@ -1582,7 +1582,7 @@ void ui_handle_next(void)
                 *p_index = 0;
             }
             *p_playtime = 0;
-            handle_local_music_play(*p_index, *p_playtime);
+            handle_local_music_play(*p_index, *p_playtime);		
         }
 		usleep(500000);
 		usleep(500000);
@@ -1692,7 +1692,7 @@ void ui_handle_folder_next(void)
 			//next_folder_flag = false;
 			folder_index_dis = *p_index;
 			folder_dis_flag = true;
-			display_ui_usb_folder(0);
+			//display_ui_usb_folder(0);
 			handle_local_music_play(*p_index, *p_playtime);
         }
 		usleep(500000);
@@ -1753,7 +1753,7 @@ void ui_handle_folder_prev(void)
 			//prev_folder_flag = false;
 			folder_index_dis = *p_index;
 			folder_dis_flag = true;
-			display_ui_usb_folder(0);
+			//display_ui_usb_folder(0);
 			handle_local_music_play(*p_index, *p_playtime);
         }
 		usleep(500000);
@@ -1818,7 +1818,7 @@ void ui_handle_tone_finish(void)
         int total = get_file_total();
         if (total > 0)
         {
-            handle_local_music_play(*p_index, *p_playtime);
+            handle_local_music_play(*p_index, *p_playtime);		
         }
     }
     else if(ui_source_select == SOURCE_SELECT_BT || ui_source_select == SOURCE_SELECT_LINEIN)

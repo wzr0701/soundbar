@@ -261,6 +261,7 @@ void handle_local_music_play(int file_index, int playtime)
 	play_list_item_t item;
 	if(play_list_get_file_byindex(&item, file_index) == 0)
 	{
+		display_ui_usb_number(file_index);
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 		usb_play_cnt = 0;
 		//发送命令进行播放

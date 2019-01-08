@@ -171,6 +171,7 @@ void display_ui_main_sys(char wm_mode)
 	display_ui_clear();
 	ht1633_updata_display();
 	display_ui_device(wm_mode);
+	dis_other_mode=1;
 	ui_goback_source(400);
 }
 
@@ -1179,6 +1180,24 @@ void display_ui_usb_folder(int loc)
 		ht1633_updata_display();
 	}
 }
+
+void display_ui_usb_number(int num)
+{
+	char num_buf1[5] = {NUM_U, NUM_B,0,0,0};
+
+	num_buf1[2] = (num+1) / 100;
+	num_buf1[3] =((num+1)% 100)/10;
+	num_buf1[4] = (num+1)%10;
+
+	if(ui_source_select == SOURCE_SELECT_USB )
+	{
+		display_ui_clear();		
+		display_str(num_buf1);		
+		ht1633_updata_display();
+		dis_other_mode=1;
+	}
+}
+
 
 /****************************************************
 
