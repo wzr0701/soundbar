@@ -369,6 +369,7 @@ void handle_bass_treble(int mode, int level)
 		{
 			treble_level = *pLevel;
 		}
+		//printf("%s:bass_level = %d.treble_level = %d\n",__func__, bass_level, treble_level);
         //����BASS��TREBLE��ֵ
         update_bass_treble(pLevel, bass_or_treble);
     }
@@ -797,10 +798,17 @@ APP_VALUE_S APP_CMD[] =
 	{"MBTUB\r\n",UI_CMD_GO_TO_USB},      //USB
 	{"MBTAX\r\n",UI_CMD_GO_TO_AUX},      //AUX
 	{"MBTOT\r\n",UI_CMD_GO_TO_SPDIF},      //OPT
-	{"MTMIO\r\n",UI_CMD_MIC_ON},      //MIC ON
+	{"MTMIO\r\n",UI_CMD_MIC_ON},      //MIC ON 
 	{"MTMIC\r\n",UI_CMD_MIC_ON},      //MIC OFF
 	{"MTMOVO\r\n",UI_CMD_MOVIE_ON},      //MOVIE ON
-	{"MTMOVC\r\n",UI_CMD_MOVIE_ON},      //MOVIE OFF
+	{"BTTUNEA\r\n",UI_CMD_FM_TUNE_ADD},      //TUNE +
+	{"BTTUNES\r\n",UI_CMD_FM_TUNE_SUB},      //TUNE -
+	{"BTSCAN\r\n",UI_CMD_FM_SCAN},      //FM SCAN
+	{"MTNEXT\r\n",UI_CMD_NEXT},      //NEXT
+	{"MTPREV\r\n",UI_CMD_PREV},      //PREV
+	{"MTPAUSE\r\n",UI_CMD_PLAY_PAUSE},      //PAUSE
+	{"MTPLAY\r\n",UI_CMD_PLAY_PAUSE},      //PLAY
+	{"BTMEM\r\n",UI_CMD_FM_MANUAL_SAVE},      //MEM
 #if 0
     {"AT+IRf30cdf20\r\n",UI_CMD_POWER},      //POWER
     {"AT+IRf708df20\r\n",UI_CMD_VOLUME_MUTE},        //MUTE
@@ -868,7 +876,7 @@ enum ui_cmd_e app_cmd_translate(char *cmd)
         //if(strstr(cmd,BT_CMD[i].bt_value) != NULL)
         if(str_cmp_80(cmd,APP_CMD[i].app_value))
         {
-			//printf("cmd = %d\n",BT_CMD[i].cmd);
+			printf("%s:cmd = %d\n",__func__,APP_CMD[i].cmd);
 			return APP_CMD[i].cmd;
         }
     }
@@ -968,6 +976,11 @@ int bt_cmd_check(char *buf_recv)
 			cmd.cmd = UI_CMD_MICVOL_SET;
 			cmd.arg2 = value;
         }
+
+		if((index == AT_MIC_ON)||(index == AT_MIC_OFF)||(index == AT_MOVIE_ON)||(index == AT_MOVIE_ON))
+		{
+			cmd.cmd = UI_CMD_NULL;
+		}
 		 
 		if(cmd.cmd != UI_CMD_NULL)
         {
@@ -1089,17 +1102,17 @@ void bt_cmd_current_mainvol(void)
 	usleep(60000);
 }
 
-void bt_cmd_current_treble(void)
+void bt_cmd_current_treble(int vol)
 {
     //通知bt当前的音量
-    handle_bt_cmd(AT_CUR_TREBLE, treble_vol+5);
+    handle_bt_cmd(AT_CUR_TREBLE, vol+5);
 	usleep(60000);
 }
 
-void bt_cmd_current_bass(void)
+void bt_cmd_current_bass(int vol)
 {
     //通知bt当前的音量
-    handle_bt_cmd(AT_CUR_BASS, bass_vol+5);
+    handle_bt_cmd(AT_CUR_BASS, vol+5);
 	usleep(60000);
 }
 
@@ -2334,6 +2347,7 @@ void ui_handle_vol_set(int vol)
     if(vol >= 0 && vol <= 30)
     {
 		printf("set vol %d\n",vol);
+		bt_mix_vol = vol;
         //mix_vol = (float)vol * VOL_STEP;
         select_mixvol_table();
 
@@ -2486,7 +2500,7 @@ static void ui_process_vol_dec(void)
 		}
 		printf("UI_CMD_EQ_TRB_SUB:%d\n",treble_vol);
 		set_bass_treble_vol(2,treble_vol);
-		display_ui_bass_vol(2,treble_vol);
+		//display_ui_bass_vol(2,treble_vol);
 	}
 	else  if(enter_bass_set == true)
     {
@@ -2498,7 +2512,7 @@ static void ui_process_vol_dec(void)
 		}
 		printf("UI_CMD_EQ_BASS_SUB:%d\n",bass_vol);
 		set_bass_treble_vol(0,bass_vol);
-		display_ui_bass_vol(0,bass_vol);
+		//display_ui_bass_vol(0,bass_vol);
 	}
 	else
 	{
@@ -2605,7 +2619,7 @@ static void ui_process_vol_inc(void)
 		}
 		printf("UI_CMD_EQ_TRB_ADD:%d\n",treble_vol);
 		set_bass_treble_vol(2,treble_vol);
-		display_ui_bass_vol(2,treble_vol);
+		//display_ui_bass_vol(2,treble_vol);
 	}
 	else  if(enter_bass_set == true)
     {
@@ -2618,7 +2632,7 @@ static void ui_process_vol_inc(void)
 		}
 		printf("UI_CMD_EQ_BASS_ADD:%d\n",bass_vol);
 		set_bass_treble_vol(0,bass_vol);
-		display_ui_bass_vol(0,bass_vol);
+		//display_ui_bass_vol(0,bass_vol);
 	}
 	else
 	{

@@ -736,8 +736,8 @@ void ui_handle_unload_eq(void);
 
 void bt_read_state(void);
 void bt_cmd_current_mainvol(void);
-void bt_cmd_current_treble(void);
-void bt_cmd_current_bass(void);
+void bt_cmd_current_treble(int vol);
+void bt_cmd_current_bass(int vol);
 void bt_cmd_current_echo(void);
 void bt_cmd_current_micvol(void);
 

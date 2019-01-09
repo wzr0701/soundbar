@@ -563,16 +563,20 @@ void set_bass_treble_vol(int mode,int vol)//mode=0:bass  mode = 2:treble
 	else if (vol > BASS_TREBLE_LEVEL_MAX)
 	{
 		vol = BASS_TREBLE_LEVEL_MAX;
-	}		
+	}
+	//printf("%s:vol = %d.\n",__func__,vol);
+	
 	handle_bass_treble(mode, vol);
+
+	display_ui_bass_vol(mode, vol);
 
 	if (mode > 1)
 	{
-		bt_cmd_current_treble(); //treble
+		bt_cmd_current_treble(vol); //treble
 	}
 	else
 	{
-		bt_cmd_current_bass();//bass
+		bt_cmd_current_bass(vol);//bass
 	}
 }
 
@@ -1336,7 +1340,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				}
 				printf("UI_CMD_EQ_TRB_ADD:%d\n",treble_vol);
 				set_bass_treble_vol(TREBLE_MODE,treble_vol);
-				display_ui_bass_vol(TREBLE_MODE,treble_vol);
+				//display_ui_bass_vol(TREBLE_MODE,treble_vol);
 				break;
 
 			case UI_CMD_EQ_TRE_SUB:
@@ -1349,7 +1353,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				}
 				printf("UI_CMD_EQ_TRB_SUB:%d\n",treble_vol);
 				set_bass_treble_vol(TREBLE_MODE,treble_vol);
-				display_ui_bass_vol(TREBLE_MODE,treble_vol);
+				//display_ui_bass_vol(TREBLE_MODE,treble_vol);
 				break;
 
 			case UI_CMD_EQ_BASS_ADD:
@@ -1361,7 +1365,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				}
 				printf("UI_CMD_EQ_BASS_ADD:%d\n",bass_vol);
 				set_bass_treble_vol(BASS_MODE,bass_vol);
-				display_ui_bass_vol(BASS_MODE,bass_vol);
+				//display_ui_bass_vol(BASS_MODE,bass_vol);
 				break;
 
 			case UI_CMD_EQ_BASS_SUB:
@@ -1372,7 +1376,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				}
 				printf("UI_CMD_EQ_BASS_SUB:%d\n",bass_vol);
 				set_bass_treble_vol(BASS_MODE,bass_vol);
-				display_ui_bass_vol(BASS_MODE,bass_vol);
+				//display_ui_bass_vol(BASS_MODE,bass_vol);
 				break;
 
 			case UI_CMD_AUX_CONNECT:
@@ -1427,19 +1431,25 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_TREBLE_SET:
-				set_bass_treble_vol(TREBLE_MODE,(cmd->arg2-5));
+				treble_vol = (cmd->arg2)-5;
+				set_bass_treble_vol(TREBLE_MODE,treble_vol);
+				//display_ui_bass_vol(TREBLE_MODE,treble_vol);
 				break;
 
 			case UI_CMD_BASS_SET:
-				set_bass_treble_vol(BASS_MODE,(cmd->arg2-5));
+				bass_vol = (cmd->arg2)-5;
+				set_bass_treble_vol(BASS_MODE,bass_vol);
+				//display_ui_bass_vol(BASS_MODE,bass_vol);
 				break;
 
 			case UI_CMD_ECHO_SET:
 				set_echo_vol(cmd->arg2);
+				display_mic_vol(echo_vol_lev);
 				break;
 
 			case UI_CMD_MICVOL_SET:
 				set_micvol_level(cmd->arg2);
+				display_mic_vol(mic_vol_lev);
 				break;
 
 			case UI_CMD_VOLUME_INC_DOWN:
@@ -1645,7 +1655,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				tre_bass_cnt = 0;
 				//display_ui_enter_tre_bass(0);
 				set_bass_treble_vol(2,treble_vol);
-				display_ui_bass_vol(2,treble_vol);
+				//display_ui_bass_vol(2,treble_vol);
 				break;
 
 			case UI_CMD_ENTER_BASS_SET:
@@ -1654,7 +1664,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				tre_bass_cnt = 0;
 				//display_ui_enter_tre_bass(1);
 				set_bass_treble_vol(0,bass_vol);
-				display_ui_bass_vol(0,bass_vol);
+				//display_ui_bass_vol(0,bass_vol);
 				break;
 
 			case UI_CMD_MOVIE_ON:
