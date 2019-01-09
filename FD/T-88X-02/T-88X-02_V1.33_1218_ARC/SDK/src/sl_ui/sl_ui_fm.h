@@ -45,7 +45,8 @@ void fm_rx_set_vol(unsigned char vol);
 void fm_rx_off(void);
 
 unsigned char fm_rx_ID(void);
- unsigned char FmScan(int mode);
+ unsigned char FmScan(int mode,int dir);
+ 
  void SaveChan(unsigned char index);
 
 unsigned char FM_Mode(void);

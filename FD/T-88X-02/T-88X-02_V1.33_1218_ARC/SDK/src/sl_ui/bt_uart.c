@@ -62,11 +62,11 @@ static const char * AT_CMDS[] = {
 	//蓝牙状态命令
 	//"ATCN\r\n",		    //设备连接成功
 	//"ATWC\r\n",            //设备断开连接
-	"CN",		    //设备连接成功
-	"WC",            //设备断开连接
+	"CN\r\n",		    //设备连接成功
+	"WC\r\n",            //设备断开连接
 	"AT+MA\n",            //蓝牙播放暂停
 	"AT+MB\n",            //蓝牙开始播放
-	"ATCX\r\n",            //查询蓝牙设备连接状态
+	"ATCZ\r\n",            //查询蓝牙设备连接状态
 	"AT+GET+AUX\n",       //AUX连接状态查询
 	"AT+AUX01\n",         //AUX连接
 	"AT+AUX00\n",         //AUX断开连接

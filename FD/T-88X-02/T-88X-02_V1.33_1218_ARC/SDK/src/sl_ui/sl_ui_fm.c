@@ -140,13 +140,18 @@ unsigned char FM_Mode(void)
    @note
 */
 /*----------------------------------------------------------------------------*/
- u8 FmScan(int mode)
+ u8 FmScan(int mode,int dir)
 {
 	u8 temp;
 	static u16 CurFrequency = 0;
 	ui_cmd_t cmdq;
 	temp = 1;
 
+	if(mode == 1)
+	{
+		fmFrequency=875;    
+	}
+	
 	CurFrequency = fmFrequency;    //保存起始频点
 	Fre_Total_Num = 0;
 
@@ -155,13 +160,20 @@ unsigned char FM_Mode(void)
 
 	if(mode == 0)
 	{
-		fmFrequency ++;
+		if(dir == 0)
+		{
+			fmFrequency --;
+		}
+		else
+		{
+			fmFrequency ++;
+		}
 	}
 
 	while(1)
 	{
 		cmdq=get_mq_msg();
-		if(cmdq.cmd==UI_CMD_FM_SCAN||cmdq.cmd==UI_CMD_PLAY_PAUSE||cmdq.cmd==UI_CMD_FM_HALF_SCAN)
+		if(cmdq.cmd==UI_CMD_FM_SCAN||cmdq.cmd==UI_CMD_PLAY_PAUSE||cmdq.cmd==UI_CMD_FM_HALF_SCAN_ADD||cmdq.cmd==UI_CMD_FM_HALF_SCAN_SUB)
 		{
 			fmFrequency --;
 			fm_rx_set_freq(fmFrequency);
@@ -198,9 +210,32 @@ unsigned char FM_Mode(void)
 				pa_mute_ctrl(true);
 			}
 		}
-		fmFrequency ++;
+		
+		if(mode == 0)
+		{
+			if(dir == 0)
+			{
+				fmFrequency --;
+			}
+			else
+			{
+				fmFrequency ++;
+			}
+		}
+		else if(mode == 1)
+		{
+			fmFrequency ++;
+		}
+		
 		if(fmFrequency > FM_MAX)
+		{
 			fmFrequency = FM_MIN;
+		}
+		else if(fmFrequency < FM_MIN)
+		{
+			fmFrequency = FM_MAX;
+		}
+			
 		if(fmFrequency == CurFrequency)     //一个循环
 		{
 			fm_rx_set_freq(fmFrequency);	
@@ -220,11 +255,14 @@ unsigned char FM_Mode(void)
 	Delay5Ms(10);
 
 
-	if(Fre_Total_Num>1)
+	if(Fre_Total_Num>=1)
 	{
 		Cur_Fre_Num = 1;
 		fmFrequency= Frequency_Save[0]+FM_MIN;
-		fm_rx_set_freq(fmFrequency);	
+		
+		if(Fre_Total_Num>1)
+			fm_rx_set_freq(fmFrequency);	
+			
 		temp=fmFrequency-FM_MIN;
 		at24c02_write_one_byte(MEM_FM_FREQUENCY ,temp);
 		Delay5Ms(10);

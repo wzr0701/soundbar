@@ -134,7 +134,7 @@ static const int bass_treble_gains_size = (sizeof(bass_treble_gains)/sizeof(bass
 #define MIX_LEV_CNT 30
 
 
-#define BASS_TREBLE_GAIN_MAX 600
+#define BASS_TREBLE_GAIN_MAX 700
 #define BASS_GAIN_MAX 1200
 #define TREBLE_GAIN_MAX 600
 
