@@ -798,9 +798,10 @@ APP_VALUE_S APP_CMD[] =
 	{"MBTUB\r\n",UI_CMD_GO_TO_USB},      //USB
 	{"MBTAX\r\n",UI_CMD_GO_TO_AUX},      //AUX
 	{"MBTOT\r\n",UI_CMD_GO_TO_SPDIF},      //OPT
-	{"MTMIO\r\n",UI_CMD_MIC_ON},      //MIC ON 
-	{"MTMIC\r\n",UI_CMD_MIC_ON},      //MIC OFF
+	{"MTMICO\r\n",UI_CMD_MIC_ON},      //MIC ON 
+	{"MTMICC\r\n",UI_CMD_MIC_ON},      //MIC OFF
 	{"MTMOVO\r\n",UI_CMD_MOVIE_ON},      //MOVIE ON
+	{"MTMOVC\r\n",UI_CMD_MOVIE_ON},      //MOVIE ON
 	{"BTTUNEA\r\n",UI_CMD_FM_TUNE_ADD},      //TUNE +
 	{"BTTUNES\r\n",UI_CMD_FM_TUNE_SUB},      //TUNE -
 	{"BTSCAN\r\n",UI_CMD_FM_SCAN},      //FM SCAN
@@ -809,23 +810,6 @@ APP_VALUE_S APP_CMD[] =
 	{"MTPAUSE\r\n",UI_CMD_PLAY_PAUSE},      //PAUSE
 	{"MTPLAY\r\n",UI_CMD_PLAY_PAUSE},      //PLAY
 	{"BTMEM\r\n",UI_CMD_FM_MANUAL_SAVE},      //MEM
-#if 0
-    {"AT+IRf30cdf20\r\n",UI_CMD_POWER},      //POWER
-    {"AT+IRf708df20\r\n",UI_CMD_VOLUME_MUTE},        //MUTE
-    {"AT+IRf00fdf20\r\n",UI_CMD_GO_TO_BT},        //WIFI
-    {"AT+IRe916df20\r\n",UI_CMD_GO_TO_SPDIF},        //OPTICAL
-    {"AT+IRf807df20\r\n",UI_CMD_GO_TO_HDMI},        //HDMI
-    {"AT+IRf609df20\r\n",UI_CMD_GO_TO_RCA},  //AUX
-    {"AT+IRf906df20\r\n",UI_CMD_GO_TO_AUX},  //LINEIN
-    {"AT+IRef10df20\r\n",UI_CMD_EQ_MUSIC},        //MUSIC
-    {"AT+IRf40bdf20\r\n",UI_CMD_EQ_MOVIE}, //MOVIE
-    {"AT+IReb14df20\r\n",UI_CMD_EQ_DIALOG},      //DIALOG
-    {"AT+IRff00df20\r\n",UI_CMD_PREV},    //上一曲
-    {"AT+IRfd02df20\r\n",UI_CMD_NEXT},     //下一曲
-    {"AT+IRfe01df20\r\n",UI_CMD_PLAY_PAUSE},  // 播放/暂停
-    {"AT+IRfc03df20\r\n",UI_CMD_VOLUME_DEC},  // -
-    {"AT+IRfa05df20\r\n",UI_CMD_VOLUME_INC},  // +
-#endif
 };
 
 int str_cmp_80(char *str1,char *str2)
@@ -2344,6 +2328,7 @@ void ui_handle_vol_down(void)
 void ui_handle_vol_set(int vol)
 {
     //if(vol >= 0 && vol <= (84.0 / VOL_STEP))
+
     if(vol >= 0 && vol <= 30)
     {
 		printf("set vol %d\n",vol);

@@ -521,7 +521,7 @@ void mic_open(bool on_off)
 void set_echo_vol(int vol)
 {
 	char parg[256] = {0};
-	int *echovol = &vol;
+	//int *echovol = &vol;
 	
 	if(vol == 0)
 	{
@@ -532,12 +532,14 @@ void set_echo_vol(int vol)
 		parameter_echo[ECHO_DELAY] = 200;
 	}
 
+	bt_cmd_current_echo();
+	
 	if(vol == 15)
 	{
 		vol = 14;
 	}
 
-	echo_vol_lev = *echovol;
+	//echo_vol_lev = *echovol;
 	
 	parameter_echo[ECHO_GAIN] =- (3000-(vol*200));
 
@@ -552,8 +554,6 @@ void set_echo_vol(int vol)
 
 	player_process_cmd(NP_CMD_LOAD_MIC_ECHO, NULL, 0, NULL, NULL);
 	player_process_cmd(NP_CMD_SET_MIC_ECHO, parg, 0, NULL, NULL);
-
-	bt_cmd_current_echo();
 
 }
 
@@ -740,8 +740,7 @@ void enter_mode( int mode)
 	usleep(100000);
 
 	select_mixvol_table();
-
-
+	
 	/*
 	if(ui_source_select != SOURCE_SELECT_BT)
 	{
@@ -993,12 +992,12 @@ void enter_mode( int mode)
 		{
 			mic_open(false);
 		}
-		bt_cmd_mic_status(mic_on_flag);
+		//bt_cmd_mic_status(mic_on_flag);
 	}
 	else
 	{
 		mic_open(false);
-		bt_cmd_mic_status(mic_on_flag);
+		//bt_cmd_mic_status(mic_on_flag);
 	}
 #endif
 
@@ -1450,13 +1449,27 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_ECHO_SET:
-				set_echo_vol(cmd->arg2);
+				mic_vol_flag = false;
+				mic_echo_flag = true;
+			
+				if(cmd->arg2 <= 15)
+					echo_vol_lev = cmd->arg2;
+				else
+					echo_vol_lev = 15;
 				display_mic_vol(echo_vol_lev);
+				set_echo_vol(cmd->arg2);
 				break;
 
 			case UI_CMD_MICVOL_SET:
-				set_micvol_level(cmd->arg2);
+				mic_vol_flag = true;
+				mic_echo_flag = false;
+			
+				if(mic_vol_lev <= 30)
+					mic_vol_lev = cmd->arg2;
+				else
+					mic_vol_lev = 30;
 				display_mic_vol(mic_vol_lev);
+				set_micvol_level(cmd->arg2);
 				break;
 
 			case UI_CMD_VOLUME_INC_DOWN:
@@ -1530,6 +1543,8 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 			case UI_CMD_MIC_ON:
 				mic_on_flag^=0xff;
+				bt_cmd_mic_status(mic_on_flag);
+			
 				if(mic_on_flag)
 				{
 					if(mic_detect_online)
@@ -1543,7 +1558,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					}
 
 					display_ui_mic(true);
-					bt_cmd_mic_status(mic_on_flag);
+					//bt_cmd_mic_status(mic_on_flag);
 					
 				}
 				else
@@ -1552,7 +1567,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					mic_echo_flag = false;
 					mic_open(false);
 					display_ui_mic(false);
-					bt_cmd_mic_status(mic_on_flag);
+					//bt_cmd_mic_status(mic_on_flag);
 				}
 			break;
 

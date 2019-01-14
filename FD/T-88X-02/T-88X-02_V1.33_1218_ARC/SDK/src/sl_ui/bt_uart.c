@@ -83,24 +83,24 @@ static const char * AT_CMDS[] = {
 	"CATPA\r\n",            //播放/暂停
 	"CATPN\r\n",            //下一曲
 	"CATPV\r\n",            //上一曲
-	"MTMIO\r\n"  ,          
-	"MTMIC\r\n" ,           
-	"MTMOVO\r\n" ,           
-	"MTMOVC\r\n",           
+	"MBMICO"  ,          
+	"MBMICC" ,           
+	"MBMOVO" ,           
+	"MBMOVC",           
 	
 	//带参数命令
-	"AT+WM+",               //特定模式设置
+	"AT+WM+",              //特定模式设置
 	"ATVER",              //版本号
 	"VBTVOL",
 	"VBTTRE",
 	"VBTBAS",
 	"VBTECH",
 	"VBTMIC",
-	"VATVOL",
-	"VATTRE",
-	"VATBAS",
-	"VATECH",
-	"VATMIC",
+	"VATV",
+	"VATT",
+	"VATB",
+	"VATE",
+	"VATM",
 	"AT+NUM+",              //数字
 	"AT+VOL+",              //音量
 	"AT+EQ+",               //音效
@@ -289,14 +289,31 @@ int bt_read(char *buf, int buf_szie)
 					number = read(bt_fd, buf_receive, buf_szie);
 					if (number <= 0)
 					{
+						//printf("read(bt_fd, buf_receive, buf_szie);\n");
+						
+						delay_time++;
+						if(delay_time >= 500)
+						{
+							if(buf[0] <'A'||buf[0]>'Z')
+								read_end = true;
+						}
 						//read_end = true;
 					}
 					else//从串口读到了数据
 					{
+						delay_time = 0;
 						strcat(buf,buf_receive);
 						count += number;
-			
-						ret = check_str_resv_over(buf,count);
+
+						if(buf[0] >='A'&&buf[0]<='Z')
+						{
+							ret = check_str_resv_over(buf,count);
+						}
+						else
+						{
+							count = 0;
+							ret = 0;
+						}
 			
 						if(ret)
 						{
@@ -310,7 +327,7 @@ int bt_read(char *buf, int buf_szie)
 					}
 				}
 				#if BT_DEBUG
-				printf("buf_rev %s count:%d\r\n",buf, count);
+				printf("buf_rev:%s ------count:%d.\r\n",buf, count);
 				#endif
             }
             else
@@ -466,7 +483,7 @@ int handle_bt_cmd(AT_CMD cmd, int value)
             {
                 if(value >= 0 && value < 100)
                 {
-                    sprintf(buf+len, "%02d\n" , value);
+                    sprintf(buf+len, "%02d" , value);
 					len = len +3;
                 }
                 else

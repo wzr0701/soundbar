@@ -467,7 +467,6 @@ void display_mic_vol(int vol)
 			volume[1]=NUM_n;
 			volume[2]=NUM_n;
 		}
-
 		else if(mic_echo_flag ==       true)
 		{
 			volume[0]=NUM_OFF;
