@@ -798,10 +798,10 @@ APP_VALUE_S APP_CMD[] =
 	{"MBTUB\r\n",UI_CMD_GO_TO_USB},      //USB
 	{"MBTAX\r\n",UI_CMD_GO_TO_AUX},      //AUX
 	{"MBTOT\r\n",UI_CMD_GO_TO_SPDIF},      //OPT
-	{"MTMICO\r\n",UI_CMD_MIC_ON},      //MIC ON 
-	{"MTMICC\r\n",UI_CMD_MIC_ON},      //MIC OFF
-	{"MTMOVO\r\n",UI_CMD_MOVIE_ON},      //MOVIE ON
-	{"MTMOVC\r\n",UI_CMD_MOVIE_ON},      //MOVIE ON
+	{"MTMICO\r\n",UI_CMD_APP_MIC_ON},      //MIC ON 
+	{"MTMICC\r\n",UI_CMD_APP_MIC_OFF},      //MIC OFF
+	{"MTMOVO\r\n",UI_CMD_APP_MOVIE_ON},      //MOVIE ON
+	{"MTMOVC\r\n",UI_CMD_APP_MOVIE_OFF},      //MOVIE OFF
 	{"BTTUNEA\r\n",UI_CMD_FM_TUNE_ADD},      //TUNE +
 	{"BTTUNES\r\n",UI_CMD_FM_TUNE_SUB},      //TUNE -
 	{"BTSCAN\r\n",UI_CMD_FM_SCAN},      //FM SCAN
@@ -860,7 +860,7 @@ enum ui_cmd_e app_cmd_translate(char *cmd)
         //if(strstr(cmd,BT_CMD[i].bt_value) != NULL)
         if(str_cmp_80(cmd,APP_CMD[i].app_value))
         {
-			printf("%s:cmd = %d\n",__func__,APP_CMD[i].cmd);
+			//printf("%s:cmd = %d\n",__func__,APP_CMD[i].cmd);
 			return APP_CMD[i].cmd;
         }
     }
@@ -2485,6 +2485,7 @@ static void ui_process_vol_dec(void)
 		}
 		printf("UI_CMD_EQ_TRB_SUB:%d\n",treble_vol);
 		set_bass_treble_vol(2,treble_vol);
+		bt_cmd_current_treble(treble_vol); //treble
 		//display_ui_bass_vol(2,treble_vol);
 	}
 	else  if(enter_bass_set == true)
@@ -2497,6 +2498,7 @@ static void ui_process_vol_dec(void)
 		}
 		printf("UI_CMD_EQ_BASS_SUB:%d\n",bass_vol);
 		set_bass_treble_vol(0,bass_vol);
+		bt_cmd_current_bass(bass_vol); //bass
 		//display_ui_bass_vol(0,bass_vol);
 	}
 	else
@@ -2512,6 +2514,8 @@ static void ui_process_vol_dec(void)
 			
 
 		select_mixvol_table();
+
+		bt_cmd_current_mainvol();
 #if 1
 		if (ui_source_select == SOURCE_SELECT_SPDIFIN ||
 			ui_source_select == SOURCE_SELECT_USB ||
@@ -2604,6 +2608,7 @@ static void ui_process_vol_inc(void)
 		}
 		printf("UI_CMD_EQ_TRB_ADD:%d\n",treble_vol);
 		set_bass_treble_vol(2,treble_vol);
+		bt_cmd_current_treble(treble_vol); //treble
 		//display_ui_bass_vol(2,treble_vol);
 	}
 	else  if(enter_bass_set == true)
@@ -2617,6 +2622,7 @@ static void ui_process_vol_inc(void)
 		}
 		printf("UI_CMD_EQ_BASS_ADD:%d\n",bass_vol);
 		set_bass_treble_vol(0,bass_vol);
+		bt_cmd_current_bass(bass_vol); //bass
 		//display_ui_bass_vol(0,bass_vol);
 	}
 	else
@@ -2636,6 +2642,8 @@ static void ui_process_vol_inc(void)
 			bt_mix_vol = MIX_LEV_CNT;
 
 		select_mixvol_table();
+
+		bt_cmd_current_mainvol();
 #if 1
 
 		if (ui_source_select == SOURCE_SELECT_SPDIFIN ||
@@ -2795,6 +2803,7 @@ void sl_ui_system_reset(void)
 	mute_state = UNMUTE;
 	bt_mix_vol = Frist_MIX_LEV;
 	select_mixvol_table();
+	bt_cmd_current_mainvol();
 	bass_vol = 0;
 	treble_vol = 0;
 	echo_vol_lev = 5;
@@ -2808,8 +2817,10 @@ void sl_ui_system_reset(void)
 	set_channel_vol_by_mode(ui_source_select);
 
 	set_bass_treble_vol(0,bass_vol);
+	bt_cmd_current_bass(bass_vol); //bass
 	usleep(10000);
 	set_bass_treble_vol(2,treble_vol);
+	bt_cmd_current_treble(treble_vol); //treble
 	//display_ui_clear();
 	//display_str(reset_clear_str);
 	//ht1633_updata_display();
