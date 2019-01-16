@@ -482,7 +482,7 @@ void ui_handle_next_down(void);
  * Assumptions:
  *
  ****************************************************************************/
-void ui_handle_pause_play(void);
+void ui_handle_pause_play(char mode,char status);
 
 /****************************************************************************
  * Name: ui_handle_power

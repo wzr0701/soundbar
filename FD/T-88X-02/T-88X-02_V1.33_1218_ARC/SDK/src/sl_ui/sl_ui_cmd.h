@@ -235,6 +235,9 @@ enum ui_cmd_e {
 
 	UI_CMD_EQ_POWER_TEST,
 
+	UI_CMD_APP_PLAY,
+	UI_CMD_APP_PAUSE,
+
 	UI_CMD_MAX,
 };
 /*静音状态*/

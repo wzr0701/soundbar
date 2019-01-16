@@ -807,8 +807,8 @@ APP_VALUE_S APP_CMD[] =
 	{"BTSCAN\r\n",UI_CMD_FM_SCAN},      //FM SCAN
 	{"MTNEXT\r\n",UI_CMD_NEXT},      //NEXT
 	{"MTPREV\r\n",UI_CMD_PREV},      //PREV
-	{"MTPAUSE\r\n",UI_CMD_PLAY_PAUSE},      //PAUSE
-	{"MTPLAY\r\n",UI_CMD_PLAY_PAUSE},      //PLAY
+	{"MTPAUSE\r\n",UI_CMD_APP_PAUSE},      //PAUSE
+	{"MTPLAY\r\n",UI_CMD_APP_PLAY},      //PLAY
 	{"BTMEM\r\n",UI_CMD_FM_MANUAL_SAVE},      //MEM
 };
 
@@ -1744,27 +1744,47 @@ void ui_handle_play_num(int num)
  * Assumptions:
  *
  ****************************************************************************/
-void ui_handle_pause_play(void)
+void ui_handle_pause_play(char mode,char status)
 {
     printf("\n%s\n", __func__);
 
- if(ui_source_select == SOURCE_SELECT_USB ||
-            ui_source_select == SOURCE_SELECT_SD)
+ 	if(ui_source_select == SOURCE_SELECT_USB ||
+    	ui_source_select == SOURCE_SELECT_SD)
     {
         //获取播放状态
         ui_info_t player_info;
         memset(&player_info, 0, sizeof(ui_info_t));
         player_get_info(&player_info);
-        if (player_info.player_stat == 2)
-        {   //正在播放
-            //发送命令停止播放
-            player_process_cmd(NP_CMD_PAUSE, NULL, 0, NULL, NULL);
-        }
-        else if (player_info.player_stat == 3)
-        {   //暂停播放
-            //发送命令恢复播放
-            player_process_cmd(NP_CMD_RESUME, NULL, 0, NULL, NULL);
-        }
+		if(mode == 0)//key
+		{
+			if (player_info.player_stat == 2)
+	        {   //正在播放
+	            //发送命令停止播放
+	            player_process_cmd(NP_CMD_PAUSE, NULL, 0, NULL, NULL);
+	        }
+	        else if (player_info.player_stat == 3)
+	        {   //暂停播放
+	            //发送命令恢复播放
+	            player_process_cmd(NP_CMD_RESUME, NULL, 0, NULL, NULL);
+	        }
+		}
+		else//app
+		{
+			if (player_info.player_stat > 1)
+			{
+				switch(status)
+				{
+					case 0://pause
+						player_process_cmd(NP_CMD_PAUSE, NULL, 0, NULL, NULL);
+						break;
+
+					case 1://play
+						player_process_cmd(NP_CMD_RESUME, NULL, 0, NULL, NULL);
+						break;
+				}
+			}
+		}
+       
     }
 }
 

@@ -1214,13 +1214,27 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_GO_TO_BT:
-				ui_handle_mode(SOURCE_SELECT_BT,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_BT,0);
+						ret=1;
+						break;
+					}
+				}				
 				break;
 
 			case UI_CMD_GO_TO_USB:
-				ui_handle_mode(SOURCE_SELECT_USB,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_USB,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 			case UI_CMD_GO_TO_SD:
@@ -1229,28 +1243,63 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_GO_TO_AUX:
-				ui_handle_mode(SOURCE_SELECT_LINEIN,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_LINEIN,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 			case UI_CMD_GO_TO_SPDIF:
-				ui_handle_mode(SOURCE_SELECT_SPDIFIN,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_SPDIFIN,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 			case UI_CMD_GO_TO_HDMI:
-				ui_handle_mode(SOURCE_SELECT_HDMI,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_HDMI,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 			case UI_CMD_GO_TO_COA:
-				ui_handle_mode(SOURCE_SELECT_COA,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_COA,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 			case UI_CMD_GO_TO_FM:
-				ui_handle_mode(SOURCE_SELECT_FM,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_FM,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 
@@ -1842,6 +1891,8 @@ void source_mode_bt(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
+			case UI_CMD_APP_PLAY:
+			case UI_CMD_APP_PAUSE:
 				bt_cmd_play_pause();
 				break;
 
@@ -1894,7 +1945,15 @@ void source_mode_usb(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
-				ui_handle_pause_play();
+				ui_handle_pause_play(0,0);
+				break;
+
+			case UI_CMD_APP_PLAY:
+				ui_handle_pause_play(1,1);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				ui_handle_pause_play(1,0);
 				break;
 
 			case UI_CMD_NEXT:
@@ -1959,7 +2018,7 @@ void source_mode_sd(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
-				ui_handle_pause_play();
+				ui_handle_pause_play(0,0);
 				break;
 
 			case UI_CMD_NEXT:
@@ -2045,6 +2104,16 @@ void source_mode_fm(void)
 				fm_manual_save_cnt = 0;
 				break;
 
+			case UI_CMD_APP_PLAY:
+				mute_state = MUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				mute_state = UNMUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
 			default:
 				ret=ui_handle_cmd_com(&cmd);
 				break;
@@ -2084,6 +2153,16 @@ void source_mode_aux(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PLAY:
+				mute_state = MUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				mute_state = UNMUTE;
 				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
@@ -2128,6 +2207,16 @@ void source_mode_spdifin(void)
 				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
+			case UI_CMD_APP_PLAY:
+				mute_state = MUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				mute_state = UNMUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
 			default:
 				ret=ui_handle_cmd_com(&cmd);
 				break;
@@ -2168,6 +2257,16 @@ void source_mode_hdmi(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PLAY:
+				mute_state = MUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				mute_state = UNMUTE;
 				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
@@ -2239,6 +2338,16 @@ void source_mode_coaxial(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PLAY:
+				mute_state = MUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				mute_state = UNMUTE;
 				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
