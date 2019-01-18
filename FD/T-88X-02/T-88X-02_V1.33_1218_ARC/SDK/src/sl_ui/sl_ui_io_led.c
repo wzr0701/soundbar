@@ -50,6 +50,7 @@ extern int auto_input_cnt;
 
 extern struct input_event save_ir_event;
 extern bool ir_short_flag;
+extern bool ir_long_flag;
 extern int save_ir_cnt;
 extern int fm_manual_save_cnt;
 extern bool fm_manual_save_status;
@@ -312,7 +313,6 @@ void pa_static_check(void)
 	{
 		if(ir_short_flag)
 		{
-			ir_short_flag = false;
 			input_add_event(&save_ir_event);
 		}
 	}

@@ -156,6 +156,7 @@ extern struct input_event save_ir_event;
 extern bool enter_tre_set;
 extern bool enter_bass_set;
 extern bool ir_short_flag;
+extern bool ir_long_flag;
 extern bool bt_wait_flag;
 
 
@@ -164,61 +165,6 @@ extern void mq_msg_clear(void);
 extern void  put_ui_msg(int ui_cmd);
 extern void set_ui_media(int source);
 extern void player_paramter_set_init(AUDIO_OUT_MODE outMode, AUDIO_IN_MODE inMode, int chnNum, int spdifNum);
-
-static void func_add_detect(void)
-{
-	ui_cmd_t cmd;
-
-	usb_play_cnt++;
-	fm_manual_save_cnt++;
-	bt_wait_cnt++;
-	save_ir_cnt++;
-	tre_bass_cnt   ++;
-	auto_input_cnt ++;
-
-	if(tre_bass_cnt == 60)
-	{
-		enter_tre_set = false;
-		enter_bass_set = false;
-	}
-
-	if(auto_input_cnt == 60)
-	{
-		cmd.cmd = UI_CMD_ENTER;
-		send_cmd_2_ui(&cmd);
-	}
-
-	if(save_ir_cnt == 4)
-	{
-		if(ir_short_flag)
-		{
-			ir_short_flag = false;
-			input_add_event(&save_ir_event);
-		}
-	}
-
-
-	if(bt_wait_cnt == 3600)
-	{
-		bt_wait_flag = true;
-	}
-
-
-	if(fm_manual_save_cnt == 100)
-	{
-		cmd.cmd = UI_CMD_ENTER;
-		send_cmd_2_ui(&cmd);
-	}
-
-
-	if(usb_play_cnt == 30)
-	{
-		set_channel_mixvol_by_mode(ui_source_select);
-		//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
-	}
-
-	enter_othermode_check();
-}
 
 void select_mixvol_table(void)
 {
@@ -560,7 +506,7 @@ void set_echo_vol(int vol)
 }
 
 
-void set_bass_treble_vol(int mode,int vol)//mode=0:bass  mode = 2:treble
+void set_bass_treble_vol(int mode,int vol,int dis_flag)//mode=0:bass  mode = 2:treble
 {
 	if (vol < BASS_TREBLE_LEVEL_MIN)
 	{
@@ -574,8 +520,10 @@ void set_bass_treble_vol(int mode,int vol)//mode=0:bass  mode = 2:treble
 	
 	handle_bass_treble(mode, vol);
 
-	display_ui_bass_vol(mode, vol);
-
+	if(dis_flag)
+	{
+		display_ui_bass_vol(mode, vol);
+	}
 }
 
 void set_micvol_level(int vol)
@@ -1390,7 +1338,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					treble_vol = BASS_TREBLE_LEVEL_MAX;
 				}
 				printf("UI_CMD_EQ_TRB_ADD:%d\n",treble_vol);
-				set_bass_treble_vol(TREBLE_MODE,treble_vol);
+				set_bass_treble_vol(TREBLE_MODE,treble_vol,1);
 				
 				bt_cmd_current_treble(treble_vol); //treble
 		
@@ -1406,7 +1354,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					treble_vol = BASS_TREBLE_LEVEL_MIN;
 				}
 				printf("UI_CMD_EQ_TRB_SUB:%d\n",treble_vol);
-				set_bass_treble_vol(TREBLE_MODE,treble_vol);
+				set_bass_treble_vol(TREBLE_MODE,treble_vol,1);
 				
 				bt_cmd_current_treble(treble_vol); //treble
 				//display_ui_bass_vol(TREBLE_MODE,treble_vol);
@@ -1420,7 +1368,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					bass_vol = BASS_TREBLE_LEVEL_MAX;
 				}
 				printf("UI_CMD_EQ_BASS_ADD:%d\n",bass_vol);
-				set_bass_treble_vol(BASS_MODE,bass_vol);
+				set_bass_treble_vol(BASS_MODE,bass_vol,1);
 
 				bt_cmd_current_bass(bass_vol); //treble
 				//display_ui_bass_vol(BASS_MODE,bass_vol);
@@ -1433,7 +1381,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					bass_vol = BASS_TREBLE_LEVEL_MIN;
 				}
 				printf("UI_CMD_EQ_BASS_SUB:%d\n",bass_vol);
-				set_bass_treble_vol(BASS_MODE,bass_vol);
+				set_bass_treble_vol(BASS_MODE,bass_vol,1);
 
 				bt_cmd_current_bass(bass_vol); //treble
 				//display_ui_bass_vol(BASS_MODE,bass_vol);
@@ -1492,13 +1440,13 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 			case UI_CMD_TREBLE_SET:
 				treble_vol = (cmd->arg2)-5;
-				set_bass_treble_vol(TREBLE_MODE,treble_vol);
+				set_bass_treble_vol(TREBLE_MODE,treble_vol,1);
 				//display_ui_bass_vol(TREBLE_MODE,treble_vol);
 				break;
 
 			case UI_CMD_BASS_SET:
 				bass_vol = (cmd->arg2)-5;
-				set_bass_treble_vol(BASS_MODE,bass_vol);
+				set_bass_treble_vol(BASS_MODE,bass_vol,1);
 				//display_ui_bass_vol(BASS_MODE,bass_vol);
 				break;
 
@@ -1773,7 +1721,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				enter_tre_set = true;
 				tre_bass_cnt = 0;
 				//display_ui_enter_tre_bass(0);
-				set_bass_treble_vol(2,treble_vol);
+				set_bass_treble_vol(2,treble_vol,1);
 				bt_cmd_current_treble(treble_vol); //treble
 				//display_ui_bass_vol(2,treble_vol);
 				break;
@@ -1783,7 +1731,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				enter_bass_set = true;
 				tre_bass_cnt = 0;
 				//display_ui_enter_tre_bass(1);
-				set_bass_treble_vol(0,bass_vol);
+				set_bass_treble_vol(0,bass_vol,1);
 				bt_cmd_current_bass(bass_vol); //treble
 				//display_ui_bass_vol(0,bass_vol);
 				break;

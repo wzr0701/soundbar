@@ -2504,7 +2504,7 @@ static void ui_process_vol_dec(void)
 			treble_vol = BASS_TREBLE_LEVEL_MIN;
 		}
 		printf("UI_CMD_EQ_TRB_SUB:%d\n",treble_vol);
-		set_bass_treble_vol(2,treble_vol);
+		set_bass_treble_vol(2,treble_vol,1);
 		bt_cmd_current_treble(treble_vol); //treble
 		//display_ui_bass_vol(2,treble_vol);
 	}
@@ -2517,7 +2517,7 @@ static void ui_process_vol_dec(void)
 			bass_vol = BASS_TREBLE_LEVEL_MIN;
 		}
 		printf("UI_CMD_EQ_BASS_SUB:%d\n",bass_vol);
-		set_bass_treble_vol(0,bass_vol);
+		set_bass_treble_vol(0,bass_vol,1);
 		bt_cmd_current_bass(bass_vol); //bass
 		//display_ui_bass_vol(0,bass_vol);
 	}
@@ -2627,7 +2627,7 @@ static void ui_process_vol_inc(void)
 			treble_vol = BASS_TREBLE_LEVEL_MAX;
 		}
 		printf("UI_CMD_EQ_TRB_ADD:%d\n",treble_vol);
-		set_bass_treble_vol(2,treble_vol);
+		set_bass_treble_vol(2,treble_vol,1);
 		bt_cmd_current_treble(treble_vol); //treble
 		//display_ui_bass_vol(2,treble_vol);
 	}
@@ -2641,7 +2641,7 @@ static void ui_process_vol_inc(void)
 			bass_vol = BASS_TREBLE_LEVEL_MAX;
 		}
 		printf("UI_CMD_EQ_BASS_ADD:%d\n",bass_vol);
-		set_bass_treble_vol(0,bass_vol);
+		set_bass_treble_vol(0,bass_vol,1);
 		bt_cmd_current_bass(bass_vol); //bass
 		//display_ui_bass_vol(0,bass_vol);
 	}
@@ -2836,10 +2836,10 @@ void sl_ui_system_reset(void)
 	usleep(10000);
 	set_channel_vol_by_mode(ui_source_select);
 
-	set_bass_treble_vol(0,bass_vol);
+	set_bass_treble_vol(0,bass_vol,0);
 	bt_cmd_current_bass(bass_vol); //bass
 	usleep(10000);
-	set_bass_treble_vol(2,treble_vol);
+	set_bass_treble_vol(2,treble_vol,0);
 	bt_cmd_current_treble(treble_vol); //treble
 	//display_ui_clear();
 	//display_str(reset_clear_str);

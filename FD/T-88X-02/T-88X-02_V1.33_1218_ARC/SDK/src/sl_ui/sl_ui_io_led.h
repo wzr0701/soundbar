@@ -28,7 +28,6 @@
 #define PA_RESET_PIN              35
 
 
-
 //////////////////////////////////////////////////
  void padmux_init(void);
 void io_early_set(void);

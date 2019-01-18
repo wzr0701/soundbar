@@ -17,6 +17,8 @@
 #include <nuttx/input.h>
 #include <silan_resources.h>
 #include "zhuque_bsp_gpio.h"
+#include "sl_ui_io_led.h"
+
 
  /****************************************************************************
   * Pre-processor Definitions
@@ -63,7 +65,9 @@
 
 struct input_event save_ir_event;
 bool ir_short_flag=false;
-int save_ir_cnt = 0;
+bool ir_long_flag=false;
+
+int save_ir_cnt = 100;
 
 extern bool next_folder_flag;
 extern bool prev_folder_flag;
@@ -256,8 +260,8 @@ extern bool fm_manual_save_flag;
 				 save_ir_event.value = ir_key_table[i].keycode; //key_priv.key_num;
 
 				 ir_short_flag = true;
-				 save_ir_cnt = 0;
-
+				 ir_long_flag = false;
+				 
 				 next_folder_flag = false;
 				 prev_folder_flag = false;
 				 fm_scan_flag = true;
@@ -272,6 +276,8 @@ extern bool fm_manual_save_flag;
 
 				 //update last IR key value
 				 ir_last_key = ir_key_table[i].keycode;
+
+				save_ir_cnt = 0;
 			 }
 		 }
 	 }
@@ -356,10 +362,10 @@ extern bool fm_manual_save_flag;
 #ifdef IR_DEBUG
 		 printf("xxxxxxxx11.5ms\n");
 #endif
+		 save_ir_cnt = 0;
 		 if (--repeat_timer == 0)
-		 {
-		 	ir_short_flag = false;
-			save_ir_cnt = 100;
+		 {	
+			 save_ir_cnt = 0;
 			 //send key event for long press
 			 //if ((CODE_VOLUME_INC == ir_last_key) ||( CODE_VOLUME_DEC == ir_last_key) )
 			 //if (ir_last_key > 0)
@@ -367,23 +373,29 @@ extern bool fm_manual_save_flag;
 			 	(CODE_IR_ECHO_ADD == ir_last_key) ||( CODE_IR_ECHO_SUB == ir_last_key)  ||
 			 	(CODE_IR_MIC_ADD == ir_last_key) ||( CODE_IR_MIC_SUB == ir_last_key) )
 			 {
-				 key_event.type = EV_IR;
-				 key_event.code = CODE_IR_LONG_PRESS;
-				 key_event.value = ir_last_key;
-				 input_add_event(&key_event);
-				 //printf("ir_code_repeat %d\n", key_event.code);
+			 		ir_short_flag = false;
+					ir_long_flag = true;
+					
+					key_event.type = EV_IR;
+					key_event.code = CODE_IR_LONG_PRESS;
+					key_event.value = ir_last_key;
+					input_add_event(&key_event);
+					//printf("ir_code_repeat %d\n", key_event.code);
 			 }
 			 else
 			 {
 				if (--repeat_timer_cnt == 0)
 				{
-					 key_event.type = EV_IR;
-					 key_event.code = CODE_IR_LONG_PRESS;
-					 key_event.value = ir_last_key;
-					 input_add_event(&key_event);
-					 //printf("repeat_timer_cnt = %d\n", repeat_timer_cnt);
+					ir_short_flag = false;
+					ir_long_flag = true;
+					
+					key_event.type = EV_IR;
+					key_event.code = CODE_IR_LONG_PRESS;
+					key_event.value = ir_last_key;
+					input_add_event(&key_event);
+					//printf("repeat_timer_cnt = %d\n", repeat_timer_cnt);
 
-					 repeat_timer_cnt = REPEATE_TIMES_CNT;
+					repeat_timer_cnt = REPEATE_TIMES_CNT;
 				}
 			 }
 
