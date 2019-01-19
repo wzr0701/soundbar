@@ -40,7 +40,7 @@
 #define BASS_MODE 0
 #define TREBLE_MODE 2
 
-int mic_vol = 15;
+int mic_vol = 45;
 int echo_vol_lev = 5;
 int mic_vol_lev = 15;
 extern int mute_state;
@@ -455,8 +455,10 @@ void mic_open(bool on_off)
 	if(on_off)
 	{
 		usleep(1000);
+		mic_vol = mic_vol_table[mic_vol_lev];
 		set_adc_channel_vol(0,mic_vol);
-		usleep(1000);
+		bt_cmd_current_micvol();
+		//usleep(1000);
 	}
 	else
 	{
