@@ -347,7 +347,7 @@ void pa_static_check(void)
 		if(count1<100)
 		{
 			count1++;
-			if(count1>20)
+			if(count1>10)
 			{
 				count1=200;
 				mic_detect_online = false;
@@ -362,7 +362,7 @@ void pa_static_check(void)
 		if(count2<100)
 		{
 			count2++;
-			if(count2>20)
+			if(count2>10)
 			{
 				count2=200;
 				mic_detect_online = true;
