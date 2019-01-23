@@ -1778,11 +1778,13 @@ void ui_handle_pause_play(char mode,char status)
 	        {   //正在播放
 	            //发送命令停止播放
 	            player_process_cmd(NP_CMD_PAUSE, NULL, 0, NULL, NULL);
+				bt_cmd_usb_playstatus(0);
 	        }
 	        else if (player_info.player_stat == 3)
 	        {   //暂停播放
 	            //发送命令恢复播放
 	            player_process_cmd(NP_CMD_RESUME, NULL, 0, NULL, NULL);
+				bt_cmd_usb_playstatus(1);
 	        }
 		}
 		else if(mode == 1)//app
