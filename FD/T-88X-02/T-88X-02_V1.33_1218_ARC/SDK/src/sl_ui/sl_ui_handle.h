@@ -735,6 +735,7 @@ void ui_handle_unload_eq(void);
 
 
 void bt_read_state(void);
+void bt_cmd_usb_playstatus(char status);
 void bt_cmd_current_mainvol(void);
 void bt_cmd_current_treble(int vol);
 void bt_cmd_current_bass(int vol);

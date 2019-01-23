@@ -28,6 +28,7 @@ typedef enum {
     AT_VOICD_DIAL,              //语音拨号
     AT_ENTER_DUT_MODE,          //
     AT_PLAY_OR_PAUSE,           //播放/暂停
+    AT_PLAY,                    //播放
     AT_STOP,                    //暂停
     AT_NEXT_TRACE,              //下一曲
     AT_PREV_TRACE,              //上一曲

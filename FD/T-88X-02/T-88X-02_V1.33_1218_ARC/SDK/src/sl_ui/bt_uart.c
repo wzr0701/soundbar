@@ -46,6 +46,7 @@ static const char * AT_CMDS[] = {
 	"AT+CV\n",            //语音拨号
 	"AT+CT\n",            //
 	"ATPA\r\n",            //播放/暂停
+	"ATPY\r\n",            //播放
 	"ATPU\r\n",            //暂停
 	"ATPN\r\n",            //下一曲
 	"ATPV\r\n",            //上一曲

@@ -809,7 +809,8 @@ APP_VALUE_S APP_CMD[] =
 	{"MTPREV\r\n",UI_CMD_PREV},      //PREV
 	{"MTPAUSE\r\n",UI_CMD_APP_PAUSE},      //PAUSE
 	{"MTPLAY\r\n",UI_CMD_APP_PLAY},      //PLAY
-	{"BTMEM\r\n",UI_CMD_FM_MANUAL_SAVE},      //MEM
+	{"BTMEM\r\n",UI_CMD_FM_MANUAL_SAVE},      //MEM 
+	{"BTGUSB\r\n",UI_CMD_GET_USB_PLAY_STATUS},  //GET USB PLAY STATUS  
 };
 
 int str_cmp_80(char *str1,char *str2)
@@ -1051,6 +1052,20 @@ void bt_set_connect_state(bool state)
 {
     bt_connected = state;
 }
+
+void bt_cmd_usb_playstatus(char status)
+{
+	if(status)//play
+	{
+		handle_bt_cmd(AT_PLAY, 0);
+	}
+	else//pause
+	{
+		handle_bt_cmd(AT_STOP, 0);
+	}
+	usleep(60000);
+}
+
 
 void bt_cmd_mic_status(char status)
 {
@@ -1768,7 +1783,7 @@ void ui_handle_pause_play(char mode,char status)
 	            player_process_cmd(NP_CMD_RESUME, NULL, 0, NULL, NULL);
 	        }
 		}
-		else//app
+		else if(mode == 1)//app
 		{
 			if (player_info.player_stat > 1)
 			{
@@ -1783,6 +1798,19 @@ void ui_handle_pause_play(char mode,char status)
 						break;
 				}
 			}
+		}
+		else if(mode == 2)//get usb play status
+		{
+			if (player_info.player_stat == 2)
+	        {   
+				//正在播放
+	            bt_cmd_usb_playstatus(1);
+	        }
+	        else if (player_info.player_stat == 3)
+	        {   
+				//暂停播放
+	            bt_cmd_usb_playstatus(0);
+	        }
 		}
        
     }

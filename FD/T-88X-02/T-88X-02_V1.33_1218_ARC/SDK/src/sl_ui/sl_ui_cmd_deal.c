@@ -1931,6 +1931,10 @@ void source_mode_usb(void)
 				//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 				break;
 
+			case UI_CMD_GET_USB_PLAY_STATUS:
+				ui_handle_pause_play(2,0);
+				break;
+
 			default:
 				ret=ui_handle_cmd_com(&cmd);
 				break;
