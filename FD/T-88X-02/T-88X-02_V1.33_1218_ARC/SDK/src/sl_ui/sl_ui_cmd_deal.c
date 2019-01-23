@@ -730,7 +730,7 @@ void enter_mode( int mode)
 	set_channel_vol_by_mode(ui_source_select);
 	usleep(1000);
 
-	bt_cmd_source_select(ui_source_select);
+	//bt_cmd_source_select(ui_source_select);
 
 	switch(mode)
 	{
@@ -1410,6 +1410,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				//if(ui_source_select == SOURCE_SELECT_HDMI)
 				{
 					ui_handle_mode(SOURCE_SELECT_HDMI,0);
+					bt_cmd_source_select(ui_source_select);
 					ret=1;
 					//set_channel_vol_by_mode(SOURCE_SELECT_HDMI);
 				}
@@ -1700,6 +1701,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_SYS_RESET:
 					sl_ui_system_reset();
 					ui_handle_mode(SOURCE_SELECT_BT,0);
+					bt_cmd_source_select(ui_source_select);
 					ret=1;
 					break;
 

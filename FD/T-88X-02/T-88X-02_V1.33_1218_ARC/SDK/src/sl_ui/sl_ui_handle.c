@@ -489,6 +489,7 @@ void ui_handle_power(int power_on_off)
 		//read_mix_vol();
 		//ui_source_select = SOURCE_SELECT_START;
 		ui_handle_mode(ui_source_select, false);
+		bt_cmd_source_select(ui_source_select);
 
 #if 0
 		usleep(500000);
@@ -616,6 +617,7 @@ void ui_handle_mode(int source, bool notify)
             {
                 ui_source_select = SOURCE_SELECT_START + 1;
             }
+			bt_cmd_source_select(ui_source_select);
         }
         else if(SOURCE_SELECT_START < source && source < SOURCE_SELECT_END)
         {
