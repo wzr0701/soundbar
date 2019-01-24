@@ -35,6 +35,9 @@ int nextkey_count = 0;
 
 int tre_bass_cnt = 100;
 int bt_wait_cnt = 0;
+int fm_scan_end_cnt = 0;
+
+
 bool bt_wait_flag = false;
 
 bool test_mode_flag = false;
@@ -50,6 +53,7 @@ extern int auto_input_cnt;
 
 extern struct input_event save_ir_event;
 extern bool ir_short_flag;
+extern bool ir_long_flag;
 extern int save_ir_cnt;
 extern int fm_manual_save_cnt;
 extern bool fm_manual_save_status;
@@ -58,6 +62,9 @@ extern int change_mode_cnt;
 extern int usb_play_cnt;
 
 extern bool frist_hdmi_init;
+
+extern bool fm_scan_end_flag;
+
 
 /****************************************************************************
  * Name: padmux_init
@@ -296,6 +303,7 @@ void pa_static_check(void)
 	save_ir_cnt++;
 	tre_bass_cnt   ++;
 	auto_input_cnt ++;
+	fm_scan_end_cnt++;
 	if(tre_bass_cnt == 60)
 	{
 		enter_tre_set = false;
@@ -312,7 +320,6 @@ void pa_static_check(void)
 	{
 		if(ir_short_flag)
 		{
-			ir_short_flag = false;
 			input_add_event(&save_ir_event);
 		}
 	}
@@ -337,6 +344,19 @@ void pa_static_check(void)
 		send_cmd_2_ui(&cmd);
 	}
 
+	if(fm_scan_end_cnt == 5)
+	{
+		fm_scan_end_cnt = 0;
+		if(fm_scan_end_flag)
+		{
+			fm_scan_end_flag = false;
+			fm_scan_end_cnt = 0;
+			cmd.cmd = UI_CMD_FM_SCAM_END;
+			send_cmd_2_ui(&cmd);
+		}
+	
+	}
+
 	enter_othermode_check();
 
 #endif
@@ -347,7 +367,7 @@ void pa_static_check(void)
 		if(count1<100)
 		{
 			count1++;
-			if(count1>20)
+			if(count1>10)
 			{
 				count1=200;
 				mic_detect_online = false;
@@ -362,7 +382,7 @@ void pa_static_check(void)
 		if(count2<100)
 		{
 			count2++;
-			if(count2>20)
+			if(count2>10)
 			{
 				count2=200;
 				mic_detect_online = true;

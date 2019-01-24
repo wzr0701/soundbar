@@ -300,7 +300,7 @@ static void ui_handle_cmd(ui_cmd_t *cmd)
         //}
         break;
 	case UI_CMD_HDMI_CONNECT:
-			//if((ui_source_select!=SOURCE_SELECT_HDMI)||(hdmi_det_flag == false))
+			if(ui_source_select==SOURCE_SELECT_HDMI)
 			{
 				//hdmi_det_flag = true;
 				ui_source_ir_select = SOURCE_SELECT_HDMI;
@@ -312,8 +312,9 @@ static void ui_handle_cmd(ui_cmd_t *cmd)
        case UI_CMD_HDMI_DISCONNECT:
 		   if (ui_source_select == SOURCE_SELECT_HDMI)
 		   {
+		   	   zhuque_bsp_gpio_unregister_interrupt(11);
 			   action_hdmi_off();
-		   }
+		   }		
 	   	break;
 
 	  case UI_CMD_HDMION_SEND:

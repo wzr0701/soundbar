@@ -40,7 +40,7 @@
 #define BASS_MODE 0
 #define TREBLE_MODE 2
 
-int mic_vol = 15;
+int mic_vol = 45;
 int echo_vol_lev = 5;
 int mic_vol_lev = 15;
 extern int mute_state;
@@ -156,6 +156,7 @@ extern struct input_event save_ir_event;
 extern bool enter_tre_set;
 extern bool enter_bass_set;
 extern bool ir_short_flag;
+extern bool ir_long_flag;
 extern bool bt_wait_flag;
 
 
@@ -164,61 +165,6 @@ extern void mq_msg_clear(void);
 extern void  put_ui_msg(int ui_cmd);
 extern void set_ui_media(int source);
 extern void player_paramter_set_init(AUDIO_OUT_MODE outMode, AUDIO_IN_MODE inMode, int chnNum, int spdifNum);
-
-static void func_add_detect(void)
-{
-	ui_cmd_t cmd;
-
-	usb_play_cnt++;
-	fm_manual_save_cnt++;
-	bt_wait_cnt++;
-	save_ir_cnt++;
-	tre_bass_cnt   ++;
-	auto_input_cnt ++;
-
-	if(tre_bass_cnt == 60)
-	{
-		enter_tre_set = false;
-		enter_bass_set = false;
-	}
-
-	if(auto_input_cnt == 60)
-	{
-		cmd.cmd = UI_CMD_ENTER;
-		send_cmd_2_ui(&cmd);
-	}
-
-	if(save_ir_cnt == 4)
-	{
-		if(ir_short_flag)
-		{
-			ir_short_flag = false;
-			input_add_event(&save_ir_event);
-		}
-	}
-
-
-	if(bt_wait_cnt == 3600)
-	{
-		bt_wait_flag = true;
-	}
-
-
-	if(fm_manual_save_cnt == 100)
-	{
-		cmd.cmd = UI_CMD_ENTER;
-		send_cmd_2_ui(&cmd);
-	}
-
-
-	if(usb_play_cnt == 30)
-	{
-		set_channel_mixvol_by_mode(ui_source_select);
-		//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
-	}
-
-	enter_othermode_check();
-}
 
 void select_mixvol_table(void)
 {
@@ -242,7 +188,6 @@ void select_mixvol_table(void)
 	#else
 	mix_vol = mix_vol_table[bt_mix_vol];
 	#endif
-	bt_cmd_current_mainvol();
 }
 
 void sl_ui_fm_test(void)
@@ -278,10 +223,14 @@ void sl_ui_fm_test(void)
 
 		display_ui_fm(0);
 
+		usleep(100000);
+		set_adc_channel_vol(1,100);
+	    set_adc_channel_vol(2,0);
+		set_adc_channel_vol(3,0);
+		//set_channel_vol_by_mode(ui_source_select);
 		usleep(500000);
-		usleep(500000);
-		set_channel_vol_by_mode(ui_source_select);
-		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 100, NULL, NULL);
+		set_channel_mixvol_by_mode(ui_source_select);
+		usleep(100000);
 		pa_mute_ctrl(false);
 		
 	}
@@ -314,6 +263,7 @@ void sl_ui_fm_test(void)
 ******************************************/
 void  save_mix_vol(void)
 {
+#if 0
 	unsigned char temp;
 
 	if(bt_mix_vol <= MIX_LEV_CNT)
@@ -325,6 +275,7 @@ void  save_mix_vol(void)
 	}
 
 	printf("save-mix_vol = %d\r\n",temp);
+#endif
 }
 
 
@@ -337,23 +288,26 @@ void  save_mix_vol(void)
 ******************************************/
 void  read_mix_vol(void)
 {
+#if 0
 	unsigned char temp;
 	temp=at24c02_read_one_byte(MEM_MIX_VOL);
 
 	if(temp <= MIX_LEV_CNT)
 	{
 		bt_mix_vol = temp;
-		//select_mixvol_table();
+		select_mixvol_table();
+		bt_cmd_current_mainvol();
 	}
 	else
 	{
 		bt_mix_vol = Frist_MIX_LEV;
-		//select_mixvol_table();
+		select_mixvol_table();
+		bt_cmd_current_mainvol();
 	}
 
 
 	printf("read-mix_vol = %d\r\n",temp);
-
+#endif
 }
 
 
@@ -501,8 +455,10 @@ void mic_open(bool on_off)
 	if(on_off)
 	{
 		usleep(1000);
+		mic_vol = mic_vol_table[mic_vol_lev];
 		set_adc_channel_vol(0,mic_vol);
-		usleep(1000);
+		bt_cmd_current_micvol();
+		//usleep(1000);
 	}
 	else
 	{
@@ -517,7 +473,7 @@ void mic_open(bool on_off)
 void set_echo_vol(int vol)
 {
 	char parg[256] = {0};
-	int *echovol = &vol;
+	//int *echovol = &vol;
 	
 	if(vol == 0)
 	{
@@ -527,13 +483,13 @@ void set_echo_vol(int vol)
 	{
 		parameter_echo[ECHO_DELAY] = 200;
 	}
-
+	
 	if(vol == 15)
 	{
 		vol = 14;
 	}
 
-	echo_vol_lev = *echovol;
+	//echo_vol_lev = *echovol;
 	
 	parameter_echo[ECHO_GAIN] =- (3000-(vol*200));
 
@@ -549,12 +505,10 @@ void set_echo_vol(int vol)
 	player_process_cmd(NP_CMD_LOAD_MIC_ECHO, NULL, 0, NULL, NULL);
 	player_process_cmd(NP_CMD_SET_MIC_ECHO, parg, 0, NULL, NULL);
 
-	bt_cmd_current_echo();
-
 }
 
 
-void set_bass_treble_vol(int mode,int vol)//mode=0:bass  mode = 2:treble
+void set_bass_treble_vol(int mode,int vol,int dis_flag)//mode=0:bass  mode = 2:treble
 {
 	if (vol < BASS_TREBLE_LEVEL_MIN)
 	{
@@ -563,16 +517,14 @@ void set_bass_treble_vol(int mode,int vol)//mode=0:bass  mode = 2:treble
 	else if (vol > BASS_TREBLE_LEVEL_MAX)
 	{
 		vol = BASS_TREBLE_LEVEL_MAX;
-	}		
+	}
+	//printf("%s:vol = %d.\n",__func__,vol);
+	
 	handle_bass_treble(mode, vol);
 
-	if (mode > 1)
+	if(dis_flag)
 	{
-		bt_cmd_current_treble(); //treble
-	}
-	else
-	{
-		bt_cmd_current_bass();//bass
+		display_ui_bass_vol(mode, vol);
 	}
 }
 
@@ -599,7 +551,7 @@ void set_micvol_level(int vol)
 			set_adc_channel_vol(0,mic_vol);
 		}
 
-		bt_cmd_current_micvol();
+		
 }
 
 #endif
@@ -733,7 +685,8 @@ void enter_mode( int mode)
 
 	select_mixvol_table();
 
-
+	bt_cmd_current_mainvol();
+	
 	/*
 	if(ui_source_select != SOURCE_SELECT_BT)
 	{
@@ -765,6 +718,11 @@ void enter_mode( int mode)
 
 	set_ui_media(ui_source_select);
 
+	if(bt_version_num == 0)
+	{
+		bt_cmd_get_version();
+	}
+	
 	save_player_info();
 	save_mix_vol();
 	////////////////////////////////////
@@ -772,7 +730,7 @@ void enter_mode( int mode)
 	set_channel_vol_by_mode(ui_source_select);
 	usleep(1000);
 
-	bt_cmd_source_select(ui_source_select);
+	//bt_cmd_source_select(ui_source_select);
 
 	switch(mode)
 	{
@@ -980,12 +938,12 @@ void enter_mode( int mode)
 		{
 			mic_open(false);
 		}
-		bt_cmd_mic_status(mic_on_flag);
+		//bt_cmd_mic_status(mic_on_flag);
 	}
 	else
 	{
 		mic_open(false);
-		bt_cmd_mic_status(mic_on_flag);
+		//bt_cmd_mic_status(mic_on_flag);
 	}
 #endif
 
@@ -1198,6 +1156,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 			case UI_CMD_MODE:
 				ui_handle_mode(SOURCE_SELECT_INC,0);
+				bt_cmd_source_select(ui_source_select);
 				ret=1;
 				break;
 
@@ -1206,13 +1165,27 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_GO_TO_BT:
-				ui_handle_mode(SOURCE_SELECT_BT,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_BT,0);
+						ret=1;
+						break;
+					}
+				}				
 				break;
 
 			case UI_CMD_GO_TO_USB:
-				ui_handle_mode(SOURCE_SELECT_USB,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_USB,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 			case UI_CMD_GO_TO_SD:
@@ -1221,28 +1194,63 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_GO_TO_AUX:
-				ui_handle_mode(SOURCE_SELECT_LINEIN,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_LINEIN,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 			case UI_CMD_GO_TO_SPDIF:
-				ui_handle_mode(SOURCE_SELECT_SPDIFIN,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_SPDIFIN,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 			case UI_CMD_GO_TO_HDMI:
-				ui_handle_mode(SOURCE_SELECT_HDMI,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_HDMI,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 			case UI_CMD_GO_TO_COA:
-				ui_handle_mode(SOURCE_SELECT_COA,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_COA,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 			case UI_CMD_GO_TO_FM:
-				ui_handle_mode(SOURCE_SELECT_FM,0);
-				ret=1;
+				while(1)
+				{
+					if(change_mode_flag == true)
+					{
+						ui_handle_mode(SOURCE_SELECT_FM,0);
+						ret=1;
+						break;
+					}
+				}
 				break;
 
 
@@ -1268,6 +1276,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_ENTER:
+				enter_tre_set = false;
+				enter_bass_set = false;
+			
 				auto_input_cnt = 100;
 				if(ui_source_select == SOURCE_SELECT_USB ||ui_source_select == SOURCE_SELECT_SD)
 				{
@@ -1330,8 +1341,11 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					treble_vol = BASS_TREBLE_LEVEL_MAX;
 				}
 				printf("UI_CMD_EQ_TRB_ADD:%d\n",treble_vol);
-				set_bass_treble_vol(TREBLE_MODE,treble_vol);
-				display_ui_bass_vol(TREBLE_MODE,treble_vol);
+				set_bass_treble_vol(TREBLE_MODE,treble_vol,1);
+				
+				bt_cmd_current_treble(treble_vol); //treble
+		
+				//display_ui_bass_vol(TREBLE_MODE,treble_vol);
 				break;
 
 			case UI_CMD_EQ_TRE_SUB:
@@ -1343,8 +1357,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					treble_vol = BASS_TREBLE_LEVEL_MIN;
 				}
 				printf("UI_CMD_EQ_TRB_SUB:%d\n",treble_vol);
-				set_bass_treble_vol(TREBLE_MODE,treble_vol);
-				display_ui_bass_vol(TREBLE_MODE,treble_vol);
+				set_bass_treble_vol(TREBLE_MODE,treble_vol,1);
+				
+				bt_cmd_current_treble(treble_vol); //treble
+				//display_ui_bass_vol(TREBLE_MODE,treble_vol);
 				break;
 
 			case UI_CMD_EQ_BASS_ADD:
@@ -1355,8 +1371,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					bass_vol = BASS_TREBLE_LEVEL_MAX;
 				}
 				printf("UI_CMD_EQ_BASS_ADD:%d\n",bass_vol);
-				set_bass_treble_vol(BASS_MODE,bass_vol);
-				display_ui_bass_vol(BASS_MODE,bass_vol);
+				set_bass_treble_vol(BASS_MODE,bass_vol,1);
+
+				bt_cmd_current_bass(bass_vol); //treble
+				//display_ui_bass_vol(BASS_MODE,bass_vol);
 				break;
 
 			case UI_CMD_EQ_BASS_SUB:
@@ -1366,8 +1384,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					bass_vol = BASS_TREBLE_LEVEL_MIN;
 				}
 				printf("UI_CMD_EQ_BASS_SUB:%d\n",bass_vol);
-				set_bass_treble_vol(BASS_MODE,bass_vol);
-				display_ui_bass_vol(BASS_MODE,bass_vol);
+				set_bass_treble_vol(BASS_MODE,bass_vol,1);
+
+				bt_cmd_current_bass(bass_vol); //treble
+				//display_ui_bass_vol(BASS_MODE,bass_vol);
 				break;
 
 			case UI_CMD_AUX_CONNECT:
@@ -1391,6 +1411,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				//if(ui_source_select == SOURCE_SELECT_HDMI)
 				{
 					ui_handle_mode(SOURCE_SELECT_HDMI,0);
+					bt_cmd_source_select(ui_source_select);
 					ret=1;
 					//set_channel_vol_by_mode(SOURCE_SELECT_HDMI);
 				}
@@ -1422,18 +1443,38 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_TREBLE_SET:
-				set_bass_treble_vol(TREBLE_MODE,(cmd->arg2-5));
+				treble_vol = (cmd->arg2)-5;
+				set_bass_treble_vol(TREBLE_MODE,treble_vol,1);
+				//display_ui_bass_vol(TREBLE_MODE,treble_vol);
 				break;
 
 			case UI_CMD_BASS_SET:
-				set_bass_treble_vol(BASS_MODE,(cmd->arg2-5));
+				bass_vol = (cmd->arg2)-5;
+				set_bass_treble_vol(BASS_MODE,bass_vol,1);
+				//display_ui_bass_vol(BASS_MODE,bass_vol);
 				break;
 
 			case UI_CMD_ECHO_SET:
+				mic_vol_flag = false;
+				mic_echo_flag = true;
+			
+				if(cmd->arg2 <= 15)
+					echo_vol_lev = cmd->arg2;
+				else
+					echo_vol_lev = 15;
+				display_mic_vol(echo_vol_lev);
 				set_echo_vol(cmd->arg2);
 				break;
 
 			case UI_CMD_MICVOL_SET:
+				mic_vol_flag = true;
+				mic_echo_flag = false;
+			
+				if(mic_vol_lev <= 30)
+					mic_vol_lev = cmd->arg2;
+				else
+					mic_vol_lev = 30;
+				display_mic_vol(mic_vol_lev);
 				set_micvol_level(cmd->arg2);
 				break;
 
@@ -1506,14 +1547,49 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				mic_open(false);
 				break;
 
+			case UI_CMD_APP_MIC_ON:
+				if(!mic_on_flag)
+				{
+					mic_on_flag = 1;
+					if(mic_detect_online)
+					{
+						mic_open(true);
+						set_echo_vol(echo_vol_lev);
+						bt_cmd_current_echo();
+					}
+					else
+					{
+						mic_open(false);
+					}				
+				}
+
+				display_ui_mic(true);
+				break;
+
+			case UI_CMD_APP_MIC_OFF:
+				if(mic_on_flag)
+				{
+					mic_on_flag = 0;
+					
+					mic_vol_flag = false;
+					mic_echo_flag = false;
+					mic_open(false);
+				}
+					
+				display_ui_mic(false);
+				//bt_cmd_mic_status(mic_on_flag);
+				break;
+				
 			case UI_CMD_MIC_ON:
-				mic_on_flag^=0xff;
+				mic_on_flag^=0xff;	
+			
 				if(mic_on_flag)
 				{
 					if(mic_detect_online)
 					{
 						mic_open(true);
 						set_echo_vol(echo_vol_lev);
+						bt_cmd_current_echo();
 					}
 					else
 					{
@@ -1521,7 +1597,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					}
 
 					display_ui_mic(true);
-					bt_cmd_mic_status(mic_on_flag);
+					//bt_cmd_mic_status(mic_on_flag);
 					
 				}
 				else
@@ -1530,8 +1606,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					mic_echo_flag = false;
 					mic_open(false);
 					display_ui_mic(false);
-					bt_cmd_mic_status(mic_on_flag);
+					//bt_cmd_mic_status(mic_on_flag);
 				}
+
+				bt_cmd_mic_status(mic_on_flag);
 			break;
 
 #endif
@@ -1544,6 +1622,8 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 							mic_vol_lev++;
 
 						set_micvol_level(mic_vol_lev);
+
+						bt_cmd_current_micvol();
 						
 						display_mic_vol(mic_vol_lev);
 
@@ -1565,6 +1645,8 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 							mic_vol_lev--;
 
 						set_micvol_level(mic_vol_lev);
+
+						bt_cmd_current_micvol();
 
 						display_mic_vol(mic_vol_lev);
 
@@ -1591,6 +1673,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 							echo_vol_lev += 1;
 						}
 						set_echo_vol(echo_vol_lev);
+						bt_cmd_current_echo();
 						display_mic_vol(echo_vol_lev);
 						printf("mic_echo_add\n");
 					}
@@ -1610,6 +1693,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 							echo_vol_lev -= 1;
 						}
 						set_echo_vol(echo_vol_lev);
+						bt_cmd_current_echo();
 						display_mic_vol(echo_vol_lev);
 						printf("mic_echo_sub\n");
 					}
@@ -1617,6 +1701,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 			case UI_CMD_SYS_RESET:
 					sl_ui_system_reset();
+					ui_handle_mode(SOURCE_SELECT_BT,0);
+					bt_cmd_source_select(ui_source_select);
+					ret=1;
 					break;
 
 			case UI_CMD_CHANGE_MODE_UNMUTE:
@@ -1639,8 +1726,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				enter_tre_set = true;
 				tre_bass_cnt = 0;
 				//display_ui_enter_tre_bass(0);
-				set_bass_treble_vol(2,treble_vol);
-				display_ui_bass_vol(2,treble_vol);
+				set_bass_treble_vol(2,treble_vol,1);
+				bt_cmd_current_treble(treble_vol); //treble
+				//display_ui_bass_vol(2,treble_vol);
 				break;
 
 			case UI_CMD_ENTER_BASS_SET:
@@ -1648,24 +1736,43 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				enter_bass_set = true;
 				tre_bass_cnt = 0;
 				//display_ui_enter_tre_bass(1);
-				set_bass_treble_vol(0,bass_vol);
-				display_ui_bass_vol(0,bass_vol);
+				set_bass_treble_vol(0,bass_vol,1);
+				bt_cmd_current_bass(bass_vol); //treble
+				//display_ui_bass_vol(0,bass_vol);
+				break;
+				
+			case UI_CMD_APP_MOVIE_ON:
+				if(!movie_on_flag)
+				{
+					movie_on_flag = 1;
+					ui_handle_eq_movie();
+				}
+				display_ui_movie(true);
+				break;
+
+			case UI_CMD_APP_MOVIE_OFF:
+				if(movie_on_flag)
+				{
+					movie_on_flag = 0;
+					ui_handle_unload_eq();
+				}
+				display_ui_movie(false);
 				break;
 
 			case UI_CMD_MOVIE_ON:
 				movie_on_flag^=0xff;
 				if(movie_on_flag)
 				{
-					display_ui_movie(true);
 					ui_handle_eq_movie();
-					bt_cmd_movie_status(movie_on_flag);
+					display_ui_movie(true);
 				}
 				else
 				{
-					display_ui_movie(false);
 					ui_handle_unload_eq();
-					bt_cmd_movie_status(movie_on_flag);
+					display_ui_movie(false);
 				}
+
+				bt_cmd_movie_status(movie_on_flag);
 				break;
 
 			case UI_CMD_SET_SOURCE:
@@ -1678,6 +1785,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				display_set_source(ui_source_select);
 				dis_other_mode=0;
 			break;
+
+			case UI_CMD_FM_SCAM_END:
+				bt_cmd_fmscan_end();
+				break;
 
 			case UI_CMD_HALF_SECOND:
 				//if(!dis_other_mode)
@@ -1737,7 +1848,13 @@ void source_mode_bt(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
+			case UI_CMD_APP_PLAY:
+			case UI_CMD_APP_PAUSE:
 				bt_cmd_play_pause();
+				break;
+
+			case UI_CMD_BT_PAIR:
+				bt_cmd_dis_connect();
 				break;
 
 			case UI_CMD_NEXT:
@@ -1785,7 +1902,15 @@ void source_mode_usb(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
-				ui_handle_pause_play();
+				ui_handle_pause_play(0,0);
+				break;
+
+			case UI_CMD_APP_PLAY:
+				ui_handle_pause_play(1,1);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				ui_handle_pause_play(1,0);
 				break;
 
 			case UI_CMD_NEXT:
@@ -1811,6 +1936,10 @@ void source_mode_usb(void)
 			case UI_CMD_USB_PLAY_MUTE:
 				set_channel_mixvol_by_mode(ui_source_select);
 				//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
+				break;
+
+			case UI_CMD_GET_USB_PLAY_STATUS:
+				ui_handle_pause_play(2,0);
 				break;
 
 			default:
@@ -1850,7 +1979,7 @@ void source_mode_sd(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
-				ui_handle_pause_play();
+				ui_handle_pause_play(0,0);
 				break;
 
 			case UI_CMD_NEXT:
@@ -1908,16 +2037,19 @@ void source_mode_fm(void)
 				break;
 
 			case UI_CMD_FM_SCAN:
-				FmScan(1);
+				FmScan(1,1);
 				break;
 
-			case UI_CMD_FM_HALF_SCAN:
-				FmScan(0);
+			case UI_CMD_FM_HALF_SCAN_SUB:
+				FmScan(0,0);
 				break;
 
-			case UI_CMD_PLAY_PAUSE:
-				FmScan(1);
-				//put_ui_msg(UI_CMD_FM_SCAN);
+			case UI_CMD_FM_HALF_SCAN_ADD:
+				FmScan(0,1);
+				break;
+
+			case UI_CMD_BT_PAIR:
+				FmScan(1,1);
 				break;
 
 			case UI_CMD_NEXT:
@@ -1931,6 +2063,16 @@ void source_mode_fm(void)
 			case UI_CMD_FM_MANUAL_SAVE:
 				fm_manual_save_status = true;
 				fm_manual_save_cnt = 0;
+				break;
+
+			case UI_CMD_APP_PLAY:
+				mute_state = MUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				mute_state = UNMUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
 			default:
@@ -1975,6 +2117,16 @@ void source_mode_aux(void)
 				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
+			case UI_CMD_APP_PLAY:
+				mute_state = MUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				mute_state = UNMUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
 			default:
 				ret=ui_handle_cmd_com(&cmd);
 				break;
@@ -2013,6 +2165,16 @@ void source_mode_spdifin(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PLAY:
+				mute_state = MUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				mute_state = UNMUTE;
 				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
@@ -2056,6 +2218,16 @@ void source_mode_hdmi(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PLAY:
+				mute_state = MUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				mute_state = UNMUTE;
 				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
@@ -2130,6 +2302,16 @@ void source_mode_coaxial(void)
 				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
+			case UI_CMD_APP_PLAY:
+				mute_state = MUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
+			case UI_CMD_APP_PAUSE:
+				mute_state = UNMUTE;
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				break;
+
 			default:
 				ret=ui_handle_cmd_com(&cmd);
 				break;
@@ -2159,11 +2341,16 @@ void source_mode_test(void)
 	ui_cmd_t cmd;
 	unsigned char ret=0;
 
+	test_mode_flag = true;
 	set_adc_channel_vol(1,0);
 	set_adc_channel_vol(2,0);
 	set_adc_channel_vol(3,0);
 	player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 	pa_mute_ctrl(true);
+
+	ui_source_select = SOURCE_SELECT_BT;
+	save_player_info();
+	ui_source_select = SOURCE_SELECT_TEST;
 	usleep(100000);
 
 	fm_clear();
@@ -2174,9 +2361,11 @@ void source_mode_test(void)
 	usleep(500000);
 	handle_bt_cmd(AT_CLEAR_LIST, 0);
 	usleep(200000);
-	mix_vol = 30;
-    bt_mix_vol = 15;
+    bt_mix_vol = Frist_MIX_LEV;
+	select_mixvol_table();	
+	usleep(10000);	
 	save_mix_vol();
+	usleep(10000);
 	display_ui_init();
 	ht1633_updata_display();
 	
@@ -2192,7 +2381,8 @@ void source_mode_test(void)
 	usleep(1000);
 	usleep(1000);
 	set_channel_vol_by_mode(ui_source_select);
-	player_process_cmd(NP_CMD_VOLUME_SET, NULL, 100, NULL, NULL);
+	usleep(200000);
+	set_channel_mixvol_by_mode(ui_source_select);
 	usleep(100000);
 	pa_mute_ctrl(false);
 

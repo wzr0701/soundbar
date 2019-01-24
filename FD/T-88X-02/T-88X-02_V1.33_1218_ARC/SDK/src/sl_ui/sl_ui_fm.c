@@ -41,12 +41,13 @@
 
 #define FM_VOL_MAX           15
 
-
+bool fm_scan_end_flag = false;
 
 extern ui_cmd_t get_mq_msg(void);
 extern unsigned char g_FMType_RX;
 extern bool fm_test_flag;
 extern bool fm_scan_start;
+extern int ui_source_select;
 
 
 
@@ -140,31 +141,47 @@ unsigned char FM_Mode(void)
    @note
 */
 /*----------------------------------------------------------------------------*/
- u8 FmScan(int mode)
+ u8 FmScan(int mode,int dir)
 {
 	u8 temp;
 	static u16 CurFrequency = 0;
 	ui_cmd_t cmdq;
 	temp = 1;
 
+	fm_scan_end_flag = false;
+
+	if(mode == 1)
+	{
+		fmFrequency=875;    
+	}
+	
 	CurFrequency = fmFrequency;    //保存起始频点
 	Fre_Total_Num = 0;
 
 	fm_rx_set_vol(0);
 	pa_mute_ctrl(true);
+	set_channel_mixvol_by_mode(ui_source_select);
 
 	if(mode == 0)
 	{
-		fmFrequency ++;
+		if(dir == 0)
+		{
+			fmFrequency --;
+		}
+		else
+		{
+			fmFrequency ++;
+		}
 	}
 
 	while(1)
 	{
 		cmdq=get_mq_msg();
-		if(cmdq.cmd==UI_CMD_FM_SCAN||cmdq.cmd==UI_CMD_PLAY_PAUSE||cmdq.cmd==UI_CMD_FM_HALF_SCAN)
+		if(cmdq.cmd==UI_CMD_FM_SCAN||cmdq.cmd==UI_CMD_PLAY_PAUSE||cmdq.cmd==UI_CMD_FM_HALF_SCAN_ADD||cmdq.cmd==UI_CMD_FM_HALF_SCAN_SUB)
 		{
 			fmFrequency --;
 			fm_rx_set_freq(fmFrequency);
+			fm_scan_end_flag = true;
 			break;
 		}
 		display_ui_fm(0);
@@ -183,13 +200,16 @@ unsigned char FM_Mode(void)
 			Delay5Ms(200);
 
 			if(Fre_Total_Num >= MAX_CH_NUM)
-			break;
-
+			{
+				fm_scan_end_flag = true;
+				break;
+			}
 			temp++;
 
 			if(mode == 0)
 			{
 				fm_scan_start =      false;
+				fm_scan_end_flag = true;
 				break;
 			}
 			else
@@ -198,12 +218,36 @@ unsigned char FM_Mode(void)
 				pa_mute_ctrl(true);
 			}
 		}
-		fmFrequency ++;
+		
+		if(mode == 0)
+		{
+			if(dir == 0)
+			{
+				fmFrequency --;
+			}
+			else
+			{
+				fmFrequency ++;
+			}
+		}
+		else if(mode == 1)
+		{
+			fmFrequency ++;
+		}
+		
 		if(fmFrequency > FM_MAX)
+		{
 			fmFrequency = FM_MIN;
+		}
+		else if(fmFrequency < FM_MIN)
+		{
+			fmFrequency = FM_MAX;
+		}
+			
 		if(fmFrequency == CurFrequency)     //一个循环
 		{
 			fm_rx_set_freq(fmFrequency);	
+			fm_scan_end_flag = true;
 			break;
 		}
 
@@ -220,11 +264,14 @@ unsigned char FM_Mode(void)
 	Delay5Ms(10);
 
 
-	if(Fre_Total_Num>1)
+	if(Fre_Total_Num>=1)
 	{
 		Cur_Fre_Num = 1;
 		fmFrequency= Frequency_Save[0]+FM_MIN;
-		fm_rx_set_freq(fmFrequency);	
+		
+		if(Fre_Total_Num>1)
+			fm_rx_set_freq(fmFrequency);	
+			
 		temp=fmFrequency-FM_MIN;
 		at24c02_write_one_byte(MEM_FM_FREQUENCY ,temp);
 		Delay5Ms(10);

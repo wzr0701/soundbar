@@ -275,10 +275,14 @@ void sl_ui_fm_test(void)
 
 		display_ui_fm(0);
 
+		usleep(100000);
+		set_adc_channel_vol(1,100);
+	    set_adc_channel_vol(2,0);
+		set_adc_channel_vol(3,0);
+		//set_channel_vol_by_mode(ui_source_select);
 		usleep(500000);
-		usleep(500000);
-		set_channel_vol_by_mode(ui_source_select);
-		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 100, NULL, NULL);
+		set_channel_mixvol_by_mode(ui_source_select);
+		usleep(100000);
 		pa_mute_ctrl(false);
 		
 	}
@@ -1170,10 +1174,6 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				ret=1;
 				break;
 
-			case UI_CMD_BT_PAIR:
-				bt_cmd_dis_connect();
-				break;
-
 			case UI_CMD_GO_TO_BT:
 				ui_handle_mode(SOURCE_SELECT_BT,0);
 				ret=1;
@@ -1237,6 +1237,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_ENTER:
+				enter_tre_set = false;
+				enter_bass_set = false;
+			
 				auto_input_cnt = 100;
 				if(ui_source_select == SOURCE_SELECT_USB ||ui_source_select == SOURCE_SELECT_SD)
 				{
@@ -1393,6 +1396,26 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_VOLUME_INC_DOWN:
 				if(ui_source_select == SOURCE_SELECT_BT)
 				{
+					//bt_cmd_next_song();
+				}
+				else if(ui_source_select == SOURCE_SELECT_USB)
+				{
+					//save_usb_play_time();
+					//ui_handle_next();
+				}
+				else if(ui_source_select == SOURCE_SELECT_FM)
+				{
+					//fm_ch_add_sub(1);
+				}
+				else
+				{
+					ui_handle_vol_inc_long_press();
+				}
+		        break;
+
+		    case UI_CMD_VOLUME_INC_UP:
+				if(ui_source_select == SOURCE_SELECT_BT)
+				{
 					bt_cmd_next_song();
 				}
 				else if(ui_source_select == SOURCE_SELECT_USB)
@@ -1406,16 +1429,33 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				}
 				else
 				{
-					ui_handle_vol_inc_long_press();
+					ui_handle_vol_long_press_up();
+				}
+		        //ui_handle_vol_long_press_up();
+		        break;
+
+		    case UI_CMD_VOLUME_DEC_DOWN:
+				if(ui_source_select == SOURCE_SELECT_BT)
+				{
+					//bt_cmd_prev_song();
+				}
+				else if(ui_source_select == SOURCE_SELECT_USB)
+				{
+					//save_usb_play_time();
+					//ui_handle_prev();
+				}
+				else if(ui_source_select == SOURCE_SELECT_FM)
+				{
+					//fm_ch_add_sub(0);
+				}
+				else
+				{
+					ui_handle_vol_dec_long_press();
 				}
 
 		        break;
 
-		    case UI_CMD_VOLUME_INC_UP:
-		        ui_handle_vol_long_press_up();
-		        break;
-
-		    case UI_CMD_VOLUME_DEC_DOWN:
+		    case UI_CMD_VOLUME_DEC_UP:
 				if(ui_source_select == SOURCE_SELECT_BT)
 				{
 					bt_cmd_prev_song();
@@ -1431,13 +1471,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				}
 				else
 				{
-					ui_handle_vol_dec_long_press();
+					ui_handle_vol_long_press_up();
 				}
-
-		        break;
-
-		    case UI_CMD_VOLUME_DEC_UP:
-		        ui_handle_vol_long_press_up();
+		        //ui_handle_vol_long_press_up();
 	        break;
 
 
@@ -1567,6 +1603,8 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 			case UI_CMD_SYS_RESET:
 					sl_ui_system_reset();
+					ui_handle_mode(SOURCE_SELECT_BT,0);
+					ret=1;
 					break;
 
 			case UI_CMD_CHANGE_MODE_UNMUTE:
@@ -1686,6 +1724,10 @@ void source_mode_bt(void)
 		{
 			case UI_CMD_PLAY_PAUSE:
 				bt_cmd_play_pause();
+				break;
+
+			case UI_CMD_BT_PAIR:
+				bt_cmd_dis_connect();
 				break;
 
 			case UI_CMD_NEXT:
@@ -1856,17 +1898,27 @@ void source_mode_fm(void)
 				break;
 
 			case UI_CMD_FM_SCAN:
-				FmScan(1);
+				FmScan(1,1);
 				break;
 
-			case UI_CMD_FM_HALF_SCAN:
-				FmScan(0);
+			case UI_CMD_FM_HALF_SCAN_SUB:
+				FmScan(0,0);
 				break;
 
+			case UI_CMD_FM_HALF_SCAN_ADD:
+				FmScan(0,1);
+				break;
+
+			case UI_CMD_BT_PAIR:
+				FmScan(1,1);
+				break;
+
+			/*
 			case UI_CMD_PLAY_PAUSE:
 				FmScan(1);
 				//put_ui_msg(UI_CMD_FM_SCAN);
 				break;
+			*/
 
 			case UI_CMD_NEXT:
 				fm_ch_add_sub(1);
@@ -2107,11 +2159,16 @@ void source_mode_test(void)
 	ui_cmd_t cmd;
 	unsigned char ret=0;
 
+	test_mode_flag = true;
 	set_adc_channel_vol(1,0);
 	set_adc_channel_vol(2,0);
 	set_adc_channel_vol(3,0);
 	player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 	pa_mute_ctrl(true);
+
+	ui_source_select = SOURCE_SELECT_BT;
+	save_player_info();
+	ui_source_select = SOURCE_SELECT_TEST;
 	usleep(100000);
 
 	fm_clear();
@@ -2122,9 +2179,11 @@ void source_mode_test(void)
 	usleep(500000);
 	handle_bt_cmd(AT_CLEAR_LIST, 0);
 	usleep(200000);
-	mix_vol = 30;
-    bt_mix_vol = 15;
+    bt_mix_vol = Frist_MIX_LEV;
+	select_mixvol_table();	
+	usleep(10000);	
 	save_mix_vol();
+	usleep(10000);
 	display_ui_init();
 	ht1633_updata_display();
 	
@@ -2140,7 +2199,8 @@ void source_mode_test(void)
 	usleep(1000);
 	usleep(1000);
 	set_channel_vol_by_mode(ui_source_select);
-	player_process_cmd(NP_CMD_VOLUME_SET, NULL, 100, NULL, NULL);
+	usleep(200000);
+	set_channel_mixvol_by_mode(ui_source_select);
 	usleep(100000);
 	pa_mute_ctrl(false);
 

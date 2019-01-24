@@ -177,7 +177,11 @@ static void handle_ui_events_inner(struct input_event *event)
             if (event->value & 0xf00)
             {
                 int value = event->value & 0x1f;
-                if(value == CMD_UI_INC)
+				if(value == CMD_UI_PLAY)
+				{
+					cmd.cmd = UI_CMD_BT_PAIR;
+				}
+                else if(value == CMD_UI_INC)
 				{
 					cmd.cmd = UI_CMD_VOLUME_INC_UP;
 				}
@@ -191,11 +195,14 @@ static void handle_ui_events_inner(struct input_event *event)
             if (event->value & 0xf00)
             {
                 int value = event->value & 0x1f;
+				/*
 				if(value == CMD_UI_PLAY)
 				{
 					cmd.cmd = UI_CMD_BT_PAIR;
 				}
-                else if(value == CMD_UI_INC)
+                else
+                */ 
+				if(value == CMD_UI_INC)
 				{
 					cmd.cmd = UI_CMD_VOLUME_INC_DOWN;
 				}
@@ -755,6 +762,7 @@ static ui_cmd_t ui_handle_ir_press(int event_cmd)
 		////////////////////////////////////////////
 
 		case  CODE_IR_FM_SCAN:
+			fm_manual_save_flag = true;
 			cmd.cmd = UI_CMD_FM_SCAN;
 			break;
 
@@ -779,7 +787,7 @@ static ui_cmd_t ui_handle_ir_press(int event_cmd)
 			if(fm_scan_start == true)
 			{
 				fm_scan_start =      false;
-				cmd.cmd = UI_CMD_FM_HALF_SCAN;
+				cmd.cmd = UI_CMD_FM_HALF_SCAN_ADD;
 			}
 			else
 			{
@@ -792,7 +800,7 @@ static ui_cmd_t ui_handle_ir_press(int event_cmd)
 			if(fm_scan_start == true)
 			{
 				fm_scan_start =      false;
-				cmd.cmd = UI_CMD_FM_HALF_SCAN;
+				cmd.cmd = UI_CMD_FM_HALF_SCAN_SUB;
 			}
 			else
 			{
@@ -916,7 +924,7 @@ static ui_cmd_t ui_handle_ir_longpress(int event_cmd)
 			{
 				fm_scan_flag = false;
 				fm_scan_start = true;
-				cmd.cmd = UI_CMD_FM_HALF_SCAN;
+				cmd.cmd = UI_CMD_FM_HALF_SCAN_ADD;
 			}
 			break;
 
@@ -925,7 +933,7 @@ static ui_cmd_t ui_handle_ir_longpress(int event_cmd)
 			{
 				fm_scan_flag = false;
 				fm_scan_start = true;
-				cmd.cmd = UI_CMD_FM_HALF_SCAN;
+				cmd.cmd = UI_CMD_FM_HALF_SCAN_SUB;
 			}
 			break;
 

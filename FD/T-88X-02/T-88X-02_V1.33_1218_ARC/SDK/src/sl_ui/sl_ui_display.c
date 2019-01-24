@@ -76,7 +76,7 @@ extern unsigned char bt_version_num;
 
 
 #define MCU_VER1 1
-#define MCU_VER2 7
+#define MCU_VER2 8
 
 #define BT_VER1 1
 #define BT_VER2 2
@@ -149,6 +149,7 @@ void display_str( char *dis_str)
 void display_ui_power(char on_off)
 {
 	display_ui_clear();
+	ht1633_updata_display();
 
 	if(on_off==1)
 		display_str(power_on_str);
@@ -167,7 +168,10 @@ void display_ui_power(char on_off)
 ****************************************************/
 void display_ui_main_sys(char wm_mode)
 {
+	display_ui_clear();
+	ht1633_updata_display();
 	display_ui_device(wm_mode);
+	dis_other_mode=1;
 	ui_goback_source(400);
 }
 
@@ -435,6 +439,7 @@ void display_ui_vol(int vol)
 	}
 	else
 	{
+		dis_other_mode=1;
 		display_set_source(ui_source_select);
 	}
 }
@@ -462,7 +467,6 @@ void display_mic_vol(int vol)
 			volume[1]=NUM_n;
 			volume[2]=NUM_n;
 		}
-
 		else if(mic_echo_flag ==       true)
 		{
 			volume[0]=NUM_OFF;
@@ -477,6 +481,7 @@ void display_mic_vol(int vol)
 	}
 	else
 	{
+		dis_other_mode=1;
 		display_set_source(ui_source_select);
 	}
 
@@ -1174,6 +1179,24 @@ void display_ui_usb_folder(int loc)
 		ht1633_updata_display();
 	}
 }
+
+void display_ui_usb_number(int num)
+{
+	char num_buf1[5] = {NUM_U, NUM_B,0,0,0};
+
+	num_buf1[2] = (num+1) / 100;
+	num_buf1[3] =((num+1)% 100)/10;
+	num_buf1[4] = (num+1)%10;
+
+	if(ui_source_select == SOURCE_SELECT_USB )
+	{
+		display_ui_clear();		
+		display_str(num_buf1);		
+		ht1633_updata_display();
+		dis_other_mode=1;
+	}
+}
+
 
 /****************************************************
 

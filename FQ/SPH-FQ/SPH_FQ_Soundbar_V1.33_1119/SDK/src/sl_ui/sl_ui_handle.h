@@ -87,6 +87,7 @@ void bt_chk_and_disp(void);
 void bt_init_sem(void);
 void bt_playsta_mute(void);
 void bt_read_state(void);
+void hdmi_padmux_init(int mode);
 void ui_hdmi_unmute(void);
 void ui_hdmion_send(void);
 void ui_goback_source(int delay);

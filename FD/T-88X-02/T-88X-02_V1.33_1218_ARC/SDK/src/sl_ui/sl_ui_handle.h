@@ -134,7 +134,7 @@ static const int bass_treble_gains_size = (sizeof(bass_treble_gains)/sizeof(bass
 #define MIX_LEV_CNT 30
 
 
-#define BASS_TREBLE_GAIN_MAX 600
+#define BASS_TREBLE_GAIN_MAX 700
 #define BASS_GAIN_MAX 1200
 #define TREBLE_GAIN_MAX 600
 
@@ -482,7 +482,7 @@ void ui_handle_next_down(void);
  * Assumptions:
  *
  ****************************************************************************/
-void ui_handle_pause_play(void);
+void ui_handle_pause_play(char mode,char status);
 
 /****************************************************************************
  * Name: ui_handle_power
@@ -735,9 +735,11 @@ void ui_handle_unload_eq(void);
 
 
 void bt_read_state(void);
+void bt_cmd_fmscan_end(void);
+void bt_cmd_usb_playstatus(char status);
 void bt_cmd_current_mainvol(void);
-void bt_cmd_current_treble(void);
-void bt_cmd_current_bass(void);
+void bt_cmd_current_treble(int vol);
+void bt_cmd_current_bass(int vol);
 void bt_cmd_current_echo(void);
 void bt_cmd_current_micvol(void);
 

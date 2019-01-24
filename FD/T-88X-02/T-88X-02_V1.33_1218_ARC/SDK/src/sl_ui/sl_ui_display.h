@@ -56,6 +56,7 @@ void display_ui_ledtest(void);
 void display_ui_mute(void);
 void display_ui_enter_tre_bass(int mode);
 void display_ui_usb_folder(int loc);
+void display_ui_usb_number(int num);
 void display_ui_movie(bool on_off);
 void display_ui_fm_manual_save(void);
 void display_ui_eq_power_test(void);
