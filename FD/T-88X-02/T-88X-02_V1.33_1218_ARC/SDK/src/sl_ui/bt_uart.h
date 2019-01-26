@@ -68,6 +68,7 @@ typedef enum {
     AT_MIC_OFF,
     AT_MOVIE_ON,
     AT_MOVIE_OFF,
+    AT_FMSCAN_START,	
     AT_FMSCAN_END,
 	
     //带参数命令

@@ -148,7 +148,9 @@ unsigned char FM_Mode(void)
 	ui_cmd_t cmdq;
 	temp = 1;
 
+	bt_cmd_fmscan_start();
 	fm_scan_end_flag = false;
+	
 
 	if(mode == 1)
 	{

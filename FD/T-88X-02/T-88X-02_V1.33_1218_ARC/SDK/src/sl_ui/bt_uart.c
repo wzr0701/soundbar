@@ -88,7 +88,8 @@ static const char * AT_CMDS[] = {
 	"MBMICC" ,           
 	"MBMOVO" ,           
 	"MBMOVC", 
-	"ATSF\r\n",
+	"ATSZ\r\n",            //开始搜台
+	"ATSF\r\n",           //搜台完成
 	
 	//带参数命令
 	"AT+WM+",              //特定模式设置

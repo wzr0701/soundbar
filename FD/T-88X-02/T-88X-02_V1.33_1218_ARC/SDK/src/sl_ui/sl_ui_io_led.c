@@ -35,7 +35,7 @@ int nextkey_count = 0;
 
 int tre_bass_cnt = 100;
 int bt_wait_cnt = 0;
-int fm_scan_end_cnt = 0;
+int fm_scan_start_end_cnt = 0;
 
 
 bool bt_wait_flag = false;
@@ -64,7 +64,6 @@ extern int usb_play_cnt;
 extern bool frist_hdmi_init;
 
 extern bool fm_scan_end_flag;
-
 
 /****************************************************************************
  * Name: padmux_init
@@ -303,7 +302,7 @@ void pa_static_check(void)
 	save_ir_cnt++;
 	tre_bass_cnt   ++;
 	auto_input_cnt ++;
-	fm_scan_end_cnt++;
+	fm_scan_start_end_cnt++;
 	if(tre_bass_cnt == 60)
 	{
 		enter_tre_set = false;
@@ -344,16 +343,17 @@ void pa_static_check(void)
 		send_cmd_2_ui(&cmd);
 	}
 
-	if(fm_scan_end_cnt == 5)
+	if(fm_scan_start_end_cnt == 3)
 	{
-		fm_scan_end_cnt = 0;
+		fm_scan_start_end_cnt = 0;
+		
 		if(fm_scan_end_flag)
 		{
 			fm_scan_end_flag = false;
-			fm_scan_end_cnt = 0;
-			cmd.cmd = UI_CMD_FM_SCAM_END;
+			cmd.cmd = UI_CMD_FM_SCAN_END;
 			send_cmd_2_ui(&cmd);
 		}
+		
 	
 	}
 

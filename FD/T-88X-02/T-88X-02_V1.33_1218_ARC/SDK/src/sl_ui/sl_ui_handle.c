@@ -1054,6 +1054,13 @@ void bt_set_connect_state(bool state)
     bt_connected = state;
 }
 
+void bt_cmd_fmscan_start(void)
+{
+	handle_bt_cmd(AT_FMSCAN_START, 0);
+	usleep(60000);
+}
+
+
 void bt_cmd_fmscan_end(void)
 {
 	handle_bt_cmd(AT_FMSCAN_END, 0);

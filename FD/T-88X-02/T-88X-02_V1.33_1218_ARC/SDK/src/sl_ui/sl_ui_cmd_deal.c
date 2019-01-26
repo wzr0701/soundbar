@@ -1786,7 +1786,11 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				dis_other_mode=0;
 			break;
 
-			case UI_CMD_FM_SCAM_END:
+			case UI_CMD_FM_SCAN_START:
+				bt_cmd_fmscan_start();
+				break;
+
+			case UI_CMD_FM_SCAN_END:
 				bt_cmd_fmscan_end();
 				break;
 

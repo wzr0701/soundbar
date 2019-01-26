@@ -735,6 +735,7 @@ void ui_handle_unload_eq(void);
 
 
 void bt_read_state(void);
+void bt_cmd_fmscan_start(void);
 void bt_cmd_fmscan_end(void);
 void bt_cmd_usb_playstatus(char status);
 void bt_cmd_current_mainvol(void);
