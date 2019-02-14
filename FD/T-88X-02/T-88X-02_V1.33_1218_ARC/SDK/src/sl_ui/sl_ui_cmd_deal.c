@@ -112,8 +112,8 @@ bool change_mode_flag = false;
 
 
 bool fm_test_flag = false;
-bool fm_manual_save_status = false;
-int fm_manual_save_cnt = 0;
+//bool fm_manual_save_status = false;
+//int fm_manual_save_cnt = 0;
 
 bool frist_hdmi_init = false;
 extern WDOG_ID wdtimer_hdmion_send;
@@ -149,7 +149,7 @@ extern int tre_bass_cnt;
 extern int bt_wait_cnt;
 extern int auto_input_cnt;
 extern int save_ir_cnt;
-extern int fm_manual_save_cnt;
+//extern int fm_manual_save_cnt;
 extern int usb_play_cnt;
 extern int  mix_vol;
 extern struct input_event save_ir_event;
@@ -409,11 +409,12 @@ void dis_play_update(void)
 		}
 	}
 
+#if 0
 	if(dis_other_mode<4)
 	{
 		display_ui_fm_manual_save();
 	}
-
+#endif
 
 	////////////////////////////////////////////
 
@@ -1292,6 +1293,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				}
 				else if(ui_source_select == SOURCE_SELECT_FM)
 				{
+				#if 0
 					if(fm_manual_save_status == false)
 					{
 						if((input_number>=FM_MIN)&&(input_number<=FM_MAX))
@@ -1326,8 +1328,28 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						usleep(500000);
 						display_ui_fm(0);
 					}
-
-
+				#else
+					if((input_number>=FM_MIN)&&(input_number<=FM_MAX))
+					{
+						input_number_ok=input_number;
+						input_number=0;
+						input_n=0;
+						fm_rx_set_freq(input_number_ok);
+						//if (fm_rx_seek(input_number_ok))
+						{
+							fmFrequency=input_number_ok;
+							fre_save();
+						}
+						display_ui_fm(0);
+					}
+					else
+					{
+						input_number_ok=input_number;
+						input_number=0;
+						input_n=0;
+						fre_num_play(input_number_ok);
+					}
+				#endif
 				}
 				input_number_ok	=0;
 				break;
@@ -2065,8 +2087,12 @@ void source_mode_fm(void)
 				break;
 
 			case UI_CMD_FM_MANUAL_SAVE:
+				#if 0
 				fm_manual_save_status = true;
 				fm_manual_save_cnt = 0;
+				#else
+				fre_manual_save();
+				#endif
 				break;
 
 			case UI_CMD_APP_PLAY:

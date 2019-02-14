@@ -60,6 +60,8 @@ void fre_num_play(unsigned char c_num);
 void fre_save(void);
 void fm_clear(void);
 
+void fre_manual_save(void);
+
 
 #endif
 

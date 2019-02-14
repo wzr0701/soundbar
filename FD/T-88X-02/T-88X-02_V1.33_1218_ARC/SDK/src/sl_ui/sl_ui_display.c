@@ -70,13 +70,13 @@ extern char mic_vol_flag;
 extern char mic_echo_flag;
 
 extern int folder_index_dis;
-extern bool fm_manual_save_status;
+//extern bool fm_manual_save_status;
 
 extern unsigned char bt_version_num;
 
 
 #define MCU_VER1 1
-#define MCU_VER2 8
+#define MCU_VER2 9
 
 #define BT_VER1 1
 #define BT_VER2 2
@@ -1205,7 +1205,7 @@ void display_ui_usb_number(int num)
 ****************************************************/
 void display_ui_fm_manual_save(void)
 {
-
+#if 0
 	static bool isDisp = true;
 
 	if(fm_manual_save_status == true)
@@ -1225,7 +1225,7 @@ void display_ui_fm_manual_save(void)
 			}
 		}
 	}
-
+#endif
 }
 
 /**********************************************************

@@ -55,8 +55,8 @@ extern struct input_event save_ir_event;
 extern bool ir_short_flag;
 extern bool ir_long_flag;
 extern int save_ir_cnt;
-extern int fm_manual_save_cnt;
-extern bool fm_manual_save_status;
+//extern int fm_manual_save_cnt;
+//extern bool fm_manual_save_status;
 extern bool change_mode_flag;
 extern int change_mode_cnt;
 extern int usb_play_cnt;
@@ -297,7 +297,7 @@ void pa_static_check(void)
 
 #if 1
 	usb_play_cnt++;
-	fm_manual_save_cnt++;
+	//fm_manual_save_cnt++;
 	bt_wait_cnt++;
 	save_ir_cnt++;
 	tre_bass_cnt   ++;
@@ -329,13 +329,13 @@ void pa_static_check(void)
 		bt_wait_flag = true;
 	}
 
-
+#if 0
 	if(fm_manual_save_cnt == 100)
 	{
 		cmd.cmd = UI_CMD_ENTER;
 		send_cmd_2_ui(&cmd);
 	}
-
+#endif
 
 	if(usb_play_cnt == 50)
 	{

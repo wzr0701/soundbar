@@ -288,6 +288,25 @@ unsigned char FM_Mode(void)
 	}
 }
 
+ 
+
+/**************************************************
+
+
+
+**************************************************/
+void fre_manual_save(void)
+{
+	//fm_manual_save_status = false;
+	//fm_manual_save_cnt = 200;
+	Fre_Total_Num = Fre_Total_Num +1;
+	SaveChan(Fre_Total_Num);
+	Cur_Fre_Num = Fre_Total_Num;
+	display_ui_fm(1);
+	//usleep(500000);
+	//display_ui_fm(0);
+}
+
 /**************************************************
 
 
