@@ -1572,7 +1572,8 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_APP_MIC_ON:
 				if(!mic_on_flag)
 				{
-					mic_on_flag = 1;
+					mic_on_flag^=0xff;	
+					
 					if(mic_detect_online)
 					{
 						mic_open(true);
@@ -1591,7 +1592,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_APP_MIC_OFF:
 				if(mic_on_flag)
 				{
-					mic_on_flag = 0;
+					mic_on_flag^=0xff;	
 					
 					mic_vol_flag = false;
 					mic_echo_flag = false;
@@ -1603,6 +1604,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 				
 			case UI_CMD_MIC_ON:
+
 				mic_on_flag^=0xff;	
 			
 				if(mic_on_flag)
