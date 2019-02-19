@@ -2980,6 +2980,8 @@ void sl_ui_system_reset(void)
 	echo_vol_lev = 5;
 	mic_vol_lev = 15;
 
+	fm_clear();
+
 	save_mix_vol();
 
 	player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);

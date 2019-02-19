@@ -114,7 +114,7 @@ unsigned char FM_Mode(void)
 	{
 		Frequency_Save[i] = at24c02_read_one_byte(MEM_SAVE_CHANNEL + i);
 		if(Frequency_Save[i] > (FM_MAX- FM_MIN))
-		Frequency_Save[i] = 0;
+			Frequency_Save[i] = 0;
 		printf("Frequency_Save[%d]===%d\r\n",Frequency_Save[i]);
 	}
 #endif
@@ -155,10 +155,10 @@ unsigned char FM_Mode(void)
 	if(mode == 1)
 	{
 		fmFrequency=875;    
+		Fre_Total_Num = 0;
 	}
 	
 	CurFrequency = fmFrequency;    //保存起始频点
-	Fre_Total_Num = 0;
 
 	fm_rx_set_vol(0);
 	pa_mute_ctrl(true);
@@ -194,20 +194,6 @@ unsigned char FM_Mode(void)
 			fm_rx_set_vol(volume);
 			pa_mute_ctrl(false);
 
-			SaveChan(temp);
-			Fre_Total_Num = temp;
-
-			Cur_Fre_Num = Fre_Total_Num;
-			display_ui_fm(1);
-			Delay5Ms(200);
-
-			if(Fre_Total_Num >= MAX_CH_NUM)
-			{
-				fm_scan_end_flag = true;
-				break;
-			}
-			temp++;
-
 			if(mode == 0)
 			{
 				fm_scan_start =      false;
@@ -216,9 +202,28 @@ unsigned char FM_Mode(void)
 			}
 			else
 			{
+				SaveChan(temp);
+				Fre_Total_Num = temp;
+
+				if(Fre_Total_Num < MAX_CH_NUM)
+					Cur_Fre_Num = Fre_Total_Num;
+				else if(Fre_Total_Num == MAX_CH_NUM)
+					Cur_Fre_Num = 0;
+				
+				display_ui_fm(1);
+				Delay5Ms(200);
+
+				if(Fre_Total_Num > MAX_CH_NUM)
+				{
+					fm_scan_end_flag = true;
+					break;
+				}
+				temp++;
+
 				fm_rx_set_vol(0);
 				pa_mute_ctrl(true);
 			}
+			
 		}
 		
 		if(mode == 0)
@@ -232,7 +237,7 @@ unsigned char FM_Mode(void)
 				fmFrequency ++;
 			}
 		}
-		else if(mode == 1)
+		else
 		{
 			fmFrequency ++;
 		}
@@ -255,28 +260,31 @@ unsigned char FM_Mode(void)
 
 	}
 
-	if(Fre_Total_Num == 0)
+	if(mode == 1)
 	{
-		Fre_Total_Num = 1;
-		Cur_Fre_Num = 1;
-		Frequency_Save[0] = 0;
-	}
-	temp = Fre_Total_Num;
-	at24c02_write_one_byte(MEM_FRE_TOTAL_NUM, temp);
-	Delay5Ms(10);
-
-
-	if(Fre_Total_Num>=1)
-	{
-		Cur_Fre_Num = 1;
-		fmFrequency= Frequency_Save[0]+FM_MIN;
-		
-		//if(Fre_Total_Num>1)
-		fm_rx_set_freq(fmFrequency);	
-			
-		temp=fmFrequency-FM_MIN;
-		at24c02_write_one_byte(MEM_FM_FREQUENCY ,temp);
+		if(Fre_Total_Num == 0)
+		{
+			Fre_Total_Num = 1;
+			Cur_Fre_Num = 1;
+			Frequency_Save[0] = 0;
+		}
+		temp = Fre_Total_Num;
+		at24c02_write_one_byte(MEM_FRE_TOTAL_NUM, temp);
 		Delay5Ms(10);
+	
+	
+		if(Fre_Total_Num>=1)
+		{
+			Cur_Fre_Num = 1;
+			fmFrequency= Frequency_Save[0]+FM_MIN;
+			
+			//if(Fre_Total_Num>1)
+			fm_rx_set_freq(fmFrequency);	
+				
+			temp=fmFrequency-FM_MIN;
+			at24c02_write_one_byte(MEM_FM_FREQUENCY ,temp);
+			Delay5Ms(10);
+		}
 	}
 
 	Delay5Ms(10);
@@ -297,12 +305,38 @@ unsigned char FM_Mode(void)
 **************************************************/
 void fre_manual_save(void)
 {
+	int temp;
+
+	temp = Search_channel_in_save();
+
+	//printf("Search_channel_in_save === %d\r\n",temp);
 	//fm_manual_save_status = false;
 	//fm_manual_save_cnt = 200;
-	Fre_Total_Num = Fre_Total_Num +1;
-	SaveChan(Fre_Total_Num);
-	Cur_Fre_Num = Fre_Total_Num;
+	
+	if(temp > 0)
+	{
+		Cur_Fre_Num = temp;
+	}
+	else
+	{	
+		if(Fre_Total_Num < MAX_CH_NUM)
+		{
+			//printf("Fre_Total_Num1 === %d\r\n",Fre_Total_Num);
+			Fre_Total_Num = Fre_Total_Num +1;
+			SaveChan(Fre_Total_Num);
+			Cur_Fre_Num = Fre_Total_Num;
+			//printf("Fre_Total_Num2 === %d\r\n",Fre_Total_Num);
+		}
+		else if(Fre_Total_Num == MAX_CH_NUM )
+		{
+			Fre_Total_Num = Fre_Total_Num +1;
+			SaveChan(Fre_Total_Num);
+			Cur_Fre_Num = 0;
+		}
+	}
+
 	display_ui_fm(1);
+	
 	//usleep(500000);
 	//display_ui_fm(0);
 }
@@ -333,6 +367,8 @@ void fre_num_play(unsigned char c_num)
 		Cur_Fre_Num=c_num;
 		fmFrequency = Frequency_Save[Cur_Fre_Num-1] + FM_MIN;
 		fm_rx_set_freq(fmFrequency);
+		if(Cur_Fre_Num == 100)
+			Cur_Fre_Num = 0;
 		display_ui_fm(1);
 
 		temp=fmFrequency-FM_MIN;
@@ -443,6 +479,10 @@ void fm_ch_add_sub(bool dir)
 	//printf("Cur_Fre_Num=%d---Fre_Total_Num =%d\n",Cur_Fre_Num,Fre_Total_Num);
 	fmFrequency = Frequency_Save[Cur_Fre_Num-1] + FM_MIN;
 	fm_rx_set_freq(fmFrequency);
+	if(Cur_Fre_Num == 100)
+	{
+		Cur_Fre_Num = 0;
+	}
 	display_ui_fm(1);
 
 	temp=fmFrequency-FM_MIN;
@@ -928,7 +968,7 @@ void fm_clear(void)
 	u8 temp;
 	
 	fmFrequency = 875;
-	Fre_Total_Num = 1;
+	Fre_Total_Num = 0;
 	Cur_Fre_Num = 1;
 	
 	temp = fmFrequency-FM_MIN;
@@ -950,4 +990,20 @@ void fm_clear(void)
 
 	//Fre_Total_Num = at24c02_read_one_byte(MEM_FRE_TOTAL_NUM);
 	//printf("Fre_Total_Num ===%d\r\n",Fre_Total_Num);
+}
+
+int Search_channel_in_save(void)
+{
+	int i;
+
+	for(i = 0;i < Fre_Total_Num+1;i++)
+	{
+		printf("Frequency_Save[%d] ===%d\r\n",i,Frequency_Save[i]);
+		if(Frequency_Save[i] == (fmFrequency - FM_MIN))
+		{
+			return i+1;
+		}			
+	}
+
+	return -1;
 }

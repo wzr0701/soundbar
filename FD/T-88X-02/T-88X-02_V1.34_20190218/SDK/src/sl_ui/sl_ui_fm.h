@@ -6,7 +6,7 @@
 #define FM_MIN    875
 #define FM_MAX   1080
 
-#define MAX_CH_NUM        99
+#define MAX_CH_NUM        100
 
 
 
@@ -61,6 +61,7 @@ void fre_save(void);
 void fm_clear(void);
 
 void fre_manual_save(void);
+int Search_channel_in_save(void);
 
 
 #endif
