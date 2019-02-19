@@ -626,7 +626,6 @@ void display_ui_fm(unsigned char f_ch)
 	}
 	else
 	{
-		//dis_other_mode=1;
 		if(Cur_Fre_Num < 100)
 		{
 			dis_buf[0]=NUM_OFF;
@@ -643,7 +642,7 @@ void display_ui_fm(unsigned char f_ch)
 			dis_buf[3]=NUM_0;
 			dis_buf[4]=NUM_0;
 		}
-		
+		dis_other_mode=1;
 	}
 
 	display_str(dis_buf);
@@ -660,7 +659,6 @@ void display_ui_fm(unsigned char f_ch)
 		display_ui_icon(ICON_VOL_UMUTE,1);
 	}
 	ht1633_updata_display();
-	dis_other_mode=1;
 }
 
 
