@@ -626,12 +626,24 @@ void display_ui_fm(unsigned char f_ch)
 	}
 	else
 	{
-		dis_other_mode=1;
-		dis_buf[0]=NUM_OFF;
-		dis_buf[1]=NUM_C;
-		dis_buf[2]=NUM_H;
-		dis_buf[3]=(char)((Cur_Fre_Num/10%10)>=0?(Cur_Fre_Num/10%10):NUM_OFF);
-		dis_buf[4]=(char)((Cur_Fre_Num%10)>=0?(Cur_Fre_Num%10):NUM_OFF);
+		//dis_other_mode=1;
+		if(Cur_Fre_Num < 100)
+		{
+			dis_buf[0]=NUM_OFF;
+			dis_buf[1]=NUM_C;
+			dis_buf[2]=NUM_H;
+			dis_buf[3]=(char)((Cur_Fre_Num/10%10)>=0?(Cur_Fre_Num/10%10):NUM_OFF);
+			dis_buf[4]=(char)((Cur_Fre_Num%10)>=0?(Cur_Fre_Num%10):NUM_OFF);
+		}
+		else if(Cur_Fre_Num == 100)
+		{
+			dis_buf[0]=NUM_OFF;
+			dis_buf[1]=NUM_C;
+			dis_buf[2]=NUM_H;
+			dis_buf[3]=NUM_0;
+			dis_buf[4]=NUM_0;
+		}
+		
 	}
 
 	display_str(dis_buf);
@@ -648,6 +660,7 @@ void display_ui_fm(unsigned char f_ch)
 		display_ui_icon(ICON_VOL_UMUTE,1);
 	}
 	ht1633_updata_display();
+	dis_other_mode=1;
 }
 
 

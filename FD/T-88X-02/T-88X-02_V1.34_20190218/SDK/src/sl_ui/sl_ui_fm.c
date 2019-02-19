@@ -204,21 +204,21 @@ unsigned char FM_Mode(void)
 			{
 				SaveChan(temp);
 				Fre_Total_Num = temp;
-
-				if(Fre_Total_Num < MAX_CH_NUM)
-					Cur_Fre_Num = Fre_Total_Num;
-				else if(Fre_Total_Num == MAX_CH_NUM)
-					Cur_Fre_Num = 0;
+				Cur_Fre_Num = Fre_Total_Num;
 				
 				display_ui_fm(1);
 				Delay5Ms(200);
 
-				if(Fre_Total_Num > MAX_CH_NUM)
+				if(Fre_Total_Num >= MAX_CH_NUM)
 				{
 					fm_scan_end_flag = true;
 					break;
 				}
-				temp++;
+				else
+				{
+					temp++;
+				}
+				
 
 				fm_rx_set_vol(0);
 				pa_mute_ctrl(true);
@@ -316,6 +316,7 @@ void fre_manual_save(void)
 	if(temp > 0)
 	{
 		Cur_Fre_Num = temp;
+		display_ui_fm(1);
 	}
 	else
 	{	
@@ -326,17 +327,11 @@ void fre_manual_save(void)
 			SaveChan(Fre_Total_Num);
 			Cur_Fre_Num = Fre_Total_Num;
 			//printf("Fre_Total_Num2 === %d\r\n",Fre_Total_Num);
+			display_ui_fm(1);
 		}
-		else if(Fre_Total_Num == MAX_CH_NUM )
-		{
-			Fre_Total_Num = Fre_Total_Num +1;
-			SaveChan(Fre_Total_Num);
-			Cur_Fre_Num = 0;
-		}
+		
 	}
 
-	display_ui_fm(1);
-	
 	//usleep(500000);
 	//display_ui_fm(0);
 }
@@ -367,8 +362,6 @@ void fre_num_play(unsigned char c_num)
 		Cur_Fre_Num=c_num;
 		fmFrequency = Frequency_Save[Cur_Fre_Num-1] + FM_MIN;
 		fm_rx_set_freq(fmFrequency);
-		if(Cur_Fre_Num == 100)
-			Cur_Fre_Num = 0;
 		display_ui_fm(1);
 
 		temp=fmFrequency-FM_MIN;
@@ -479,10 +472,7 @@ void fm_ch_add_sub(bool dir)
 	//printf("Cur_Fre_Num=%d---Fre_Total_Num =%d\n",Cur_Fre_Num,Fre_Total_Num);
 	fmFrequency = Frequency_Save[Cur_Fre_Num-1] + FM_MIN;
 	fm_rx_set_freq(fmFrequency);
-	if(Cur_Fre_Num == 100)
-	{
-		Cur_Fre_Num = 0;
-	}
+	
 	display_ui_fm(1);
 
 	temp=fmFrequency-FM_MIN;
@@ -998,7 +988,7 @@ int Search_channel_in_save(void)
 
 	for(i = 0;i < Fre_Total_Num+1;i++)
 	{
-		printf("Frequency_Save[%d] ===%d\r\n",i,Frequency_Save[i]);
+		//printf("Frequency_Save[%d] ===%d\r\n",i,Frequency_Save[i]);
 		if(Frequency_Save[i] == (fmFrequency - FM_MIN))
 		{
 			return i+1;
