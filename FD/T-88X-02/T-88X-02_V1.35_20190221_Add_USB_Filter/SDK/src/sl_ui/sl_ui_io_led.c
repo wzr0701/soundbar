@@ -319,7 +319,14 @@ void pa_static_check(void)
 	{
 		if(ir_short_flag)
 		{
-			input_add_event(&save_ir_event);
+			if(save_ir_event.type == EV_IR)
+			{
+				input_add_event(&save_ir_event);
+				save_ir_event.type = 0;
+				save_ir_event.code = 0;
+				save_ir_event.value = 0;
+			}
+
 		}
 	}
 

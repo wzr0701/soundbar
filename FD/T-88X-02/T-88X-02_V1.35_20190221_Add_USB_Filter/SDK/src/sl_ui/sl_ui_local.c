@@ -161,6 +161,7 @@ static int get_local_info(char *local_name, int *total_num, int *folder_num)
 			folder_index_tab[j][0] = total_file_index;
 			total_file_index += file_num;
 			folder_index_tab[j][1] = total_file_index - 1;
+			//printf("%s-------- folder_index_tab[j][1]: %d \n",__func__,folder_index_tab[j][1]);
 			/*printf("%s-------- path:%s--no.: %d--parent:%d--child:%d---index:%d--num:%d--dir:%d--folder_index_tab[%d][0]:%d--folder_index_tab[%d][1]:%d \n",
 			__func__,dir_elm->path_name, i, dir_elm->parent_index, dir_elm->child_index, dir_elm->file_index,
 			dir_elm->file_num, dir_elm->dir_num,j, folder_index_tab[j][0],j, folder_index_tab[j][1]);*/
@@ -259,6 +260,7 @@ void handle_local_music_play(int file_index, int playtime)
 {
 	//获取播放项
 	play_list_item_t item;
+	//printf("%s:file_index === %d\n", __func__,file_index);
 	if(play_list_get_file_byindex(&item, file_index) == 0)
 	{
 		display_ui_usb_number(file_index);

@@ -1302,18 +1302,30 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					if((input_number>0)&&(input_number<INPUT_MAX))
 					{
 						usb_prev_flag = false;
-						input_number_ok=input_number;
+						if(folder_index_cnt < 1)
+						{
+							input_number_ok = input_number;
+						}
+						else
+						{
+							input_number_ok = input_number+(folder_index_tab[folder_index_cnt-1][1]+1);
+						}
 						input_number=0;
 						input_n=0;
+						//ui_handle_play_num(input_number_ok);
+						#if 1
+						printf("%s:input_number_ok === %d\n", __func__,input_number_ok);
 						if(input_number_ok < folder_index_tab[folder_index_cnt][1]+1)
 						{
+							//printf("%s:input_number_ok1 === %d\n", __func__,input_number_ok);
 							ui_handle_play_num(input_number_ok);
 						}
 						else
 						{
+							//printf("%s:folder_index_tab[folder_index_cnt][1]+1 === %d\n", __func__,folder_index_tab[folder_index_cnt][1]+1);
 							ui_handle_play_num(folder_index_tab[folder_index_cnt][1]+1);
 						}
-						
+						#endif
 					}
 				}
 				else if(ui_source_select == SOURCE_SELECT_FM)
@@ -1996,6 +2008,7 @@ void source_mode_usb(void)
 
 			case UI_CMD_USB_PLAY_MUTE:
 				set_channel_mixvol_by_mode(ui_source_select);
+				pa_mute_ctrl(false);
 				//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 				break;
 

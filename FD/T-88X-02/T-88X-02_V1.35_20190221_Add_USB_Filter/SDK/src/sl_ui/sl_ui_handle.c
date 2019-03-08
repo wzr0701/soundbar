@@ -1818,26 +1818,32 @@ void ui_handle_play_num(int num)
         int *p_index = (ui_source_select == SOURCE_SELECT_USB?&usb_last_file_index:&sd_last_file_index);
         int *p_playtime = (ui_source_select == SOURCE_SELECT_USB?&usb_playtime:&sd_playtime);
         int total = get_file_total();
+		//printf("%s:get_file_total === %d\n", __func__,total);
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 		pa_mute_ctrl(true);
         if( (total > 0)&&(num<=total))
         {
+			//printf("%s:num === %d\n", __func__,num);
 			*p_index = num-1;
 			*p_playtime = 0;
+			//printf("%s:*p_index === %d\n", __func__,*p_index);
 			handle_local_music_play(*p_index, *p_playtime);
         }
 		else if(num>total)
 		{
 			*p_index = total-1;
 			*p_playtime = 0;
+			//printf("%s:*p_index === %d\n", __func__,*p_index);
 			handle_local_music_play(*p_index, *p_playtime);
 		}
+		#if 0
 		usleep(500000);
 		usleep(500000);
 		usleep(500000);
 		set_channel_mixvol_by_mode(ui_source_select);
 		//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 		pa_mute_ctrl(false);
+		#endif
     }
     printf("%s.\n", __func__);
 }
@@ -1972,6 +1978,7 @@ void ui_handle_next(void)
             handle_local_music_play(*p_index, *p_playtime);
         }
 		search_current_music_folder();
+		#if 0
 		usleep(500000);
 		usleep(500000);
 		usleep(500000);
@@ -1981,7 +1988,7 @@ void ui_handle_next(void)
 			//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 			pa_mute_ctrl(false);
 		}
-
+		#endif
     }
 
     printf("%s\n", __func__);
@@ -2029,6 +2036,8 @@ void ui_handle_prev(void)
             handle_local_music_play(*p_index, *p_playtime);
         }
 		search_current_music_folder();
+
+		#if 0
 		usleep(500000);
 		usleep(500000);
 		usleep(500000);
@@ -2038,6 +2047,7 @@ void ui_handle_prev(void)
 			//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 			pa_mute_ctrl(false);
 		}
+		#endif
     }
 
     printf("%s\n", __func__);
@@ -2090,12 +2100,14 @@ void ui_handle_folder_next(void)
 		usleep(500000);
 		usleep(500000);
 		usleep(500000);
+		#if 0
 		if (mute_state == UNMUTE)
 		{
 			set_channel_mixvol_by_mode(ui_source_select);
 			//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 			pa_mute_ctrl(false);
 		}
+		#endif
 		display_ui_usb_folder(1);
 		usleep(500000);
 		folder_dis_flag = false;
@@ -2151,12 +2163,14 @@ void ui_handle_folder_prev(void)
 		usleep(500000);
 		usleep(500000);
 		usleep(500000);
+		#if 0
 		if (mute_state == UNMUTE)
 		{
 			set_channel_mixvol_by_mode(ui_source_select);
 			//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 			pa_mute_ctrl(false);
 		}
+		#endif
 		display_ui_usb_folder(1);
 		usleep(500000);
 		folder_dis_flag = false;

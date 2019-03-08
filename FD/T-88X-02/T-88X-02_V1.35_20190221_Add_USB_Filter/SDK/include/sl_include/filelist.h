@@ -1,7 +1,7 @@
 #ifndef __FS_FILE_LIST__
 #define __FS_FILE_LIST__
 #define MAX_DIR_NUM	  512//512  //2000
-#define MAX_FILE_NUM  2000  //5000
+#define MAX_FILE_NUM  2500  //5000
 #define MAX_FILE_NAME_LEN	128//8//48
 #define MAX_DIR_NAME_LEN	256//MAX_FILE_NAME_LEN//48
 
