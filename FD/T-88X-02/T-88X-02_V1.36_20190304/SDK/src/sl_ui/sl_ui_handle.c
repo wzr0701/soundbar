@@ -125,17 +125,17 @@ static int sd_last_total_num = -1;
 /*播放时间*/
  int sd_playtime = 0;
 /*USB上一次播放的歌曲序号*/
-static int usb_last_file_index = -1;
+int usb_last_file_index = -1;
 /*USB有音频文件的文件夹数量*/
-static int usb_last_folder_num = -1;
+int usb_last_folder_num = -1;
 /*USB总文件夹数量*/
-static int usb_last_total_num = -1;
+int usb_last_total_num = -1;
 /*播放时间*/
  int usb_playtime = 0;
 /*长按物理上下区处理看门狗*/
 static WDOG_ID wdtimer_action_longpress = NULL;
 /*mute检测处理看门狗*/
- WDOG_ID wdtimer_bt_mute_detect = NULL;
+ //WDOG_ID wdtimer_bt_mute_detect = NULL;
 
  WDOG_ID wdtimer_pa_station_detect = NULL;
 
@@ -481,7 +481,7 @@ void ui_handle_power(int power_on_off)
 		enter_dynamic();
 		printf("out of low power\n");
 #endif
-		printf("POWERon%d\r\n");
+		//printf("POWERon%d\r\n");
 
 		//启动蓝牙模块通信线程
 		if (bt_state_tid < 0)
@@ -585,7 +585,7 @@ void ui_handle_power(int power_on_off)
 	}
 	else
 	{
-		printf("POWEofff%d\r\n");
+		//printf("POWEofff%d\r\n");
 		pa_mute_ctrl(true);
 		display_ui_power(0);
 		//save_player_info();
@@ -719,8 +719,10 @@ void ui_handle_mode(int source, bool notify)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+#if 0
 void bt_mute_detect(void)
 {
+
     static int count = 0;
     uint32_t value;
     //获取IO口状态
@@ -745,13 +747,13 @@ void bt_mute_detect(void)
             {
                 //关闭功放
                 pa_mute_ctrl(true);
-                printf("%s:AMP off.\n", __func__);
+                //printf("%s:AMP off.\n", __func__);
             }
             else
             {
                 //打开功放
                 pa_mute_ctrl(false);
-                printf("%s:AMP on.\n", __func__);
+                //printf("%s:AMP on.\n", __func__);
             }
         }
     }
@@ -761,7 +763,9 @@ void bt_mute_detect(void)
         //设置5ms检测一次
         wd_start(wdtimer_bt_mute_detect, CLOCKS_PER_SEC/200, (wdentry_t)bt_mute_detect, 0);
     }
+
 }
+#endif
 
 
 
@@ -1558,6 +1562,7 @@ void save_usb_play_time(void)
     if (SOURCE_SELECT_USB == ui_source_select)
     {
         usb_playtime = player_info.curtime;
+		printf("%s:usb_playtime = %d\n", __func__,usb_playtime);
     }
 }
 
@@ -1713,13 +1718,31 @@ void ui_handle_eq(int num)
  ****************************************************************************/
 void ui_handle_file_load(int total_num, int folder_num, char * url)
 {
+	int file_index_temp;
     if(ui_source_select == SOURCE_SELECT_USB && strcmp(SEARCH_USB_NAME, url) == 0)
     {
-        if(usb_last_total_num != total_num || usb_last_folder_num != folder_num)
-        {
-            usb_last_file_index = 0;
-            usb_playtime = 0;
-        }
+		if(usb_last_total_num == -1)
+		{
+			file_index_temp = read_usb_num();
+			if(file_index_temp != -1)
+			{
+				usb_last_file_index = file_index_temp;
+				usb_playtime = 0;
+			}
+			else
+			{
+				usb_last_file_index = 0;
+	            usb_playtime = 0;
+			}
+		}
+		else
+		{
+			if(usb_last_total_num != total_num || usb_last_folder_num != folder_num)
+	        {
+	            usb_last_file_index = 0;
+	            usb_playtime = 0;
+	        }
+		}
         usb_last_total_num = total_num;
         usb_last_folder_num = folder_num;
         handle_local_music_play(usb_last_file_index, usb_playtime);
@@ -1963,11 +1986,13 @@ void ui_handle_next(void)
         int *p_index = (ui_source_select == SOURCE_SELECT_USB?&usb_last_file_index:&sd_last_file_index);
         int *p_playtime = (ui_source_select == SOURCE_SELECT_USB?&usb_playtime:&sd_playtime);
         int total = get_file_total();
+		
+		dis_other_mode=1;
+		
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 		pa_mute_ctrl(true);
 
 		usb_prev_flag = false;
-		
 		
         if (total > 0)
         {
@@ -1976,10 +2001,9 @@ void ui_handle_next(void)
                 *p_index = 0;
             }
             *p_playtime = 0;
-			search_current_music_folder();
+			//search_current_music_folder();
             handle_local_music_play(*p_index, *p_playtime);
         }
-		
 		#if 0
 		usleep(500000);
 		usleep(500000);
@@ -1993,7 +2017,7 @@ void ui_handle_next(void)
 		#endif
     }
 
-    printf("%s\n", __func__);
+    //printf("%s\n", __func__);
 }
 
 
@@ -2023,6 +2047,9 @@ void ui_handle_prev(void)
         int *p_index = (ui_source_select == SOURCE_SELECT_USB?&usb_last_file_index:&sd_last_file_index);
         int *p_playtime = (ui_source_select == SOURCE_SELECT_USB?&usb_playtime:&sd_playtime);
         int total = get_file_total();
+
+		dis_other_mode=1;
+		
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 		pa_mute_ctrl(true);
 
@@ -2035,9 +2062,10 @@ void ui_handle_prev(void)
                 *p_index = total-1;
             }
             *p_playtime = 0;
-			search_current_music_folder();
+			//search_current_music_folder();
             handle_local_music_play(*p_index, *p_playtime);
         }
+		
 		#if 0
 		usleep(500000);
 		usleep(500000);
@@ -2051,7 +2079,7 @@ void ui_handle_prev(void)
 		#endif
     }
 
-    printf("%s\n", __func__);
+    //printf("%s\n", __func__);
 }
 
 /****************************************************************************

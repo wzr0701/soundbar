@@ -32,6 +32,7 @@ int usb_play_cnt = 100;
 
 extern  bool usb_prev_flag;
 extern int folder_index_cnt;
+extern bool usb_is_load;
 
 
 int folder_index_tab[255][2];
@@ -178,7 +179,7 @@ static int get_local_info(char *local_name, int *total_num, int *folder_num)
 
 	if (0 == (*folder_num))
 	{	//没有任何音频文件
-		printf("%s %d this part has null music!\n", __func__, __LINE__);
+		//printf("%s %d this part has null music!\n", __func__, __LINE__);
 		return -SL_UI_ERROR_NO_FILE;
 	}
 
@@ -238,6 +239,7 @@ void handle_local(const char* local_media)
 				}
 				else
 				{
+					usb_is_load = true;
 					printf("%s:detach thread success\n", __func__);
 				}
 			}
@@ -268,6 +270,9 @@ void handle_local_music_play(int file_index, int playtime)
 	//printf("%s:file_index === %d\n", __func__,file_index);
 	if(play_list_get_file_byindex(&item, file_index) == 0)
 	{
+		//printf("%s:file_index === %d\n", __func__,file_index);
+		search_current_music_folder();
+		save_usb_num(file_index);
 		//printf("%s:folder_index_tab[%d][0] === %d----------folder_index_tab[%d][1] === %d\n", __func__,folder_index_cnt,folder_index_tab[folder_index_cnt][0],folder_index_cnt,folder_index_tab[folder_index_cnt][1]);
 		if(file_index < folder_index_tab[0][1])
 		{
@@ -278,7 +283,6 @@ void handle_local_music_play(int file_index, int playtime)
 			file_rel_pos = file_index - folder_index_tab[folder_index_cnt][0];
 		}
 		
-		display_ui_usb_number(file_rel_pos);
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 		usb_play_cnt = 0;
 		usb_prev_flag = false;
@@ -290,6 +294,8 @@ void handle_local_music_play(int file_index, int playtime)
 		{	//seek到上次播放的位置
 			player_process_cmd(NP_CMD_SEEK, item.path, playtime * 1000, NULL, NULL);
 		}
+
+		display_ui_usb_number(file_rel_pos);
 	}
 }
 

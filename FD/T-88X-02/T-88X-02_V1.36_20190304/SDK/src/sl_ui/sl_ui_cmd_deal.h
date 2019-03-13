@@ -18,6 +18,8 @@
 #define MEM_TREBLE_LEVEL      200
 #define MEM_BASS_LEVEL      300
 
+#define MEM_USB_NUM  500
+
 #define BASS_MODE 0
 #define TREBLE_MODE 2
 
@@ -51,6 +53,10 @@ void  read_player_info(void);
 
 void  save_mix_vol(void);
 void  read_mix_vol(void);
+
+void  save_usb_num(int file_index);
+int  read_usb_num(void);
+
 
 
 #endif

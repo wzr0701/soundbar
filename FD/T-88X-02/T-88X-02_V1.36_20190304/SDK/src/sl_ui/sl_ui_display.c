@@ -331,6 +331,7 @@ void display_ui_device(char wm_mode)
 		wd_cancel(wdtimer_goback_mode);
 	}
 
+	dis_other_mode=0;
 
 	if(input_flag)
 	{
@@ -346,7 +347,6 @@ void display_ui_device(char wm_mode)
 		//display_set_source(ui_source_select);
 	}
 
-	dis_other_mode=0;
 
 }
 
@@ -768,6 +768,7 @@ void ui_update_music_time(void)
 		//{   //播放状态或暂停显示隐藏状态
 		int * seek_time_p = (ui_source_select == SOURCE_SELECT_USB?&usb_playtime:&sd_playtime);
 		int curtime = player_info.curtime;
+		//printf("%s:* seek_time_p = %d, curtime = %d\n", __func__,* seek_time_p,curtime);
 		#if 1
 		if(curtime < *seek_time_p)
 		{

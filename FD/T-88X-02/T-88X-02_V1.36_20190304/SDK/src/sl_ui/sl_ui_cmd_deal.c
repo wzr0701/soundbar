@@ -107,6 +107,8 @@ bool enter_bass_set = false;
 
 bool change_mode_flag = false;
 
+bool usb_is_load=false;
+
 
 
 bool fm_test_flag = false;
@@ -159,6 +161,9 @@ extern bool enter_bass_set;
 extern bool ir_short_flag;
 extern bool ir_long_flag;
 extern bool bt_wait_flag;
+
+extern int usb_playtime;
+extern int usb_last_file_index;
 
 extern int folder_index_cnt;
 extern int folder_index_tab[255][2];
@@ -253,6 +258,62 @@ void sl_ui_fm_test(void)
 	}
 }
 
+/******************************************
+
+
+
+
+
+******************************************/
+void  save_usb_num(int file_index)
+{
+#if 1
+	unsigned char temp[4];
+	int i;
+
+	temp[0] = file_index/1000;
+	temp[1] = (file_index%1000)/100;
+	temp[2] = (file_index%100)/10;
+	temp[3] = file_index%10;
+
+	for(i = 0;i < 4;i++)
+	{
+		at24c02_write_one_byte(MEM_USB_NUM+i ,temp[i]);
+		Delay5Ms(10);
+	}
+			
+#endif
+}
+
+
+/******************************************
+
+
+
+
+
+******************************************/
+int  read_usb_num(void)
+{
+#if 1
+	unsigned char temp[4];
+	int file_index,i;
+
+	for(i = 0;i < 4;i++)
+	{
+		if(temp[i] == 0xFF)
+		{
+			return -1;
+		}
+		temp[i]=at24c02_read_one_byte(MEM_USB_NUM+i);
+	}
+	
+    file_index = temp[3]+temp[2]*10+temp[1]*100+temp[0]*1000;
+
+	return file_index;
+	
+#endif
+}
 
 
 
@@ -813,6 +874,19 @@ void enter_mode( int mode)
 			//printf(">>>>>>>>>> usb mode <<<<<<<<<<\n");
 			sl_ui_set_reqrate();
 			usleep(1000);
+		
+			#if 0
+			if(usb_is_load)
+			{				
+				handle_local_music_play(usb_last_file_index,usb_playtime);
+			}
+			else
+			{
+				handle_local(SEARCH_USB_NAME);
+				usleep(6000000);
+			}
+			#endif
+				
 			handle_local(SEARCH_USB_NAME);
 			usleep(6000000);
 			break;
@@ -930,8 +1004,6 @@ void enter_mode( int mode)
 
 	}
 
-	dis_other_mode=1;
-	
 #if(MIC_ENABLE_ADC0==1)
 	usleep(5000);
 	player_process_cmd(NP_CMD_I2SIN_OPEN, NULL,0, NULL, NULL);///////adc0
@@ -964,7 +1036,7 @@ void enter_mode( int mode)
 	{
 		change_mode_unmute();
 	}
-	
+	dis_other_mode=1;
 
 }
 
@@ -1136,7 +1208,13 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 			case UI_CMD_USB_LOAD:
 				if(ui_source_select==SOURCE_SELECT_USB)
-					handle_local(SEARCH_USB_NAME);
+				{
+					if(!usb_is_load)
+					{
+						handle_local(SEARCH_USB_NAME);
+					}						
+				}
+					
 				break;
 
 
@@ -1147,15 +1225,18 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_PLAYER_FINISH:
 				if(usb_prev_flag)
 				{
+					save_usb_play_time();
 					ui_handle_prev();
 				}
 				else
 				{
+					save_usb_play_time();
 					ui_handle_next();
 				}				
 				break;
 
 			case UI_CMD_USB_OUT:
+				usb_is_load = false;
 				usb_online=0;
 				ui_handle_usb_out();
 				break;
@@ -1318,7 +1399,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						input_n=0;
 						//ui_handle_play_num(input_number_ok);
 						#if 1
-						printf("%s:input_number_ok === %d\n", __func__,input_number_ok);
+						//printf("%s:input_number_ok === %d\n", __func__,input_number_ok);
 						if(input_number_ok < folder_index_tab[folder_index_cnt][1]+1)
 						{
 							//printf("%s:input_number_ok1 === %d\n", __func__,input_number_ok);
@@ -2300,7 +2381,7 @@ void source_mode_hdmi(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
-				put_ui_msg(UI_CMD_VOLUME_MUTE);
+				//put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
 			case UI_CMD_APP_PLAY:

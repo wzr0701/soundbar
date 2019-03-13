@@ -141,7 +141,7 @@ static int sl_ui_thread(int argc, char **argv)
 	}
 	while(ret == -1);
 	ret = 0;
-	printf("DSP sync finish\n");
+	//printf("DSP sync finish\n");
 	//引脚功能初始化
 	//printf("#############################################20180929\n");
 #ifdef CONFIG_CEC

@@ -13718,15 +13718,15 @@ void PCM5242_Init(void)
 	pcm5242_write_byte(0x00, 0x0);
 	readreg = pcm5242_read_byte(0x01);
 
-	printf("88888888888888888888read reg 0x01 0x%x \n", readreg);
+	//printf("88888888888888888888read reg 0x01 0x%x \n", readreg);
 
 	readreg = pcm5242_read_byte(0x08);
 
-	printf("88888888888888888888read reg 0x08 0x%x \n", readreg);
+	//printf("88888888888888888888read reg 0x08 0x%x \n", readreg);
 
 	readreg = pcm5242_read_byte(0x55);
 
-	printf("88888888888888888888read reg 0x55 0x%x \n", readreg);
+	//printf("88888888888888888888read reg 0x55 0x%x \n", readreg);
 
 	//   sem_post(&de_i2c_sem);
 }
@@ -13761,15 +13761,15 @@ void PCM5242_TestMode_Init(void)
 	pcm5242_write_byte(0x00, 0x0);
 	readreg = pcm5242_read_byte(0x01);
 
-	printf("88888888888888888888read reg 0x01 0x%x \n", readreg);
+	//printf("88888888888888888888read reg 0x01 0x%x \n", readreg);
 
 	readreg = pcm5242_read_byte(0x08);
 
-	printf("88888888888888888888read reg 0x08 0x%x \n", readreg);
+	//printf("88888888888888888888read reg 0x08 0x%x \n", readreg);
 
 	readreg = pcm5242_read_byte(0x55);
 
-	printf("88888888888888888888read reg 0x55 0x%x \n", readreg);
+	//printf("88888888888888888888read reg 0x55 0x%x \n", readreg);
 
 	//sem_post(&de_i2c_sem);
 }
