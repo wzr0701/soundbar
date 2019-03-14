@@ -682,8 +682,10 @@ static ui_cmd_t ui_handle_ir_press(int event_cmd)
 
 		case CODE_IR_PLAY_PAUSE:
 			ir_playpause_flag = false;
-			if(ui_source_select != SOURCE_SELECT_FM)
+			if((ui_source_select == SOURCE_SELECT_BT)||(ui_source_select == SOURCE_SELECT_USB))
+			{
 				cmd.cmd = UI_CMD_PLAY_PAUSE;
+			}		
 			break;
 
 		case  CODE_IR_SOURCE:

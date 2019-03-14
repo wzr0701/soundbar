@@ -784,6 +784,11 @@ void enter_mode( int mode)
 
 	display_ui_main_sys(ui_source_select);
 
+	if(ui_source_select != SOURCE_SELECT_USB)
+	{
+		dis_other_mode=1;
+	}
+
 	set_ui_media(ui_source_select);
 
 	if(bt_version_num == 0)
@@ -873,22 +878,8 @@ void enter_mode( int mode)
 		case SOURCE_SELECT_USB:
 			//printf(">>>>>>>>>> usb mode <<<<<<<<<<\n");
 			sl_ui_set_reqrate();
-			usleep(1000);
-		
-			#if 0
-			if(usb_is_load)
-			{				
-				handle_local_music_play(usb_last_file_index,usb_playtime);
-			}
-			else
-			{
-				handle_local(SEARCH_USB_NAME);
-				usleep(6000000);
-			}
-			#endif
-				
+			usleep(1000);	
 			handle_local(SEARCH_USB_NAME);
-			usleep(6000000);
 			break;
 
 		case SOURCE_SELECT_SD:
@@ -1036,7 +1027,11 @@ void enter_mode( int mode)
 	{
 		change_mode_unmute();
 	}
-	dis_other_mode=1;
+	
+	if(ui_source_select == SOURCE_SELECT_USB)
+	{
+		dis_other_mode=1;
+	}
 
 }
 
@@ -2381,7 +2376,7 @@ void source_mode_hdmi(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
-				//put_ui_msg(UI_CMD_VOLUME_MUTE);
+				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
 			case UI_CMD_APP_PLAY:

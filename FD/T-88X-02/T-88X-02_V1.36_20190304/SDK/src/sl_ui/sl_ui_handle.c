@@ -554,6 +554,7 @@ void ui_handle_power(int power_on_off)
 
 		//////////////////////////////////////////////
 
+		handle_local(SEARCH_USB_NAME);
 		//  led7_open();
 		pa_io_ret_set(true);
 		pa_static_check();
@@ -987,7 +988,7 @@ int bt_cmd_check(char *buf_recv)
 
 	if(index > AT_START && index < AT_MAX)
     {
-		printf("%s:cmd.arg2=%d\n",__func__, value);
+		//printf("%s:cmd.arg2=%d\n",__func__, value);
         //int ui_cmd = bt_cmd_translate(index);
         if ((index == AT_PLAY_OR_PAUSE)||(index == AT_PLAY_PAUSE))
         {
