@@ -168,6 +168,8 @@ extern int usb_last_file_index;
 extern int folder_index_cnt;
 extern int folder_index_tab[255][2];
 
+extern int file_rel_pos;
+
 extern ui_cmd_t get_mq_msg(void);
 extern void mq_msg_clear(void);
 extern void  put_ui_msg(int ui_cmd);
@@ -2051,6 +2053,7 @@ void source_mode_usb(void)
 	{
 		usleep(UI_TASK_DELAY);
 		cmd=get_mq_msg();
+		//printf("\n %s:cmd:%d \n", __func__, cmd.cmd);
 
 		switch(cmd.cmd)
 		{
@@ -2087,13 +2090,20 @@ void source_mode_usb(void)
 				break;
 
 			case UI_CMD_USB_PLAY_MUTE:
-				set_channel_mixvol_by_mode(ui_source_select);
-				pa_mute_ctrl(false);
-				//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
+				if (mute_state == UNMUTE)
+				{
+					set_channel_mixvol_by_mode(ui_source_select);
+					pa_mute_ctrl(false);
+					//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
+				}			
 				break;
 
 			case UI_CMD_GET_USB_PLAY_STATUS:
 				ui_handle_pause_play(2,0);
+				break;
+
+			case UI_CMD_USB_FOLDER_DIS:
+				display_ui_usb_number(file_rel_pos);
 				break;
 
 			default:

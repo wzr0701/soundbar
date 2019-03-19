@@ -79,6 +79,7 @@ extern int treble_vol;
 
 int folder_index_cnt=0;
 bool folder_dis_flag = false;
+int folder_dis_cnt = 100;
 
 bool usb_prev_flag =  false;
 
@@ -1563,7 +1564,7 @@ void save_usb_play_time(void)
     if (SOURCE_SELECT_USB == ui_source_select)
     {
         usb_playtime = player_info.curtime;
-		printf("%s:usb_playtime = %d\n", __func__,usb_playtime);
+		//printf("%s:usb_playtime = %d\n", __func__,usb_playtime);
     }
 }
 
@@ -2002,7 +2003,14 @@ void ui_handle_next(void)
                 *p_index = 0;
             }
             *p_playtime = 0;
-			//search_current_music_folder();
+			search_current_music_folder();
+			if(*p_index == folder_index_tab[folder_index_cnt][0])
+			{
+				folder_index_dis = *p_index;
+				folder_dis_flag = true;
+				display_ui_usb_folder(0);
+				folder_dis_cnt = 0;
+			}
             handle_local_music_play(*p_index, *p_playtime);
         }
 		#if 0
@@ -2063,7 +2071,14 @@ void ui_handle_prev(void)
                 *p_index = total-1;
             }
             *p_playtime = 0;
-			//search_current_music_folder();
+			search_current_music_folder();
+			if(*p_index == folder_index_tab[folder_index_cnt][1])
+			{
+				folder_index_dis = *p_index;
+				folder_dis_flag = true;
+				display_ui_usb_folder(0);
+				folder_dis_cnt = 0;
+			}
             handle_local_music_play(*p_index, *p_playtime);
         }
 		
@@ -2119,14 +2134,16 @@ void ui_handle_folder_next(void)
 			}
 			*p_index = folder_index_tab[folder_index_cnt][0];
             *p_playtime = 0;
-			printf(">>>>>>>>>>p_index:%d--- p_playtime:%d---  folder_index_tab[%d][0]:%d \n",
-				*p_index, *p_playtime, folder_index_cnt, folder_index_tab[folder_index_cnt][0]);
+			//printf(">>>>>>>>>>p_index:%d--- p_playtime:%d---  folder_index_tab[%d][0]:%d \n",
+			//	*p_index, *p_playtime, folder_index_cnt, folder_index_tab[folder_index_cnt][0]);
 			//next_folder_flag = false;
 			folder_index_dis = *p_index;
 			folder_dis_flag = true;
-			//display_ui_usb_folder(0);
+			display_ui_usb_folder(0);
 			handle_local_music_play(*p_index, *p_playtime);
+			folder_dis_cnt = 0;
         }
+		#if 0
 		usleep(500000);
 		usleep(500000);
 		usleep(500000);
@@ -2141,6 +2158,7 @@ void ui_handle_folder_next(void)
 		display_ui_usb_folder(1);
 		usleep(500000);
 		folder_dis_flag = false;
+		#endif
     }
 
     printf("%s\n", __func__);
@@ -2182,14 +2200,16 @@ void ui_handle_folder_prev(void)
 			}
 			*p_index = folder_index_tab[folder_index_cnt][0];
             *p_playtime = 0;
-			printf(">>>>>>>>>>p_index:%d--- p_playtime:%d---  f0lder_index_tab[%d][0]:%d \n",
-				*p_index, *p_playtime, folder_index_cnt, folder_index_tab[folder_index_cnt][0]);
+			//printf(">>>>>>>>>>p_index:%d--- p_playtime:%d---  f0lder_index_tab[%d][0]:%d \n",
+			//	*p_index, *p_playtime, folder_index_cnt, folder_index_tab[folder_index_cnt][0]);
 			//prev_folder_flag = false;
 			folder_index_dis = *p_index;
 			folder_dis_flag = true;
-			//display_ui_usb_folder(0);
+			display_ui_usb_folder(0);
 			handle_local_music_play(*p_index, *p_playtime);
+			folder_dis_cnt = 0;
         }
+		#if 0
 		usleep(500000);
 		usleep(500000);
 		usleep(500000);
@@ -2204,6 +2224,7 @@ void ui_handle_folder_prev(void)
 		display_ui_usb_folder(1);
 		usleep(500000);
 		folder_dis_flag = false;
+		#endif
     }
 
     printf("%s\n", __func__);

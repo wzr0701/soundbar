@@ -115,7 +115,7 @@ unsigned char FM_Mode(void)
 		Frequency_Save[i] = at24c02_read_one_byte(MEM_SAVE_CHANNEL + i);
 		if(Frequency_Save[i] > (FM_MAX- FM_MIN))
 			Frequency_Save[i] = 0;
-		printf("Frequency_Save[%d]===%d\r\n",Frequency_Save[i]);
+		//printf("Frequency_Save[%d]===%d\r\n",Frequency_Save[i]);
 	}
 #endif
 
@@ -198,6 +198,10 @@ unsigned char FM_Mode(void)
 			{
 				fm_scan_start =      false;
 				fm_scan_end_flag = true;
+
+				fre_manual_save();
+				Delay5Ms(200);
+				
 				break;
 			}
 			else
@@ -284,6 +288,8 @@ unsigned char FM_Mode(void)
 			temp=fmFrequency-FM_MIN;
 			at24c02_write_one_byte(MEM_FM_FREQUENCY ,temp);
 			Delay5Ms(10);
+			at24c02_write_one_byte(MEM_CUR_FRE_NUM ,Cur_Fre_Num);
+			Delay5Ms(10);
 		}
 	}
 
@@ -330,6 +336,8 @@ void fre_manual_save(void)
 			display_ui_fm(1);
 			temp = Fre_Total_Num;
 			at24c02_write_one_byte(MEM_FRE_TOTAL_NUM, temp);
+			Delay5Ms(10);
+			at24c02_write_one_byte(MEM_CUR_FRE_NUM ,temp);
 			Delay5Ms(10);
 		}
 		
@@ -561,7 +569,6 @@ void fm_auto_seek(bool dir)
     Frequency_Save[index -1] = temp;
 
     at24c02_write_one_byte(MEM_SAVE_CHANNEL + index -1,temp);
-
     Delay5Ms(10);
 }
 

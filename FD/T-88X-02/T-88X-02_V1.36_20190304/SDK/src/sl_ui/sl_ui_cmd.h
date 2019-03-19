@@ -244,6 +244,9 @@ enum ui_cmd_e {
 	
 	UI_CMD_FM_SCAN_START,//334
 	UI_CMD_FM_SCAN_END,//335
+
+	UI_CMD_USB_FOLDER_DIS,//336
+
 	
 	UI_CMD_MAX,
 };

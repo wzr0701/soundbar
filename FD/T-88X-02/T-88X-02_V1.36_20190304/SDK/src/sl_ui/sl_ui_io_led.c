@@ -60,10 +60,14 @@ extern int save_ir_cnt;
 extern bool change_mode_flag;
 extern int change_mode_cnt;
 extern int usb_play_cnt;
-
+extern int folder_dis_cnt;
 extern bool frist_hdmi_init;
 
 extern bool fm_scan_end_flag;
+
+extern char dis_other_mode;
+
+extern bool folder_dis_flag;
 
 /****************************************************************************
  * Name: padmux_init
@@ -254,7 +258,7 @@ void bt_power_crt(bool on_off)
 
 void sys_power_control(void)
 {
-	printf("%s:hdmi power off\n", __func__);
+	//printf("%s:hdmi power off\n", __func__);
     const int pin = SYS_POWER_CON_PIN;
     zhuque_bsp_gpio_set_mode(pin, GPIO_OUT, PULLING_NONE);
     zhuque_bsp_gpio_set_value(pin, GPIO_VALUE_HIGH);
@@ -296,6 +300,7 @@ void pa_static_check(void)
 	zhuque_bsp_gpio_get_value(SL_HDMI_CEC_DET_PIN, &value3);
 
 #if 1
+	folder_dis_cnt++;
 	usb_play_cnt++;
 	//fm_manual_save_cnt++;
 	bt_wait_cnt++;
@@ -348,6 +353,17 @@ void pa_static_check(void)
 	{
 		cmd.cmd = UI_CMD_USB_PLAY_MUTE;
 		send_cmd_2_ui(&cmd);
+	}
+
+	if(folder_dis_cnt <= 20)
+	{
+		dis_other_mode=1;
+		if(folder_dis_cnt == 20)
+		{
+			folder_dis_flag = false;
+			cmd.cmd = UI_CMD_USB_FOLDER_DIS;
+			send_cmd_2_ui(&cmd);
+		}
 	}
 
 	if(fm_scan_start_end_cnt == 3)
