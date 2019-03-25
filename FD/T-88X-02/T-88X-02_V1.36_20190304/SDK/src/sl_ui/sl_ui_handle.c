@@ -2120,6 +2120,9 @@ void ui_handle_folder_next(void)
         int *p_index = (ui_source_select == SOURCE_SELECT_USB?&usb_last_file_index:&sd_last_file_index);
         int *p_playtime = (ui_source_select == SOURCE_SELECT_USB?&usb_playtime:&sd_playtime);
         int total = get_file_total();
+		
+		dis_other_mode=1;
+		
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 		pa_mute_ctrl(true);
         //if (total > 0)
@@ -2186,6 +2189,9 @@ void ui_handle_folder_prev(void)
         int *p_index = (ui_source_select == SOURCE_SELECT_USB?&usb_last_file_index:&sd_last_file_index);
         int *p_playtime = (ui_source_select == SOURCE_SELECT_USB?&usb_playtime:&sd_playtime);
         int total = get_file_total();
+
+		dis_other_mode=1;
+		
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 		pa_mute_ctrl(true);
         //if (total > 0)
@@ -3056,7 +3062,8 @@ void sl_ui_system_reset(void)
 
 	display_ui_clear();
 	ht1633_updata_display();
-	//usleep(500000);
+	player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+	usleep(100000);
 	pa_mute_ctrl(true);
 	mute_state = UNMUTE;
 	bt_mix_vol = Frist_MIX_LEV;
@@ -3071,7 +3078,7 @@ void sl_ui_system_reset(void)
 
 	save_mix_vol();
 
-	player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+	//player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 
 	usleep(10000);
 	set_channel_vol_by_mode(ui_source_select);
@@ -3086,11 +3093,12 @@ void sl_ui_system_reset(void)
 	//display_ui_clear();
 	//display_str(reset_clear_str);
 	//ht1633_updata_display();
-	usleep(10000);
-	pa_mute_ctrl(false);
-	usleep(500000);
-	usleep(500000);
+	//usleep(10000);
 	set_channel_mixvol_by_mode(ui_source_select);
+	//pa_mute_ctrl(false);
+	usleep(500000);
+	usleep(500000);
+	//set_channel_mixvol_by_mode(ui_source_select);
 	//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 	//display_set_source(ui_source_select);
 }

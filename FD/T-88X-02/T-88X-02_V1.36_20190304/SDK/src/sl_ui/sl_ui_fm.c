@@ -182,7 +182,10 @@ unsigned char FM_Mode(void)
 		if(cmdq.cmd==UI_CMD_FM_SCAN||cmdq.cmd==UI_CMD_PLAY_PAUSE||cmdq.cmd==UI_CMD_FM_HALF_SCAN_ADD||cmdq.cmd==UI_CMD_FM_HALF_SCAN_SUB)
 		{
 			//fmFrequency --;
-			//fm_rx_set_freq(fmFrequency);
+			fm_rx_set_freq(fmFrequency);
+			fm_rx_set_vol(volume);
+			pa_mute_ctrl(false);
+			fm_scan_start =      false;
 			fm_scan_end_flag = true;
 			break;
 		}

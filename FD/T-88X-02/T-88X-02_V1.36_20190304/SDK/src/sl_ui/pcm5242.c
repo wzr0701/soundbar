@@ -13,7 +13,7 @@
 /*数据引脚*/
 #define I2C_DATA_PIN 18
 
-
+char vol_level_save;
 
 extern sem_t de_i2c_sem;
 
@@ -13775,7 +13775,24 @@ void PCM5242_TestMode_Init(void)
 }
 
 
+void PCM2452_Vol_Set(char level)//[+24db,-103db] 11111111:mute
+{
+	char vol_value;
 
+	if(vol_level_save != level)
+	{
+		vol_value = 48-level*2;
+		//{ 0x3d, 0x30 },Page 0 / Register 61 Default value: 00110000(0x30) ---0x00 = +24.0db 0x30 =24-0x30*0.5 = 0db 
+		//{ 0x3e, 0x30 },Page 0 / Register 62 Default value: 00110000(0x30) ---0x00 = +24.0db 0x30 =24-0x30*0.5 = 0db 
+		pcm5242_write_byte(0x00, 0x0);
+		pcm5242_write_byte(0x3d, vol_value);
+		pcm5242_write_byte(0x3e, vol_value);
+
+		vol_level_save = level;
+
+		//printf("PCM2452_Vol_Set: vol_level_save = %d.\n", vol_level_save);
+	}
+}
 
 
 

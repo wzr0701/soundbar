@@ -25,6 +25,9 @@ extern  WDOG_ID wdtimer_pa_station_detect;
 extern  WDOG_ID wdtimer_change_mode_unmute;
 extern  WDOG_ID wdtimer_hdmion_send;
 
+struct input_event save_ir_event_tmp;
+
+
 int enter_count = 0;
 int playkey_count = 0;
 int prevkey_count = 0;
@@ -320,16 +323,29 @@ void pa_static_check(void)
 		send_cmd_2_ui(&cmd);
 	}
 
+	if(save_ir_event.type != 0)
+	{
+		save_ir_event_tmp.type = save_ir_event.type;
+		save_ir_event_tmp.code =save_ir_event.code;
+		save_ir_event_tmp.value = save_ir_event.value;
+
+		save_ir_event.type = 0;
+		save_ir_event.code = 0;
+		save_ir_event.value = 0;
+		
+	}
+	
 	if(save_ir_cnt == 4)
 	{
 		if(ir_short_flag)
 		{
-			if(save_ir_event.type == EV_IR)
+			if(save_ir_event_tmp.type == EV_IR)
 			{
-				input_add_event(&save_ir_event);
-				save_ir_event.type = 0;
-				save_ir_event.code = 0;
-				save_ir_event.value = 0;
+				input_add_event(&save_ir_event_tmp);	
+
+				save_ir_event_tmp.type = 0;
+				save_ir_event_tmp.code = 0;
+				save_ir_event_tmp.value = 0;
 			}
 
 		}

@@ -33,6 +33,8 @@
 
 #define MIC_VOL_STEP (100.0f/60)
 
+#define PCM2452_Vol_Lowlev             -2
+#define PCM2452_Vol_Normallev             0
 
 #define MCU_VERSION 0
 #define BT_VERSION           1
@@ -179,6 +181,16 @@ extern void player_paramter_set_init(AUDIO_OUT_MODE outMode, AUDIO_IN_MODE inMod
 void select_mixvol_table(void)
 {
 	#ifdef MIX_VOL_BT
+	
+	if(bt_mix_vol < 4)
+	{
+		PCM2452_Vol_Set(PCM2452_Vol_Lowlev);
+	}
+	else
+	{
+		PCM2452_Vol_Set(PCM2452_Vol_Normallev);
+	}
+	
 	if(ui_source_select == SOURCE_SELECT_BT)
 	{
 		mix_vol = mix_vol_bt_table[bt_mix_vol];
@@ -434,10 +446,14 @@ void hdmi_send_unmute(void)
 	usleep(100000);
 	sc8836_action_hdmi_soundbar_adj_tv_vol();
 	usleep(100000);
-	//player_process_cmd(NP_CMD_VOLUME_SET, NULL, (int)mix_vol, NULL, NULL);
-	set_channel_mixvol_by_mode(ui_source_select);
-	usleep(500000);
-	pa_mute_ctrl(false);
+	if (mute_state == UNMUTE)
+	{
+		//player_process_cmd(NP_CMD_VOLUME_SET, NULL, (int)mix_vol, NULL, NULL);
+		set_channel_mixvol_by_mode(ui_source_select);
+		usleep(500000);
+		pa_mute_ctrl(false);
+	}
+	
 }
 
 
@@ -1850,7 +1866,14 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 			case UI_CMD_SYS_RESET:
 					sl_ui_system_reset();
-					ui_handle_mode(SOURCE_SELECT_BT,0);
+					if(ui_source_select == SOURCE_SELECT_BT)
+					{
+						pa_mute_ctrl(false);
+					}
+					else
+					{
+						ui_handle_mode(SOURCE_SELECT_BT,0);
+					}				
 					bt_cmd_source_select(ui_source_select);
 					ret=1;
 					break;
@@ -1895,7 +1918,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_APP_MOVIE_ON:
 				if(!movie_on_flag)
 				{
-					movie_on_flag = 1;
+					movie_on_flag^=0xff;
 					ui_handle_eq_movie();
 				}
 				display_ui_movie(true);
@@ -1904,7 +1927,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_APP_MOVIE_OFF:
 				if(movie_on_flag)
 				{
-					movie_on_flag = 0;
+					movie_on_flag^=0xff;
 					ui_handle_unload_eq();
 				}
 				display_ui_movie(false);

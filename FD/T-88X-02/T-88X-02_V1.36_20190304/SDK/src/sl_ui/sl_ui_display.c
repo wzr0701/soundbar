@@ -1189,6 +1189,7 @@ void display_ui_usb_folder(int loc)
 		}
 
 		ht1633_updata_display();
+		dis_other_mode=1;
 	}
 }
 
