@@ -168,11 +168,16 @@ static void silan_platform_init(void)
     value |= (1<<16);
     REG32(KSEG1(SILAN_SYSTEM_CTL_REG15)) = value;
     /*----------------------------------------------*/
-    //gpio drive strength
+    //gpio drive strength   
     value = 0xaaaaaaaa; //8mA; 0x55555555: 4mA
     REG32(KSEG1(SILAN_SYSTEM_CTL_REG17)) = value;
     REG32(KSEG1(SILAN_SYSTEM_CTL_REG18)) = value;
     REG32(KSEG1(SILAN_SYSTEM_CTL_REG19)) = value;
+    /*
+    REG32(KSEG1(SILAN_SYSTEM_CTL_REG17)) = 0xaaaa8000; //GPIO1_0 - GPIO1_6 iis脚设置最小电流
+    REG32(KSEG1(SILAN_SYSTEM_CTL_REG18)) = 0xaaaa82aa; //GPIO1_21 GPIO1_22 iis脚设置最小电流
+    REG32(KSEG1(SILAN_SYSTEM_CTL_REG19)) = 0xaaaaaaaa;
+    */
 
 #ifdef CONFIG_CEC
 

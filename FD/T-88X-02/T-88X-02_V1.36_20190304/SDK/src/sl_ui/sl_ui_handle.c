@@ -168,6 +168,9 @@ static int bass_level = 0;
 bool next_folder_flag = false;
 bool prev_folder_flag = false;
 
+
+bool app_mute_flag = false;
+
 /*全局*/
 /*开关机状态*/
 int ui_power = POWER_OFF;
@@ -2410,6 +2413,12 @@ void ui_handle_mute(void)
 		{
 			save_usb_play_time();
 		}
+		
+		if ((ui_source_select == SOURCE_SELECT_FM)&&(app_mute_flag == false))
+		{
+			handle_bt_cmd(AT_STOP, 0);
+		}
+		app_mute_flag = false;
 
 		take_micmute_flag = true;
 		mic_open(false);
@@ -2454,10 +2463,17 @@ void ui_handle_mute(void)
 			usleep(100000);
 			sc8836_action_hdmi_soundbar_adj_tv_vol();
 		}
+		
 		if (ui_source_select == SOURCE_SELECT_USB)
 		{
 			save_usb_play_time();
 		}
+
+		if ((ui_source_select == SOURCE_SELECT_FM)&&(app_mute_flag == false))
+		{
+			handle_bt_cmd(AT_PLAY, 0);
+		}
+		app_mute_flag = false;
 
 		if(take_micmute_flag ==        true)
 		{

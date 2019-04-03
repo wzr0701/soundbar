@@ -164,6 +164,8 @@ extern bool ir_short_flag;
 extern bool ir_long_flag;
 extern bool bt_wait_flag;
 
+extern bool app_mute_flag;
+
 extern int usb_playtime;
 extern int usb_last_file_index;
 
@@ -2257,11 +2259,13 @@ void source_mode_fm(void)
 				break;
 
 			case UI_CMD_APP_PLAY:
+				app_mute_flag = true;
 				mute_state = MUTE;
 				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
 
 			case UI_CMD_APP_PAUSE:
+				app_mute_flag = true;
 				mute_state = UNMUTE;
 				put_ui_msg(UI_CMD_VOLUME_MUTE);
 				break;
