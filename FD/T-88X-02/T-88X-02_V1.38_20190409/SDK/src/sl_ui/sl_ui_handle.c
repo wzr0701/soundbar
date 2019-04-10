@@ -1011,17 +1011,17 @@ int bt_cmd_check(char *buf_recv)
 		}
         else if (index == AT_DEVICE_CONNECTED)
         {//设备连接
-        	printf("BT conneted\n");
+        	//printf("BT conneted\n");
 			cmd.cmd = UI_CMD_BLUETOOTH_CONNECT;
-			cmd.arg2 = true;
+			//cmd.arg2 = true;
         }
         else if (index == AT_DEVICE_DISCONNECTED)
         {//设备断开连接
         	bt_wait_cnt = 0;
 			bt_wait_flag = false;
 			cmd.cmd = UI_CMD_BLUETOOTH_DISCONNECT;
-			cmd.arg2 = false;
-        	printf("BT disconneted\n");
+			//cmd.arg2 = false;
+        	//printf("BT disconneted\n");
         }  
 		else if(index == AT_VERSION)
         {
@@ -2065,8 +2065,6 @@ void ui_handle_prev(void)
 		
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 		pa_mute_ctrl(true);
-
-		usb_prev_flag = true;
 		
         if (total > 0)
         {
@@ -2085,6 +2083,7 @@ void ui_handle_prev(void)
 			}
             handle_local_music_play(*p_index, *p_playtime);
         }
+		usb_prev_flag = true;
 		
 		#if 0
 		usleep(500000);
@@ -2750,7 +2749,7 @@ static void ui_process_vol_dec(void)
 		{
 			treble_vol = BASS_TREBLE_LEVEL_MIN;
 		}
-		printf("UI_CMD_EQ_TRB_SUB:%d\n",treble_vol);
+		//printf("UI_CMD_EQ_TRB_SUB:%d\n",treble_vol);
 		set_bass_treble_vol(TREBLE_MODE,treble_vol,1);
 		save_trebass_level(TREBLE_MODE);
 		bt_cmd_current_treble(treble_vol); //treble
@@ -2764,7 +2763,7 @@ static void ui_process_vol_dec(void)
 		{
 			bass_vol = BASS_TREBLE_LEVEL_MIN;
 		}
-		printf("UI_CMD_EQ_BASS_SUB:%d\n",bass_vol);
+		//printf("UI_CMD_EQ_BASS_SUB:%d\n",bass_vol);
 		set_bass_treble_vol(BASS_MODE,bass_vol,1);
 		save_trebass_level(BASS_MODE);
 		bt_cmd_current_bass(bass_vol); //bass
@@ -2818,7 +2817,7 @@ static void ui_process_vol_dec(void)
 			sc8836_action_hdmi_soundbar_adj_tv_vol();
 		}
 		
-		printf("%s:mix_vol = %d\n", __func__, mix_vol);
+		//printf("%s:mix_vol = %d\n", __func__, mix_vol);
 
 
 		display_ui_vol(bt_mix_vol);
@@ -2843,7 +2842,7 @@ static void ui_process_vol_dec(void)
 	            silan_set_hardware_gilr_volume(vol, vol);
 	        }
 	    }
-	    printf("%s:bypass_in_vol=%d\n", __func__, bypass_in_vol);
+	    //printf("%s:bypass_in_vol=%d\n", __func__, bypass_in_vol);
 	    #endif
 	}
 
@@ -2880,7 +2879,7 @@ static void ui_process_vol_inc(void)
 		{
 			treble_vol = BASS_TREBLE_LEVEL_MAX;
 		}
-		printf("UI_CMD_EQ_TRB_ADD:%d\n",treble_vol);
+		//printf("UI_CMD_EQ_TRB_ADD:%d\n",treble_vol);
 		set_bass_treble_vol(TREBLE_MODE,treble_vol,1);
 		save_trebass_level(TREBLE_MODE);
 		bt_cmd_current_treble(treble_vol); //treble
@@ -2895,7 +2894,7 @@ static void ui_process_vol_inc(void)
 		{
 			bass_vol = BASS_TREBLE_LEVEL_MAX;
 		}
-		printf("UI_CMD_EQ_BASS_ADD:%d\n",bass_vol);
+		//printf("UI_CMD_EQ_BASS_ADD:%d\n",bass_vol);
 		set_bass_treble_vol(BASS_MODE,bass_vol,1);
 		save_trebass_level(BASS_MODE);
 		bt_cmd_current_bass(bass_vol); //bass
@@ -2973,7 +2972,7 @@ static void ui_process_vol_inc(void)
 			sc8836_action_hdmi_soundbar_adj_tv_vol();
 		}
 
-		printf("%s:mix_vol = %d\n", __func__, mix_vol);
+		//printf("%s:mix_vol = %d\n", __func__, mix_vol);
 
 		display_ui_vol(bt_mix_vol);
 
@@ -3006,7 +3005,7 @@ static void ui_process_vol_inc(void)
 	            silan_set_hardware_gilr_volume(vol, vol);
 	        }
 	    }
-	    printf("%s:bypass_in_vol=%d\n", __func__, bypass_in_vol);
+	    //printf("%s:bypass_in_vol=%d\n", __func__, bypass_in_vol);
 	    #endif
 	}
 
@@ -3021,7 +3020,7 @@ void set_adc_channel_vol(int ch, int vol)
 {
     int val[6]={0}; /* 6 channels */
 
-	printf("%s vol:%d \n", __func__, vol);
+	//printf("%s vol:%d \n", __func__, vol);
     if (vol > 100)
 	{
         vol = 100;
@@ -3142,7 +3141,7 @@ int sc8836_action_hdmi_on( void)
 {
 #if 1
 #ifdef SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
 
 	int cec_cmd_gpio = SL_HDMI_CEC_PIN;  //GPIO1_  change
@@ -3176,7 +3175,7 @@ int sc8836_action_hdmi_on( void)
 int sc8836_action_hdmi_off(void)
 {
 #ifdef SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
 
 	cec_process_cmd(CEC_CMD_ARCOFF, NULL);
@@ -3187,7 +3186,7 @@ int sc8836_action_hdmi_off(void)
 int sc8836_action_hdmi_standby(void)
 {
 #ifdef SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
 
 	cec_process_cmd(CEC_CMD_STANDBY, NULL);
@@ -3197,7 +3196,7 @@ int sc8836_action_hdmi_standby(void)
 int sc8836_action_hdmi_poweron(void)
 {
 #ifdef SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
 
 	cec_process_cmd(CEC_CMD_POWERON, NULL);
@@ -3211,7 +3210,7 @@ int sc8836_action_hdmi_poweron(void)
 int sc8836_ui_handle_cec_inactive_source( void)
 {
 #if 1//def SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
 	//set_sl_ui_cmd(NP_CMD_STOP, NULL, 0);
 	sc8836_action_hdmi_off();
@@ -3222,7 +3221,7 @@ int sc8836_ui_handle_cec_inactive_source( void)
 int sc8836_ui_handle_cec_active_source( void)
 {
 #if 1//def SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
 	sc8836_action_hdmi_on();
 	//set_sl_ui_cmd(NP_CMD_STOP, NULL, 0);
@@ -3233,7 +3232,7 @@ int sc8836_ui_handle_cec_active_source( void)
 int sc8836_ui_handle_cec_volume_key_up(struct ui_cmd_s *cmd)
 {
 #ifdef SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
 	//set_sl_ui_cmd(NP_CMD_STOP, NULL, 0);
 	return 	-SL_UI_ERROR_NO_DIALOG;
@@ -3242,7 +3241,7 @@ int sc8836_ui_handle_cec_volume_key_up(struct ui_cmd_s *cmd)
 int sc8836_ui_handle_cec_volume_key_down(struct ui_cmd_s *cmd)
 {
 #if 1//def SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
 	//set_sl_ui_cmd(NP_CMD_STOP, NULL, 0);
 	return 	-SL_UI_ERROR_NO_DIALOG;
@@ -3251,7 +3250,7 @@ int sc8836_ui_handle_cec_volume_key_down(struct ui_cmd_s *cmd)
 int sc8836_ui_handle_cec_volume_key_release(struct ui_cmd_s *cmd)
 {
 #if 1//def SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
 	//set_sl_ui_cmd(NP_CMD_STOP, NULL, 0);
 	return 	-SL_UI_ERROR_NO_DIALOG;
@@ -3260,7 +3259,7 @@ int sc8836_ui_handle_cec_volume_key_release(struct ui_cmd_s *cmd)
 int sc8836_ui_handle_cec_mute_key(struct ui_cmd_s *cmd)
 {
 #ifdef SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
 
 	return 	-SL_UI_ERROR_NO_DIALOG;
@@ -3282,7 +3281,7 @@ int sc8836_action_hdmi_soundbar_adj_tv_vol(void)
 	}
 	
 #ifdef SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
     cec_process_cmd(CEC_CMD_SDB_ADJ_TV_VOL, &cur_volum);
 }
@@ -3290,7 +3289,7 @@ int sc8836_action_hdmi_soundbar_adj_tv_vol(void)
 int sc8836_action_hdmi_soundbar_mute_tv(void)
 {
 #ifdef SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
     cec_process_cmd(CEC_CMD_SDB_MUTE_TV, NULL);
 }
@@ -3298,7 +3297,7 @@ int sc8836_action_hdmi_soundbar_mute_tv(void)
 int sc8836_action_hdmi_soundbar_unmute_tv(void)
 {
 #ifdef SL_UI_DBG
-	printf("%s %d\n", __func__, __LINE__);
+	//printf("%s %d\n", __func__, __LINE__);
 #endif
 
     cec_process_cmd(CEC_CMD_SDB_UNMUTE_TV, NULL);

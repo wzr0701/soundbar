@@ -42,7 +42,7 @@ void display_str( char *dis_str);
  void display_set_source(int num);
  void ui_display_source(void);
 void ui_goback_source(int delay);
-void ui_update_music_time(void);
+int ui_update_music_time(void);
 void display_ui_coaxial(void);
 
 void display_ui_input(unsigned int number);

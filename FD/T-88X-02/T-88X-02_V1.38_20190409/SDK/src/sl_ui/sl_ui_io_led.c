@@ -594,18 +594,28 @@ void change_mode_unmute(void)
 
 	unmute_count++;
 
-	if(unmute_count == 35)
+	if(unmute_count == 20)
 	{
-		//printf("%s:1.\n",__func__);
-	
+		cmd.cmd = UI_CMD_OPEN_IIS;
+		send_cmd_2_ui(&cmd);		
+	}
+
+	if(unmute_count == 30)
+	{
+		cmd.cmd = UI_CMD_SET_MICVOL;
+		send_cmd_2_ui(&cmd);		
+	}
+
+	if(unmute_count == 40)
+	{
+		//printf("%s:1.\n",__func__);	
 		cmd.cmd = UI_CMD_CHANGE_MODE_UNMUTE;
 		send_cmd_2_ui(&cmd);			
 	}
 
-	if(unmute_count == 45)
+	if(unmute_count == 50)
 	{
-		//printf("%s:2.\n",__func__);
-		
+		//printf("%s:2.\n",__func__);	
 		cmd.cmd = UI_CMD_CHANGE_MODE_VOL_REC;
 		send_cmd_2_ui(&cmd);
 		wd_cancel(wdtimer_change_mode_unmute);
@@ -614,7 +624,10 @@ void change_mode_unmute(void)
 	////////////////////////////////////
 }
 
-
+void cancel_mode_unmute(void)
+{
+	wd_cancel(wdtimer_change_mode_unmute);
+}
 
 
 void ui_hdmion_send(void)

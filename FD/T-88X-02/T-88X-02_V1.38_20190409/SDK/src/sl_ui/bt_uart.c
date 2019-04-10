@@ -297,8 +297,8 @@ int bt_read(char *buf, int buf_szie)
 						delay_time++;
 						if(delay_time >= 500)
 						{
-							if(buf[0] <'A'||buf[0]>'Z')
-								read_end = true;
+							//if(buf[0] <'A'||buf[0]>'Z')
+							read_end = true;
 						}
 						//read_end = true;
 					}

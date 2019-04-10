@@ -103,6 +103,9 @@ int auto_input_cnt = 100;
 int  bass_vol = 0;
 int  treble_vol = 0;
 
+int usb_curtime_save = 0;
+
+
 int unmute_count = 100;
 bool enter_tre_set = false;
 bool enter_bass_set = false;
@@ -111,7 +114,7 @@ bool change_mode_flag = false;
 
 bool usb_is_load=false;
 
-
+bool usb_play_flag = false;
 
 bool fm_test_flag = false;
 //bool fm_manual_save_status = false;
@@ -169,7 +172,7 @@ extern bool app_mute_flag;
 extern int usb_playtime;
 extern int usb_last_file_index;
 
-extern bool usb_play_flag;
+extern char usb_dis_cnt;
 
 extern int folder_index_cnt;
 extern int folder_index_tab[255][2];
@@ -473,6 +476,7 @@ void dis_play_update(void)
 	static unsigned char second_count=0;
 	static unsigned char wait_count=0;
 	ui_cmd_t cmd;
+	int curtime_tmp;
 
 	if(!dis_other_mode)
 	{
@@ -493,7 +497,23 @@ void dis_play_update(void)
 			}
 			if(folder_dis_flag == false)
 			{
-				ui_update_music_time();
+				usb_curtime_save = ui_update_music_time();
+				if(ui_source_select == SOURCE_SELECT_USB)
+				{
+					if(usb_dis_cnt < 5)
+					{
+						usb_dis_cnt++;
+						if(usb_dis_cnt == 5)
+						{
+							//printf("usb_dis_cnt == 6.\r\n");
+							if(usb_curtime_save == 0)
+							{
+								cmd.cmd = UI_CMD_PLAYER_PASS;
+								send_cmd_2_ui(&cmd);
+							}
+						}
+					}
+				}				
 			}
 		}
 	}
@@ -804,6 +824,10 @@ void enter_mode( int mode)
 	player_process_cmd(NP_CMD_STOP, NULL, 0, NULL, NULL);
 	usleep(1000);
 
+
+	pcm1803_power_crt(true);
+	usleep(100000);
+
 	display_ui_main_sys(ui_source_select);
 
 	if(ui_source_select != SOURCE_SELECT_USB)
@@ -912,7 +936,7 @@ void enter_mode( int mode)
 			break;
 
 		case SOURCE_SELECT_FM:
-			printf(">>>>>>>>>> fm mode <<<<<<<<<<\n");
+			//printf(">>>>>>>>>> fm mode <<<<<<<<<<\n");
 			FM_Mode();
 			usleep(10000);
 			aux_fm_channel_choose(false);
@@ -946,15 +970,12 @@ void enter_mode( int mode)
 #endif
 			player_process_cmd(NP_CMD_I2SIN_CHAN, NULL, 1, NULL, NULL);//////////adc1
 			usleep(1000);
-
-
-
 #if (BYPASS_MODE || INNERADC_MODE)
 			player_process_cmd(NP_CMD_LINEIN_ON, NULL, 0, NULL, NULL);
 #else
 			player_process_cmd(NP_CMD_I2SIN_OPEN, NULL, 1, NULL, NULL);///////adc1
 #endif
-			usleep(1000);
+			usleep(10000);
 			break;
 
 
@@ -1051,7 +1072,7 @@ void enter_mode( int mode)
 
 	unmute_count = 0;
 	change_mode_flag = true;
-	usleep(100000);
+	//usleep(100000);
 	printf("%s:mode init success!\n", __func__);
 
 	//if(ui_source_select != SOURCE_SELECT_HDMI)
@@ -1074,7 +1095,8 @@ void enter_mode( int mode)
 void exit_mode( int mode)
 {
 	printf("%s %d\n", __func__, ui_source_select);
-
+	cancel_mode_unmute();
+	
 	pa_mute_ctrl(true);
 	usleep(10000);
 
@@ -1104,7 +1126,7 @@ void exit_mode( int mode)
 			break;
 
 		case SOURCE_SELECT_USB:
-
+			usb_play_flag =      false;
 			break;
 
 		case SOURCE_SELECT_SD:
@@ -1249,6 +1271,14 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_PLAYER_FINISH:
+				if(usb_playtime > 0)
+				{
+					save_usb_play_time();
+					ui_handle_next();
+				}	
+			break;
+
+			case UI_CMD_PLAYER_PASS:
 				if(usb_prev_flag)
 				{
 					save_usb_play_time();
@@ -1258,7 +1288,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				{
 					save_usb_play_time();
 					ui_handle_next();
-				}				
+				}
 				break;
 
 			case UI_CMD_USB_OUT:
@@ -1707,7 +1737,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 #if(MIC_ENABLE_ADC0==1)
 			case UI_CMD_MIC_CONNECT:
-				printf("mic conncect!\n");
+				//printf("mic conncect!\n");
 				if(mic_on_flag)
 				{
 					mic_open(true);
@@ -1719,7 +1749,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_MIC_DISCONNECT:
-				printf("mic disconnect!\n");
+				//printf("mic disconnect!\n");
 				mic_open(false);
 				break;
 
@@ -1809,7 +1839,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						{
 							save_usb_play_time();
 						}
-						printf("mic_vol_add\n");
+						//printf("mic_vol_add\n");
 					}
 					break;
 
@@ -1833,7 +1863,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 							save_usb_play_time();
 						}
 
-						printf("mic_vol_sub\n");
+						//printf("mic_vol_sub\n");
 					}
 					break;
 
@@ -1853,7 +1883,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						set_echo_vol(echo_vol_lev);
 						bt_cmd_current_echo();
 						display_mic_vol(echo_vol_lev);
-						printf("mic_echo_add\n");
+						//printf("mic_echo_add\n");
 					}
 					break;
 
@@ -1873,7 +1903,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						set_echo_vol(echo_vol_lev);
 						bt_cmd_current_echo();
 						display_mic_vol(echo_vol_lev);
-						printf("mic_echo_sub\n");
+						//printf("mic_echo_sub\n");
 					}
 					break;
 
@@ -1892,7 +1922,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					break;
 
 			case UI_CMD_CHANGE_MODE_UNMUTE:
-				player_process_cmd(NP_CMD_I2SIN_OPEN, NULL,0, NULL, NULL);///////adc0
+				
 				if(ui_source_select != SOURCE_SELECT_HDMI)
 				{
 					if(usb_play_flag == false)
@@ -1905,10 +1935,25 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					}
 					
 				}
+				player_process_cmd(NP_CMD_I2SIN_OPEN, NULL,0, NULL, NULL);///////adc0
 				break;
 
 			case UI_CMD_CHANGE_MODE_VOL_REC:
-				
+				if(ui_source_select != SOURCE_SELECT_HDMI)
+				{
+					if(usb_play_flag == false)
+					{
+						if (mute_state == UNMUTE)
+						{
+							pa_mute_ctrl(false);
+						}
+					}
+					else
+					{
+						usb_play_flag = false;
+					}
+					
+				}
 				if(mic_on_flag)
 				{
 					if(mic_detect_online)
@@ -1925,22 +1970,6 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				{
 					mic_open(false);
 					//bt_cmd_mic_status(mic_on_flag);
-				}
-				
-				if(ui_source_select != SOURCE_SELECT_HDMI)
-				{
-					if(usb_play_flag == false)
-					{
-						if (mute_state == UNMUTE)
-						{
-							pa_mute_ctrl(false);
-						}
-					}
-					else
-					{
-						usb_play_flag = false;
-					}
-					
 				}
 				
 				
@@ -2020,6 +2049,31 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 			case UI_CMD_FM_SCAN_END:
 				bt_cmd_fmscan_end();
+				break;
+
+
+			case UI_CMD_OPEN_IIS:
+				player_process_cmd(NP_CMD_I2SIN_OPEN, NULL,0, NULL, NULL);///////adc0
+				break;
+
+			case UI_CMD_SET_MICVOL:
+				if(mic_on_flag)
+				{
+					if(mic_detect_online)
+					{
+						mic_open(true);
+					}
+					else
+					{
+						mic_open(false);
+					}
+					//bt_cmd_mic_status(mic_on_flag);
+				}
+				else
+				{
+					mic_open(false);
+					//bt_cmd_mic_status(mic_on_flag);
+				}						
 				break;
 
 			case UI_CMD_HALF_SECOND:

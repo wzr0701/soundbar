@@ -76,7 +76,7 @@ extern unsigned char bt_version_num;
 
 
 #define MCU_VER1 2
-#define MCU_VER2 5
+#define MCU_VER2 6
 
 #define BT_VER1 1
 #define BT_VER2 2
@@ -496,9 +496,10 @@ void display_mic_vol(int vol)
 void display_ui_usb(void)
 {
 	char dis[5]={NUM_U,NUM_S,NUM_B,NUM_N,NUM_O};
+	int curtime_tmp;
 	if(usb_online)
 	{
-		ui_update_music_time();
+		curtime_tmp = ui_update_music_time();
 		display_ui_icon(ICON_USB,usb_online);
 	}
 	else
@@ -518,9 +519,10 @@ void display_ui_usb(void)
 void display_ui_sd(void)
 {
 	char dis[5]={NUM_OFF,NUM_S,NUM_D,NUM_N,NUM_O};
+	int curtime_tmp;
 	if(sd_online)
 	{
-		ui_update_music_time();
+		curtime_tmp = ui_update_music_time();
 		//display_str(sd_str);
 		//display_ui_icon(ICON_SD,sd_online);
 		ht1633_updata_display();
@@ -749,7 +751,7 @@ void display_ui_coaxial(void)
  * Assumptions:
  *
  ****************************************************************************/
-void ui_update_music_time(void)
+int ui_update_music_time(void)
 {
 #if 1
 	if(ui_source_select == SOURCE_SELECT_USB ||
@@ -835,6 +837,8 @@ void ui_update_music_time(void)
 		//}
 
 		ht1633_updata_display();
+
+		return curtime;
 	}
 #endif
 

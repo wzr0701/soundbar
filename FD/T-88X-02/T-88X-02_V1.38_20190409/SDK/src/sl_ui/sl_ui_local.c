@@ -28,15 +28,16 @@
 //static char *audiotype2str[AUDIO_MAX] = {"unknown", "mp3", "alac", "aac", "wma", "flac", "ape", "ac3", "dts", "wav", "ogg", "spdac3", "spddts", "pcm"};
 //static char *media2str[MEDIA_MAX] = {"unknown", "sd", "usb", "bluetooth", "airplay", "dlna", "radio"};
 
+char usb_dis_cnt = 100;
+
 int usb_play_cnt = 100;
 int file_rel_pos = 0;
-bool usb_play_flag =  false;
-
 
 extern  bool usb_prev_flag;
 extern int folder_index_cnt;
 extern bool usb_is_load;
 extern bool folder_dis_flag;
+extern bool usb_play_flag;
 
 int folder_index_tab[255][2];
 int folder_total_num = 0;
@@ -243,6 +244,7 @@ void handle_local(const char* local_media)
 				else
 				{
 					usb_is_load = true;
+					usb_play_flag =      true;
 					printf("%s:detach thread success\n", __func__);
 				}
 			}
@@ -272,7 +274,6 @@ void handle_local_music_play(int file_index, int playtime)
 	//printf("%s:file_index === %d\n", __func__,file_index);
 	if(play_list_get_file_byindex(&item, file_index) == 0)
 	{
-		usb_play_flag = true;
 		//printf("%s:file_index === %d\n", __func__,file_index);
 		search_current_music_folder();
 		save_usb_num(file_index);
@@ -296,6 +297,8 @@ void handle_local_music_play(int file_index, int playtime)
 		{	//seek到上次播放的位置
 			player_process_cmd(NP_CMD_SEEK, item.path, playtime * 1000, NULL, NULL);
 		}
+
+		usb_dis_cnt = 0;
 
 		if(!folder_dis_flag)
 		{

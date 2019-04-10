@@ -34,6 +34,7 @@ void io_early_set(void);
 void pa_static_check(void);
 void enter_othermode_check(void);
 void change_mode_unmute(void);
+void cancel_mode_unmute(void);
 void pa_mute_ctrl(bool mute);
 //void bt_mute_detect(void);
 void pa_io_ret_set(bool on_off);

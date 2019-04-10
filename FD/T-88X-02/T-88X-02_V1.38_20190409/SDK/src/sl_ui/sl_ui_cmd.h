@@ -247,6 +247,11 @@ enum ui_cmd_e {
 
 	UI_CMD_USB_FOLDER_DIS,//336
 
+	UI_CMD_OPEN_IIS,//337
+
+    UI_CMD_SET_MICVOL,//338
+
+	UI_CMD_PLAYER_PASS,//339
 	
 	UI_CMD_MAX,
 };
