@@ -5,16 +5,31 @@
 #include <stdio.h>
 #include "sl_ui_cmd.h"
 #include "sl_ui_display.h"
-#include "ht1633.h"
+#include "sc6138_led7.h"
 #include <pthread.h>
 #include <string.h>
 #include <sys/ioctl.h>
 
 //#include "sl_ui_handle.h"
 
+static const char rca_str[] = {NUM_A, NUM_U, NUM_H, NUM_2};
+static const char aux_str[] = {NUM_A, NUM_U, NUM_H, NUM_1};
+static const char bt_str[] = {NUM__, NUM_B, NUM_T, NUM__};
+static const char clear_str[] = {NUM_OFF, NUM_OFF, NUM_OFF, NUM_OFF};
+static const char fm_str[] = {NUM_T, NUM_U, NUM_N, NUM_E};
+static const char optical_str[] = {NUM__, NUM_0, NUM_P, NUM__};
+static const char coa_str[] = {NUM__, NUM_C, NUM_0, NUM__};
+static const char power_on_str[] = {NUM__, NUM_H, NUM_1, NUM__};
+static const char power_off_str[] = {NUM_0, NUM_V, NUM_E, NUM_OFF};
+static const char sd_str[] = {NUM__, NUM_5, NUM_D, NUM__};
+static const char usb_str[] = {NUM_U, NUM_5, NUM_B, NUM_OFF};
+static const char up_str[] = {NUM__, NUM_U, NUM_P, NUM__};
+static const char off_str[] = {NUM_0, NUM_F, NUM_F, NUM_OFF};
+static const char power_wait_str[] = {NUM__,NUM__, NUM__, NUM__};
+static const char hdmi_str[] = {NUM__,NUM_H,NUM_D, NUM__,};
 
+#if 0
 static  char aux_str[] = {NUM_OFF,NUM_A, NUM_U, NUM_X, NUM_OFF};
-
 static  char bt_str[] = {NUM_OFF,NUM_OFF, NUM_B, NUM_t, NUM_OFF};
 static  char clear_str[] = {NUM_OFF,NUM_OFF, NUM_OFF, NUM_OFF, NUM_OFF};
 static  char fm_str[] = {NUM_OFF,NUM_OFF, NUM_F, NUM_M, NUM_OFF};
@@ -24,19 +39,8 @@ static  char power_off_str[] = {NUM_OFF,NUM_B, NUM_Y, NUM_E, NUM_OFF};
 static  char sd_str[] = {NUM_OFF,NUM_OFF, NUM_S, NUM_D, NUM_OFF};
 static  char usb_str[] = {NUM_OFF,NUM_U, NUM_S, NUM_B, NUM_OFF};
 static  char hdmi_str[] = {NUM_OFF,NUM_H, NUM_D, NUM_M ,NUM_I};
-
 static  char coa_str[] = {NUM_OFF,NUM_C, NUM_O, NUM_A ,NUM_OFF};
-
 static  char power_wait_str[] = {NUM__,NUM__, NUM__, NUM__ ,NUM__};
-
-#if 0
-static  char bt_no_vol[5] = {NUM_B, NUM_t,NUM_OFF,NUM_OFF,NUM_OFF};
-static  char aux_no_vol[5] = {NUM_A, NUM_U,NUM_X,NUM_OFF,NUM_OFF};
-static  char opt_no_vol[5] ={NUM_O, NUM_P,NUM_T,NUM_OFF,NUM_OFF};
-static  char hdmi_no_vol[5] ={NUM_H, NUM_D,NUM_OFF,NUM_OFF,NUM_OFF};
-static  char coa_no_vol[5] ={NUM_C, NUM_O,NUM_A,NUM_OFF,NUM_OFF};
-static  char fm_no_vol[5] ={NUM_OFF, NUM_F,NUM_M,NUM_OFF,NUM_OFF};
-static  char usb_no_vol[5] ={NUM_U, NUM_S,NUM_B,NUM_OFF,NUM_OFF};
 #endif
 
 
@@ -110,7 +114,9 @@ void display_ui_full(void)
 **************************************/
 void display_ui_clear(void)
 {
-	ht1633_clear_disbuf();
+	led7_clear_disbuf();
+    led7_clear_bitbuf();
+	led7_clear_display();
 }
 /**************************************
 
@@ -121,7 +127,48 @@ void display_ui_clear(void)
 
 void display_ui_icon(char icon,bool on_off)
 {
-	ht1633_set_icon(icon,on_off);
+	if((icon>ICON_TOTAL)||(icon<0))
+		return;
+	
+	switch(icon)
+	{
+		case ICON_AUX:
+			led7_set_aux(on_off);
+		break;
+		
+		case ICON_USB:
+			led7_set_usb(on_off);
+		break;
+
+		case ICON_BT:
+			led7_set_bt(on_off);
+		break;
+
+		case ICON_OPTI:
+			led7_set_opt(on_off);
+		break;
+
+		case ICON_COA:
+			led7_set_coa(on_off);
+		break;
+
+		case ICON_HDMI:
+			led7_set_hdmi(on_off);
+		break;
+
+		case ICON_EQ:
+			led7_set_eq(on_off);
+		break;
+
+		case ICON_DOT:
+			led7_set_dot(on_off);
+		break;
+
+		case ICON_CLON_2:
+			led7_set_colon(on_off);
+		break;			
+	}
+	led7_update_char();
 }
 
 
@@ -131,11 +178,12 @@ void display_str( char *dis_str)
     if (dis_str != NULL)
     {
         int i;
-        for (i = 0; i < 5; ++i)
+        for (i = 0; i < 4; ++i)
         {
-            ht1633_set_num_leter(i, dis_str[i],1);
+            led7_set_display(i, dis_str[i]);
         }
 
+        led7_update_bitbuf();
     }
 }
 
@@ -149,16 +197,12 @@ void display_str( char *dis_str)
 void display_ui_power(char on_off)
 {
 	display_ui_clear();
-	ht1633_updata_display();
-
 	if(on_off==1)
 		display_str(power_on_str);
 	else if(on_off==0)
 		display_str(power_off_str);
 	else if(on_off==2)
 		display_str(power_wait_str);
-
-	ht1633_updata_display();
 }
 
 /****************************************************
@@ -169,7 +213,6 @@ void display_ui_power(char on_off)
 void display_ui_main_sys(char wm_mode)
 {
 	display_ui_clear();
-	ht1633_updata_display();
 	display_ui_device(wm_mode);
 	//dis_other_mode=1;
 	//ui_goback_source(400);
@@ -189,12 +232,12 @@ void display_ui_device(char wm_mode)
 	switch(wm_mode)
 	{
 		case SOURCE_SELECT_BT:
-			display_ui_icon(ICON_BT,bt_connected);
+			display_ui_icon(ICON_BT,1);
 			display_str(bt_str);
 			break;
 
 		case SOURCE_SELECT_USB:
-			display_ui_icon(ICON_USB,usb_online);
+			display_ui_icon(ICON_USB,1);
 			display_str(usb_str);
 			break;
 
@@ -204,17 +247,22 @@ void display_ui_device(char wm_mode)
 			break;
 
 		case SOURCE_SELECT_FM:
-			display_ui_icon(ICON_FM,1);
+			//display_ui_icon(ICON_FM,1);
 			display_str(fm_str);
 			break;
 
 		case SOURCE_SELECT_LINEIN:
-			//display_ui_icon(ICON_AUX,aux_online);
+			display_ui_icon(ICON_AUX,1);
 			display_str(aux_str);
 			break;
 
+		case SOURCE_SELECT_RCA:
+			display_ui_icon(ICON_AUX,1);
+			display_str(rca_str);
+			break;
+
 		case SOURCE_SELECT_COA:
-			// display_ui_icon(ICON_COA,1);
+			display_ui_icon(ICON_COA,1);
 			display_str(coa_str);
 			break;
 
@@ -224,12 +272,10 @@ void display_ui_device(char wm_mode)
 			break;
 
 		case SOURCE_SELECT_HDMI:
-			// display_ui_icon(ICON_HDMI,1);
+			display_ui_icon(ICON_HDMI,1);
 			display_str(hdmi_str);
 			break;
 	}
-
-	ht1633_updata_display();
 }
 
 
@@ -288,6 +334,10 @@ void display_ui_device(char wm_mode)
 			display_ui_aux();
 			break;
 
+		case SOURCE_SELECT_RCA:
+			display_ui_rca();
+			break;
+
 		case SOURCE_SELECT_SPDIFIN:
 			display_ui_op();
 			break;
@@ -300,7 +350,7 @@ void display_ui_device(char wm_mode)
 			display_ui_coaxial();
 			break;
 	}
-	ht1633_updata_display();
+	//ht1633_updata_display();
 }
 
 
@@ -395,53 +445,15 @@ void display_ui_vol(int vol)
 {
 	//int vol_i =(int)(vol / VOL_STEP);
 
-	char volume[5] = {0, 0, 0, 0,0};
-	volume[3] = vol / 10;
-	volume[4] =  vol % 10;
+	char volume[4] = {0, -1, 0, 0};
+
+	volume[0]  = NUM_U;
+	volume[2] = vol / 10;
+	volume[3] =  vol % 10;
 
 	display_ui_clear();
-	if(mute_state)
-	{
-		display_ui_icon(ICON_VOL_MUTE,1);
-		display_ui_icon(ICON_VOL_UMUTE,0);
-	}
-	else
-	{
-		display_ui_icon(ICON_VOL_MUTE,0);
-		display_ui_icon(ICON_VOL_UMUTE,1);
-	}
-
-	if((ui_source_select==SOURCE_SELECT_USB)||(ui_source_select==SOURCE_SELECT_SD)||(ui_source_select==SOURCE_SELECT_FM))
-	{
-		 if(ui_source_select==SOURCE_SELECT_USB)
-		{
-			volume[0]=NUM_U;
-			volume[1]=NUM_S;
-			volume[2]=NUM_B;
-		}
-		else  if(ui_source_select==SOURCE_SELECT_SD)
-		{
-			volume[0]=NUM_OFF;
-			volume[1]=NUM_S;
-			volume[2]=NUM_D;
-		}
-		else if(ui_source_select==SOURCE_SELECT_FM)
-		{
-			volume[0]=NUM_OFF;
-			volume[1]=NUM_F;
-			volume[2]=NUM_M;
-		}
-
-		dis_other_mode=1;
-		display_str(volume);
-		ht1633_updata_display();
-
-	}
-	else
-	{
-		dis_other_mode=1;
-		display_set_source(ui_source_select);
-	}
+	display_str(volume);
+	dis_other_mode=1;
 }
 
 /****************************************************
@@ -451,6 +463,7 @@ void display_ui_vol(int vol)
 ****************************************************/
 void display_mic_vol(int vol)
 {
+#if 0
 	//int vol_i =(int)(vol / VOL_STEP);
 
 	char volume[5] = {0, 0, 0, 0,0};
@@ -484,7 +497,7 @@ void display_mic_vol(int vol)
 		dis_other_mode=1;
 		display_set_source(ui_source_select);
 	}
-
+#endif
 }
 
 
@@ -495,18 +508,17 @@ void display_mic_vol(int vol)
 ****************************************************/
 void display_ui_usb(void)
 {
-	char dis[5]={NUM_U,NUM_S,NUM_B,NUM_N,NUM_O};
+	char dis[4]={NUM_U,NUM_5,NUM_B,NUM_OFF};
+	display_ui_icon(ICON_USB,1);
 	if(usb_online)
 	{
 		ui_update_music_time();
-		display_ui_icon(ICON_USB,usb_online);
 	}
 	else
 	{
 		display_str(dis);
-		display_ui_icon(ICON_USB,usb_online);
 	}
-	ht1633_updata_display();
+	//ht1633_updata_display();
 }
 
 
@@ -517,13 +529,13 @@ void display_ui_usb(void)
 ****************************************************/
 void display_ui_sd(void)
 {
-	char dis[5]={NUM_OFF,NUM_S,NUM_D,NUM_N,NUM_O};
+	char dis[4]={NUM_5,NUM_D,NUM_N,NUM_0};
 	if(sd_online)
 	{
 		ui_update_music_time();
 		//display_str(sd_str);
 		//display_ui_icon(ICON_SD,sd_online);
-		ht1633_updata_display();
+		//ht1633_updata_display();
 	}
 	else
 	{
@@ -545,14 +557,15 @@ void display_ui_bt(void)
 
 	//int vol_i =(int)( mix_vol / VOL_STEP);
 
-	char volume[5] = {NUM_B, NUM_t,NUM_OFF,0,0};
+	char volume[4] =  {NUM__, NUM_B, NUM_T, NUM__};
 
-	volume[3] = bt_mix_vol / 10;
-	volume[4] = bt_mix_vol % 10;
+	//volume[2] = bt_mix_vol / 10;
+	//volume[3] = bt_mix_vol % 10;
 
 	if(ui_source_select == SOURCE_SELECT_BT )
 	{
 		display_ui_clear();
+		display_ui_icon(ICON_BT,1);
 		if(bt_connected)
 		{
 			//已经连接
@@ -590,8 +603,8 @@ void display_ui_bt(void)
 			display_ui_icon(ICON_VOL_UMUTE,1);
 		}
 
-		display_ui_icon(ICON_BT,bt_connected);
-		ht1633_updata_display();
+		
+		//ht1633_updata_display();
 	}
 }
 
@@ -602,7 +615,7 @@ void display_ui_bt(void)
 ****************************************************/
 void display_ui_fm(unsigned char f_ch)
 {
-	char dis_buf[5];
+	char dis_buf[4];
 	display_ui_clear();
 	if(f_ch==0)
 	{
@@ -610,14 +623,12 @@ void display_ui_fm(unsigned char f_ch)
 		if(fmFrequency<1000)
 		{
 			dis_buf[0]=NUM_OFF;
-			dis_buf[4]=NUM_OFF;
 			dis_buf[1]=(char)((fmFrequency/100%10)>=0?(fmFrequency/100%10):NUM_OFF);
 			dis_buf[2]=(char)((fmFrequency/10%10)>=0?(fmFrequency/10%10):NUM_OFF);
 			dis_buf[3]=(char)((fmFrequency%10)>=0?(fmFrequency%10):NUM_OFF);
 		}
 		else
 		{
-			dis_buf[4]=NUM_OFF;
 			dis_buf[0]=(char)((fmFrequency/1000%10)>=0?(fmFrequency/1000%10):NUM_OFF);
 			dis_buf[1]=(char)((fmFrequency/100%10)>=0?(fmFrequency/100%10):NUM_OFF);
 			dis_buf[2]=(char)((fmFrequency/10%10)>=0?(fmFrequency/10%10):NUM_OFF);
@@ -628,25 +639,24 @@ void display_ui_fm(unsigned char f_ch)
 	{
 		if(Cur_Fre_Num < 100)
 		{
-			dis_buf[0]=NUM_OFF;
-			dis_buf[1]=NUM_C;
-			dis_buf[2]=NUM_H;
-			dis_buf[3]=(char)((Cur_Fre_Num/10%10)>=0?(Cur_Fre_Num/10%10):NUM_OFF);
-			dis_buf[4]=(char)((Cur_Fre_Num%10)>=0?(Cur_Fre_Num%10):NUM_OFF);
+			dis_buf[0]=NUM_C;
+			dis_buf[1]=NUM_H;
+			dis_buf[2]=(char)((Cur_Fre_Num/10%10)>=0?(Cur_Fre_Num/10%10):NUM_OFF);
+			dis_buf[3]=(char)((Cur_Fre_Num%10)>=0?(Cur_Fre_Num%10):NUM_OFF);
 		}
 		else if(Cur_Fre_Num == 100)
 		{
-			dis_buf[0]=NUM_OFF;
-			dis_buf[1]=NUM_C;
-			dis_buf[2]=NUM_H;
+			dis_buf[0]=NUM_C;
+			dis_buf[1]=NUM_H;
+			dis_buf[2]=NUM_0;
 			dis_buf[3]=NUM_0;
-			dis_buf[4]=NUM_0;
 		}
 		dis_other_mode=1;
 	}
 
-	display_str(dis_buf);
 	display_ui_icon(ICON_FM,1);
+	display_str(dis_buf);
+	
 
 	if(mute_state)
 	{
@@ -658,7 +668,7 @@ void display_ui_fm(unsigned char f_ch)
 		display_ui_icon(ICON_VOL_MUTE,0);
 		display_ui_icon(ICON_VOL_UMUTE,1);
 	}
-	ht1633_updata_display();
+	//ht1633_updata_display();
 }
 
 
@@ -669,16 +679,38 @@ void display_ui_fm(unsigned char f_ch)
 ****************************************************/
 void display_ui_aux(void)
 {
-	char volume[5] = {NUM_A, NUM_U,NUM_X,0,0};
+	char volume[4] = {NUM_A, NUM_U,NUM_H,NUM_1};
 	aux_online=true;
 
-	volume[3] = bt_mix_vol / 10;
-	volume[4] = bt_mix_vol % 10;
+	//volume[2] = bt_mix_vol / 10;
+	//volume[3] = bt_mix_vol % 10;
+	display_ui_icon(ICON_AUX,1);
 	display_str(volume);
-	//display_ui_icon(ICON_AUX,aux_online);
-	ht1633_updata_display();
+	
+	//ht1633_updata_display();
 
 }
+
+
+/****************************************************
+
+
+
+****************************************************/
+void display_ui_rca(void)
+{
+	char volume[4] = {NUM_A, NUM_U,NUM_H,NUM_2};
+	aux_online=true;
+
+	//volume[2] = bt_mix_vol / 10;
+	//volume[3] = bt_mix_vol % 10;
+	display_ui_icon(ICON_AUX,1);
+	display_str(volume);
+	
+	//ht1633_updata_display();
+
+}
+
 
 /****************************************************
 
@@ -687,14 +719,12 @@ void display_ui_aux(void)
 ****************************************************/
 void display_ui_op(void)
 {
-	char volume[5] = {NUM_O, NUM_P,NUM_T,0,0};
+	char volume[4] = {NUM__, NUM_0, NUM_P, NUM__};
 
-	volume[3] = bt_mix_vol / 10;
-	volume[4] = bt_mix_vol % 10;
-	display_str(volume);
-
+	//volume[2] = bt_mix_vol / 10;
+	//volume[3] = bt_mix_vol % 10;
 	display_ui_icon(ICON_OPTI,1);
-	ht1633_updata_display();
+	display_str(volume);
 }
 /****************************************************
 
@@ -703,14 +733,15 @@ void display_ui_op(void)
 ****************************************************/
 void display_ui_hdmi(void)
 {
-	char volume[5] = {NUM_H, NUM_D,NUM_OFF,0,0};
+	char volume[4] = {NUM__,NUM_H, NUM_D,NUM__,};
 
-	volume[3] = bt_mix_vol / 10;
-	volume[4] = bt_mix_vol % 10;
+	//volume[2] = bt_mix_vol / 10;
+	//volume[3] = bt_mix_vol % 10;
+	display_ui_icon(ICON_HDMI,1);
 	display_str(volume);
 
-	//display_ui_icon(ICON_HDMI,1);
-	ht1633_updata_display();
+	
+	//ht1633_updata_display();
 }
 
 
@@ -722,14 +753,15 @@ void display_ui_coaxial(void)
 
 	//int vol_i = (int)(mix_vol / VOL_STEP);
 
-	char volume[5] = {NUM_C, NUM_O,NUM_A,0,0};
+	char volume[4] = {NUM__,NUM_C, NUM_0,NUM__};
 	//printf("display_ui_coaxial vol = %d\n",vol_i);
-	volume[3] = bt_mix_vol/ 10;
-	volume[4] = bt_mix_vol % 10;
+	//volume[2] = bt_mix_vol/ 10;
+	//volume[3] = bt_mix_vol % 10;
+	display_ui_icon(ICON_COA,1);
 	display_str(volume);
 
-	//display_ui_icon(ICON_HDMI,1);
-	ht1633_updata_display();
+	
+	//ht1633_updata_display();
 }
 
 
@@ -790,7 +822,7 @@ void ui_update_music_time(void)
 		#endif
 
 		display_ui_clear();
-		display_ui_icon(ICON_USB,usb_online);
+		display_ui_icon(ICON_USB,1);
 
 		if(mute_state)
 		{
@@ -810,7 +842,8 @@ void ui_update_music_time(void)
 			//显示播放时间
 			char min = curtime / 60;
 			char sec = curtime % 60;
-			char display[5] = {NUM_OFF,min/10, min%10, sec/10, sec%10};
+			char display[4] = {min/10, min%10, sec/10, sec%10};
+			display_ui_icon(ICON_CLON_2,colon_showed);
 			display_str(display);
 			//  if( (player_info.player_stat == 2)||(player_info.player_stat == 3))	//////play
 			if( player_info.player_stat == 2)
@@ -822,19 +855,18 @@ void ui_update_music_time(void)
 			{
 				colon_showed = true;
 			}
-			display_ui_icon(ICON_CLON_2,colon_showed);
 			//printf("%s:min = %d, sec = %d\n", __func__,min,sec);
 		}
 		else
 		{
 			showed = false;
-			display_str(clear_str);
 			//隐藏两点
 			display_ui_icon(ICON_CLON_2,0);
+			display_str(clear_str);		
 		}
 		//}
 
-		ht1633_updata_display();
+		//ht1633_updata_display();
 	}
 #endif
 
@@ -849,16 +881,16 @@ void ui_update_music_time(void)
 void display_ui_input(unsigned int number)
 {
 	display_ui_clear();
-	char dis_buf[5];
+	char dis_buf[4];
 	if((number>=0)&&(number<=9999))
-	dis_buf[0]=NUM_OFF;
-	dis_buf[1]=(char)((number/1000%10)>=0?(number/1000%10):NUM_OFF);
-	dis_buf[2]=(char)((number/100%10)>=0?(number/100%10):NUM_OFF);
-	dis_buf[3]=(char)((number/10%10)>=0?(number/10%10):NUM_OFF);
-	dis_buf[4]=(char)((number%10)>=0?(number%10):NUM_OFF);
-
+	{
+		dis_buf[0]=(char)((number/1000%10)>=0?(number/1000%10):NUM_OFF);
+		dis_buf[1]=(char)((number/100%10)>=0?(number/100%10):NUM_OFF);
+		dis_buf[2]=(char)((number/10%10)>=0?(number/10%10):NUM_OFF);
+		dis_buf[3]=(char)((number%10)>=0?(number%10):NUM_OFF);
+	}
 	display_str(dis_buf);
-	ht1633_updata_display();
+	//ht1633_updata_display();
 	dis_other_mode=2;
 	//input_flag=1;
 }
@@ -874,6 +906,7 @@ void display_ui_input(unsigned int number)
 ************************************************************/
 void display_ui_mic(bool on_off)
 {
+#if 0
 	char dis_buf1[5]={NUM_M,NUM_I,NUM_C,NUM_O,NUM_N};
 	char dis_buf2[5]={NUM_M,NUM_I,NUM_C,NUM_O,NUM_F};
 
@@ -884,7 +917,7 @@ void display_ui_mic(bool on_off)
 	else
 		display_str(dis_buf2);
 	ht1633_updata_display();
-
+#endif
 }
 
 
@@ -896,6 +929,7 @@ void display_ui_mic(bool on_off)
 ************************************************************/
 void display_ui_movie(bool on_off)
 {
+#if 0
 	char dis_buf1[5]={NUM_M,NUM_O,NUM_U,NUM_O,NUM_N};
 	char dis_buf2[5]={NUM_M,NUM_O,NUM_U,NUM_O,NUM_F};
 
@@ -906,11 +940,13 @@ void display_ui_movie(bool on_off)
 		display_str(dis_buf2);
 	ht1633_updata_display();
 	dis_other_mode=1;
+#endif
 }
 
 
 void display_ui_bass_vol(int mode,int vol)
 {
+#if 0
 	char dis_buf1[5]={NUM_OFF,NUM_B,NUM_0,NUM_0,NUM_0};
 	char dis_buf2[5]={NUM_OFF,NUM_t,NUM_0,NUM_0,NUM_0};
 
@@ -942,7 +978,7 @@ void display_ui_bass_vol(int mode,int vol)
 	}
 
 	ht1633_updata_display();
-
+#endif
 }
 
 
@@ -955,22 +991,22 @@ void display_ui_bass_vol(int mode,int vol)
 ************************************************************/
 void dis_ui_updata_program(char on_off)
 {
-	char dis_buf1[5]={NUM_U,NUM_P,NUM_D,NUM_A,NUM__};
-	char dis_buf2[5]={NUM__,NUM_O,NUM_K,NUM__,NUM__};
+	char dis_buf1[4]={NUM_U,NUM_P,NUM_D,NUM_A};
+	char dis_buf2[4]={NUM__,NUM_0,NUM_U,NUM__ };
 
 	display_ui_clear();
 	if(on_off==0)
 		display_str(dis_buf1);
 	else
 		display_str(dis_buf2);
-	ht1633_updata_display();
+	//ht1633_updata_display();
 }
 
 
 void display_ui_version(int ver)
 {
-	char dis_buf1[5]={NUM__,NUM_U,0,0,NUM__};
-	char dis_buf2[5]={NUM__,NUM_U,0,0,NUM__};
+	char dis_buf1[4]={NUM_OFF,NUM_U,0,0};
+	char dis_buf2[4]={NUM_OFF,NUM_U,0,0};
 
 	display_ui_clear();
 	if(ver==0)
@@ -987,23 +1023,26 @@ void display_ui_version(int ver)
 	}
 	display_ui_icon(ICON_DOT,1);
 
-	ht1633_updata_display();
+	//ht1633_updata_display();
 }
 
 
 void display_ui_init(void)
 {
-	char dis_buf[5]={NUM_R,NUM_S,NUM_t,NUM_OFF,NUM_OFF};
+#if 0
+	char dis_buf[5]={NUM_R,NUM_5,NUM_t,NUM_OFF,NUM_OFF};
 
 	display_ui_clear();
 
 	display_str(dis_buf);
 
-	ht1633_updata_display();
+	//ht1633_updata_display();
+#endif
 }
 
 void display_ui_ledtest(void)
 {
+#if 0
 	char hor_dis_buf[5]={NUM_HOR,NUM_HOR,NUM_HOR,NUM_HOR,NUM_HOR};
 	char ver_dis_buf[5]={NUM_VER,NUM_VER,NUM_VER,NUM_VER,NUM_VER};
 
@@ -1040,15 +1079,17 @@ void display_ui_ledtest(void)
 			break;
 
 	}
+#endif
 }
 
-char bt_no_vol[5] = {NUM_B, NUM_t,NUM_OFF,NUM_OFF,NUM_OFF};
-char aux_no_vol[5] = {NUM_A, NUM_U,NUM_X,NUM_OFF,NUM_OFF};
-char opt_no_vol[5] ={NUM_O, NUM_P,NUM_T,NUM_OFF,NUM_OFF};
-char hdmi_no_vol[5] ={NUM_H, NUM_D,NUM_OFF,NUM_OFF,NUM_OFF};
-char coa_no_vol[5] ={NUM_C, NUM_O,NUM_A,NUM_OFF,NUM_OFF};
-char fm_no_vol[5] ={NUM_OFF, NUM_F,NUM_M,NUM_OFF,NUM_OFF};
-char usb_no_vol[5] ={NUM_U, NUM_S,NUM_B,NUM_OFF,NUM_OFF};
+char bt_no_vol[4] = {NUM_B, NUM_T,NUM_OFF,NUM_OFF};
+char aux_no_vol[4] = {NUM_A, NUM_U,NUM_OFF,NUM_OFF};
+char rca_no_vol[4] = {NUM_C, NUM_A,NUM_OFF,NUM_OFF};
+char opt_no_vol[4] ={NUM_0, NUM_P,NUM_OFF,NUM_OFF};
+char hdmi_no_vol[4] ={NUM_H, NUM_D,NUM_OFF,NUM_OFF};
+char coa_no_vol[4] ={NUM_C, NUM_0,NUM_OFF,NUM_OFF};
+char fm_no_vol[4] ={NUM_T,NUM_N,NUM_OFF,NUM_OFF};
+char usb_no_vol[4] ={NUM_U, NUM_5,NUM_OFF,NUM_OFF};
 
 typedef void (*func_mode)(void);
 struct mute_dispui_st
@@ -1062,6 +1103,7 @@ struct mute_dispui_st
 	{SOURCE_SELECT_SPDIFIN,opt_no_vol,display_ui_op},
 	{SOURCE_SELECT_USB,usb_no_vol,display_ui_usb},
 	{SOURCE_SELECT_LINEIN,aux_no_vol,display_ui_aux},
+	{SOURCE_SELECT_RCA,rca_no_vol,display_ui_aux},
 	{SOURCE_SELECT_HDMI,hdmi_no_vol,display_ui_hdmi},
 	{SOURCE_SELECT_COA,coa_no_vol,display_ui_coaxial},
 	{SOURCE_SELECT_FM,fm_no_vol,display_ui_fm},
@@ -1072,10 +1114,10 @@ void display_ui_mute(void)
 	int i;
 	static bool isDisp = true;
 	char *str_no_vol = NULL;
-	char volume[5] = {NUM_B, NUM_t,NUM_OFF,0,0};
+	char volume[4] = {NUM_B, NUM_T,0,0};
 
-	volume[3] = bt_mix_vol / 10;
-	volume[4] = bt_mix_vol % 10;
+	volume[2] = bt_mix_vol / 10;
+	volume[3] = bt_mix_vol % 10;
 
 	for(i=0;i<7;i++)
 	{
@@ -1134,7 +1176,7 @@ void display_ui_mute(void)
 
 					isDisp = false;
 				}
-				ht1633_updata_display();
+				//ht1633_updata_display();
 			}
 			else if((mute_state == false)&&(mute_dis_flag ==  true))
 			{
@@ -1149,6 +1191,7 @@ void display_ui_mute(void)
 
 void display_ui_enter_tre_bass(int mode)
 {
+#if 0
 	char treble_buf[5]={NUM_OFF,NUM_t,NUM_0,NUM_1,NUM_OFF};
 	char bass_buf[5]={NUM_OFF,NUM_B,NUM_0,NUM_1,NUM_OFF};
 
@@ -1164,17 +1207,18 @@ void display_ui_enter_tre_bass(int mode)
 
 	ht1633_updata_display();
 	dis_other_mode=2;
+#endif
 }
 
 void display_ui_usb_folder(int loc)
 {
 
-	char folder_buf1[5] = {NUM_U, 0,0,0,0};
-	char folder_buf2[5] = {NUM_U, NUM_0,NUM_0,NUM_0,NUM_1};
+	char folder_buf1[4] = {NUM_U, 0,0,0};
+	char folder_buf2[4] = {NUM_U, NUM_0,NUM_0,NUM_1};
 
-	folder_buf1[2] = (folder_index_dis+1) / 100;
-	folder_buf1[3] =((folder_index_dis+1)% 100)/10;
-	folder_buf1[4] = (folder_index_dis+1)%10;
+	folder_buf1[1] = (folder_index_dis+1) / 100;
+	folder_buf1[2] =((folder_index_dis+1)% 100)/10;
+	folder_buf1[3] = (folder_index_dis+1)%10;
 
 	if(ui_source_select == SOURCE_SELECT_USB )
 	{
@@ -1188,25 +1232,25 @@ void display_ui_usb_folder(int loc)
 			display_str(folder_buf2);
 		}
 
-		ht1633_updata_display();
+		//ht1633_updata_display();
 		dis_other_mode=1;
 	}
 }
 
 void display_ui_usb_number(int num)
 {
-	char num_buf1[5] = {NUM_U, 0,0,0,0};
+	char num_buf1[4] = {NUM_U, 0,0,0};
 
-	num_buf1[1] = (num+1) / 1000;
-	num_buf1[2] = ((num+1) %1000)/ 100;
-	num_buf1[3] =((num+1)% 100)/10;
-	num_buf1[4] = (num+1)%10;
+	num_buf1[0] = (num+1) / 1000;
+	num_buf1[1] = ((num+1) %1000)/ 100;
+	num_buf1[2] =((num+1)% 100)/10;
+	num_buf1[3] = (num+1)%10;
 
 	if(ui_source_select == SOURCE_SELECT_USB )
 	{
 		display_ui_clear();		
 		display_str(num_buf1);		
-		ht1633_updata_display();
+		//ht1633_updata_display();
 		dis_other_mode=1;
 	}
 }
@@ -1250,12 +1294,14 @@ void display_ui_fm_manual_save(void)
 ************************************************************/
 void display_ui_eq_power_test(void)
 {
+#if 0
 	char dis_buf[5]={NUM_B,NUM_Y,NUM_P,NUM_A,NUM_S};
 
 	display_ui_clear();
 	display_str(dis_buf);
 	ht1633_updata_display();
 	dis_other_mode=10;
+#endif
 }
 
 

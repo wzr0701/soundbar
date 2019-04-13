@@ -186,6 +186,7 @@ extern int bt_wait_cnt;
 extern char mic_on_flag;
 extern bool mic_detect_online;
 
+extern char eq_mode;
 
 unsigned char power_on_usb_sd_auto_play;
 
@@ -340,6 +341,7 @@ void  save_trebass_level(int mode)
 ******************************************/
 void  read_trebass_level(int mode)
 {
+#if 0
 	unsigned char temp;
 	
 	if(mode == 0)//bass
@@ -371,7 +373,7 @@ void  read_trebass_level(int mode)
 		
 	}
 	//printf("%s:treble_level = %d--- bass_level = %d.\n",  __func__, treble_level,bass_level);
-
+#endif
 }
 
 
@@ -525,6 +527,7 @@ void ui_handle_power(int power_on_off)
 		}
 
 #endif
+
 		if (NULL == wdtimer_display_updata)
 		{
 			wdtimer_display_updata = wd_create();
@@ -534,13 +537,6 @@ void ui_handle_power(int power_on_off)
 		{
 			wdtimer_pa_station_detect = wd_create();
 		}
-
-#if 0
-		if(NULL == wdtimer_enter_testmode_detect)
-		{
-			wdtimer_enter_testmode_detect = wd_create();
-		}
-#endif
 
 		if(NULL == wdtimer_change_mode_unmute)
 		{
@@ -559,25 +555,23 @@ void ui_handle_power(int power_on_off)
 		//////////////////////////////////////////////
 
 		handle_local(SEARCH_USB_NAME);
-		//  led7_open();
-		pa_io_ret_set(true);
+		led7_open();
+		display_ui_power(1);
+		usleep(500000);
 		pa_static_check();
-		//sl_func_add();
 		dis_play_update();
-		enter_othermode_check();
-		change_mode_unmute();
+		//enter_othermode_check();
+		//change_mode_unmute();
 
-		read_player_info();
-		read_mix_vol();
-		read_trebass_level(BASS_MODE);
-		read_trebass_level(TREBLE_MODE);	
-		set_bass_treble_vol(BASS_MODE,bass_vol,0);
-		set_bass_treble_vol(TREBLE_MODE,treble_vol,0);
-		//ui_source_select = SOURCE_SELECT_START;
+		//set_bass_treble_vol(BASS_MODE,bass_vol,0);
+		//set_bass_treble_vol(TREBLE_MODE,treble_vol,0);
+		
+		ui_source_select = SOURCE_SELECT_BT;
 		ui_handle_mode(ui_source_select, false);
-		bt_cmd_source_select(ui_source_select);
-		bt_cmd_current_bass(bass_vol); //bass
-		bt_cmd_current_treble(treble_vol); //treble
+		
+		//bt_cmd_source_select(ui_source_select);
+		//bt_cmd_current_bass(bass_vol); //bass
+		//bt_cmd_current_treble(treble_vol); //treble
 
 #if 0
 		usleep(500000);
@@ -629,13 +623,7 @@ void ui_handle_power(int power_on_off)
 		{
 			wd_cancel(wdtimer_pa_station_detect );
 		}
-#if 0
-		if(wdtimer_enter_testmode_detect != NULL)
-		{
-			wd_cancel(wdtimer_enter_testmode_detect );
-		}
 
-#endif
 		if(wdtimer_change_mode_unmute != NULL)
 		{
 			wd_cancel(wdtimer_change_mode_unmute );
@@ -653,7 +641,7 @@ void ui_handle_power(int power_on_off)
 		//ui_source_select = SOURCE_SELECT_START;
 
 		//关闭LED 7段屏
-		//led7_off();
+		led7_off();
 
 		display_ui_power(2);
 		usleep(500000);
@@ -1204,7 +1192,7 @@ void bt_cmd_movie_status(char status)
 void bt_cmd_current_mainvol(void)
 {
     //通知bt当前的音量
-    handle_bt_cmd(AT_CUR_MAINVOL, bt_mix_vol);
+    handle_bt_cmd(AT_SET_VOL, bt_mix_vol);
 	usleep(60000);
 }
 
@@ -1238,6 +1226,19 @@ void bt_cmd_current_micvol(void)
 }
 
 
+void bt_cmd_eq_set(void)
+{
+    handle_bt_cmd(AT_EQ, eq_mode);
+	usleep(60000);
+}
+
+void bt_cmd_woofer_pair(void)
+{
+    handle_bt_cmd(AT_WOOFER_PAIR, 0);
+	usleep(60000);
+}
+
+
 
 
 void bt_cmd_source_select(int source)
@@ -1262,6 +1263,10 @@ void bt_cmd_source_select(int source)
 
 		case SOURCE_SELECT_LINEIN:
 			handle_bt_cmd(AT_MODE_AUX, 0);
+			break;
+
+		case SOURCE_SELECT_RCA:
+			handle_bt_cmd(AT_MODE_RCA, 0);
 			break;
 
 		case SOURCE_SELECT_SPDIFIN:
@@ -1629,6 +1634,9 @@ void set_ui_media(int source)
 		case SOURCE_SELECT_LINEIN:
 			playerInfo.ui_media = MEDIA_LINEIN;
 			break;
+		case SOURCE_SELECT_RCA:
+			playerInfo.ui_media = MEDIA_LINEIN;
+			break;
 		case SOURCE_SELECT_SPDIFIN:
 			playerInfo.ui_media = MEDIA_SPDIF;
 			break;
@@ -1726,28 +1734,12 @@ void ui_handle_file_load(int total_num, int folder_num, char * url)
 	int file_index_temp;
     if(ui_source_select == SOURCE_SELECT_USB && strcmp(SEARCH_USB_NAME, url) == 0)
     {
-		if(usb_last_total_num == -1)
-		{
-			file_index_temp = read_usb_num();
-			if(file_index_temp != -1)
-			{
-				usb_last_file_index = file_index_temp;
-				usb_playtime = 0;
-			}
-			else
-			{
-				usb_last_file_index = 0;
-	            usb_playtime = 0;
-			}
-		}
-		else
-		{
-			if(usb_last_total_num != total_num || usb_last_folder_num != folder_num)
-	        {
-	            usb_last_file_index = 0;
-	            usb_playtime = 0;
-	        }
-		}
+	
+		if(usb_last_total_num != total_num || usb_last_folder_num != folder_num)
+        {
+            usb_last_file_index = 0;
+            usb_playtime = 0;
+        }	
         usb_last_total_num = total_num;
         usb_last_folder_num = folder_num;
 		dis_other_mode=1;
@@ -2415,14 +2407,14 @@ void ui_handle_mute(void)
 			save_usb_play_time();
 		}
 		
-		if ((ui_source_select == SOURCE_SELECT_FM)&&(app_mute_flag == false))
-		{
-			handle_bt_cmd(AT_STOP, 0);
-		}
-		app_mute_flag = false;
+		//if ((ui_source_select == SOURCE_SELECT_FM)&&(app_mute_flag == false))
+		//{
+		//	handle_bt_cmd(AT_STOP, 0);
+		//}
+		//app_mute_flag = false;
 
-		take_micmute_flag = true;
-		mic_open(false);
+		//take_micmute_flag = true;
+		//mic_open(false);
 
         #if BYPASS_MODE
         if(ui_source_select != SOURCE_SELECT_SPDIFIN)
@@ -2454,7 +2446,7 @@ void ui_handle_mute(void)
 			set_adc_channel_vol(1,(int)mix_vol);
 		}
 		#endif
-		set_channel_mixvol_by_mode(ui_source_select);
+		//set_channel_mixvol_by_mode(ui_source_select);
         //player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
         mute_state = UNMUTE;
        	pa_mute_ctrl(false);
@@ -2470,12 +2462,13 @@ void ui_handle_mute(void)
 			save_usb_play_time();
 		}
 
-		if ((ui_source_select == SOURCE_SELECT_FM)&&(app_mute_flag == false))
-		{
-			handle_bt_cmd(AT_PLAY, 0);
-		}
-		app_mute_flag = false;
+		//if ((ui_source_select == SOURCE_SELECT_FM)&&(app_mute_flag == false))
+		//{
+		//	handle_bt_cmd(AT_PLAY, 0);
+		//}
+		//app_mute_flag = false;
 
+		/*
 		if(take_micmute_flag ==        true)
 		{
 			take_micmute_flag = false;
@@ -2495,6 +2488,7 @@ void ui_handle_mute(void)
 				mic_open(false);
 			}
 		}
+		*/
 		
 		
         #if BYPASS_MODE
@@ -2593,6 +2587,7 @@ void ui_handle_vol_set(int vol)
 
     if(vol >= 0 && vol <= 30)
     {
+#if 0
 		if (mute_state == MUTE)
 		{
 			ui_handle_mute();
@@ -2624,6 +2619,7 @@ void ui_handle_vol_set(int vol)
         //显示音量信息
 		display_ui_vol(vol);
 		save_mix_vol();
+#endif
     }
 }
 
@@ -2737,115 +2733,32 @@ void ui_handle_vol_long_press_up(void)
 static void ui_process_vol_dec(void)
 {
 	int vol_temp = 0;
-    //mix_vol -= VOL_STEP;
-    //if(mix_vol <= 0)
-    //{
-        //mix_vol = 0;
-    //}
-    if(enter_tre_set == true)
-    {
-		tre_bass_cnt = 0;
-		treble_vol--;
-		if(treble_vol <= BASS_TREBLE_LEVEL_MIN)
-		{
-			treble_vol = BASS_TREBLE_LEVEL_MIN;
-		}
-		printf("UI_CMD_EQ_TRB_SUB:%d\n",treble_vol);
-		set_bass_treble_vol(TREBLE_MODE,treble_vol,1);
-		save_trebass_level(TREBLE_MODE);
-		bt_cmd_current_treble(treble_vol); //treble
-		//display_ui_bass_vol(2,treble_vol);
-	}
-	else  if(enter_bass_set == true)
-    {
-		tre_bass_cnt = 0;
-		bass_vol--;
-		if(bass_vol <= BASS_TREBLE_LEVEL_MIN)
-		{
-			bass_vol = BASS_TREBLE_LEVEL_MIN;
-		}
-		printf("UI_CMD_EQ_BASS_SUB:%d\n",bass_vol);
-		set_bass_treble_vol(BASS_MODE,bass_vol,1);
-		save_trebass_level(BASS_MODE);
-		bt_cmd_current_bass(bass_vol); //bass
-		//display_ui_bass_vol(0,bass_vol);
-	}
-	else
+    
+   
+	if (mute_state == MUTE)
 	{
-		if (mute_state == MUTE)
-		{
-			ui_handle_mute();
-		}
-		
-		bt_mix_vol -= 1;
-
-		if(bt_mix_vol <=0)
-		{
-			bt_mix_vol = 0;
-			take_micmute_flag = true;
-			mic_open(false);
-		}
-			
-
-		select_mixvol_table();
-
-		bt_cmd_current_mainvol();
-#if 1
-		if (ui_source_select == SOURCE_SELECT_SPDIFIN ||
-			ui_source_select == SOURCE_SELECT_USB ||
-			ui_source_select == SOURCE_SELECT_SD ||
-			ui_source_select == SOURCE_SELECT_HDMI ||
-			ui_source_select == SOURCE_SELECT_COA)
-		{
-			set_adc_channel_vol(3,(int)mix_vol);
-		}
-		else if (ui_source_select == SOURCE_SELECT_BT)
-		{
-			set_adc_channel_vol(2,(int)mix_vol);
-		}
-		else if (ui_source_select == SOURCE_SELECT_FM ||
-			ui_source_select == SOURCE_SELECT_LINEIN)
-		{
-			set_adc_channel_vol(1,(int)mix_vol);
-		}
-#else
-		/*直接调channel音量，会导致功率过早到达额定功率，所以固定channel音量，调节总音量*/
-		player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
-#endif
-
-		if(ui_source_select == SOURCE_SELECT_HDMI)
-		{
-			sc8836_action_hdmi_soundbar_adj_tv_vol();
-		}
-		
-		printf("%s:mix_vol = %d\n", __func__, mix_vol);
-
-
-		display_ui_vol(bt_mix_vol);
-
-		save_mix_vol();
-
-	    #if BYPASS_MODE
-	    bypass_in_vol -= BYPASS_VOL_IN_STEP;
-	    if(bypass_in_vol <= BYPASS_VOL_IN_MIN || mix_vol < VOL_STEP)
-	    {
-	        bypass_in_vol = BYPASS_VOL_IN_MIN;
-	        if(ui_source_select != SOURCE_SELECT_SPDIFIN)
-	        {
-	            silan_set_linebypass_disable();
-	        }
-	    }
-	    else
-	    {
-	        if(ui_source_select != SOURCE_SELECT_SPDIFIN)
-	        {
-	            float vol = bypass_in_vol + bypass_vol_offset;
-	            silan_set_hardware_gilr_volume(vol, vol);
-	        }
-	    }
-	    printf("%s:bypass_in_vol=%d\n", __func__, bypass_in_vol);
-	    #endif
+		ui_handle_mute();
 	}
+	
+	bt_mix_vol -= 1;
+
+	if(bt_mix_vol <=0)
+	{
+		bt_mix_vol = 0;
+	}
+		
+	bt_cmd_current_mainvol();
+
+
+	if(ui_source_select == SOURCE_SELECT_HDMI)
+	{
+		sc8836_action_hdmi_soundbar_adj_tv_vol();
+	}
+	
+	printf("%s:mix_vol = %d\n", __func__, mix_vol);
+
+
+	display_ui_vol(bt_mix_vol);
 
 	if (ui_source_select == SOURCE_SELECT_USB)
 	{
@@ -2869,147 +2782,28 @@ static void ui_process_vol_dec(void)
  ****************************************************************************/
 static void ui_process_vol_inc(void)
 {
-	int vol_temp = 0;
-
-	if(enter_tre_set == true)
-    {
-		tre_bass_cnt = 0;
-
-		treble_vol++;
-		if(treble_vol >= BASS_TREBLE_LEVEL_MAX)
-		{
-			treble_vol = BASS_TREBLE_LEVEL_MAX;
-		}
-		printf("UI_CMD_EQ_TRB_ADD:%d\n",treble_vol);
-		set_bass_treble_vol(TREBLE_MODE,treble_vol,1);
-		save_trebass_level(TREBLE_MODE);
-		bt_cmd_current_treble(treble_vol); //treble
-		//display_ui_bass_vol(2,treble_vol);
-	}
-	else  if(enter_bass_set == true)
-    {
-		tre_bass_cnt = 0;
-
-		bass_vol++;
-		if(bass_vol >= BASS_TREBLE_LEVEL_MAX)
-		{
-			bass_vol = BASS_TREBLE_LEVEL_MAX;
-		}
-		printf("UI_CMD_EQ_BASS_ADD:%d\n",bass_vol);
-		set_bass_treble_vol(BASS_MODE,bass_vol,1);
-		save_trebass_level(BASS_MODE);
-		bt_cmd_current_bass(bass_vol); //bass
-		//display_ui_bass_vol(0,bass_vol);
-	}
-	else
+	
+	if (mute_state == MUTE)
 	{
-		//mix_vol += VOL_STEP;
-	    //if(mix_vol >= 100)
-	    //{
-	    //    mix_vol = 100;
-	    //}
-
-		//bt_mix_vol += 1;
-		//if(bt_mix_vol >=60)
-		//	bt_mix_vol = 60;
-		if (mute_state == MUTE)
-		{
-			ui_handle_mute();
-		}
-
-		bt_mix_vol += 1;
-
-		if(bt_mix_vol >= MIX_LEV_CNT)
-			bt_mix_vol = MIX_LEV_CNT;
-
-		select_mixvol_table();
-
-		bt_cmd_current_mainvol();
-#if 1
-
-		if (ui_source_select == SOURCE_SELECT_SPDIFIN ||
-			ui_source_select == SOURCE_SELECT_USB ||
-			ui_source_select == SOURCE_SELECT_SD ||
-			ui_source_select == SOURCE_SELECT_HDMI ||
-			ui_source_select == SOURCE_SELECT_COA)
-		{
-			set_adc_channel_vol(3,mix_vol);
-		}
-		else if (ui_source_select == SOURCE_SELECT_BT)
-		{
-			set_adc_channel_vol(2,mix_vol);
-		}
-		else if (ui_source_select == SOURCE_SELECT_FM ||
-			ui_source_select == SOURCE_SELECT_LINEIN)
-		{
-			set_adc_channel_vol(1,mix_vol);
-		}
-#else
-		player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
-#endif
-
-		if(take_micmute_flag ==        true)
-		{
-			take_micmute_flag = false;
-			if(mic_on_flag)
-			{
-				if(mic_detect_online)
-				{
-					mic_open(true);
-				}
-				else
-				{
-					mic_open(false);
-				}
-			}
-			else
-			{
-				mic_open(false);
-			}
-		}
-		
-		if(ui_source_select == SOURCE_SELECT_HDMI)
-		{
-			sc8836_action_hdmi_soundbar_adj_tv_vol();
-		}
-
-		printf("%s:mix_vol = %d\n", __func__, mix_vol);
-
-		display_ui_vol(bt_mix_vol);
-
-		save_mix_vol();
-
-	    #if BYPASS_MODE
-	    if(bypass_in_vol == BYPASS_VOL_IN_MIN)
-	    {
-	        if(ui_source_select != SOURCE_SELECT_SPDIFIN)
-	        {
-	            silan_set_linebypass_enable();
-	        }
-	    }
-
-	    bypass_in_vol += BYPASS_VOL_IN_STEP;
-	    if(bypass_in_vol > BYPASS_VOL_IN_MAX || mix_vol > 100)
-	    {
-	        bypass_in_vol = BYPASS_VOL_IN_MAX;
-	        if(ui_source_select != SOURCE_SELECT_SPDIFIN)
-	        {
-	            float vol = bypass_in_vol + bypass_vol_offset;
-	            silan_set_hardware_gilr_volume(vol, vol);
-	        }
-	    }
-	    else
-	    {
-	        if(ui_source_select != SOURCE_SELECT_SPDIFIN)
-	        {
-	            float vol = bypass_in_vol + bypass_vol_offset;
-	            silan_set_hardware_gilr_volume(vol, vol);
-	        }
-	    }
-	    printf("%s:bypass_in_vol=%d\n", __func__, bypass_in_vol);
-	    #endif
+		ui_handle_mute();
 	}
 
+	bt_mix_vol += 1;
+
+	if(bt_mix_vol >= MIX_LEV_CNT)
+		bt_mix_vol = MIX_LEV_CNT;
+
+	bt_cmd_current_mainvol();
+
+	if(ui_source_select == SOURCE_SELECT_HDMI)
+	{
+		sc8836_action_hdmi_soundbar_adj_tv_vol();
+	}
+
+	printf("%s:mix_vol = %d\n", __func__, mix_vol);
+
+	display_ui_vol(bt_mix_vol);
+	
 	if (ui_source_select == SOURCE_SELECT_USB)
 	{
 		save_usb_play_time();

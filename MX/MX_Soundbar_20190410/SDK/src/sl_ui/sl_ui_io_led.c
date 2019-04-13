@@ -93,8 +93,6 @@ extern int ui_source_select;
 {
 	int value=0xffff;
 #if 1
-	pa_mute_ctrl(true);
-
 	REG32(KSEG1(SILAN_PADMUX_CTRL))=0;
 	REG32(KSEG1(SILAN_PADMUX_CTRL2))=0;
 	value = REG32(KSEG1(SILAN_PADMUX_CTRL));
@@ -102,27 +100,16 @@ extern int ui_source_select;
 	value = REG32(KSEG1(SILAN_PADMUX_CTRL2));
 	printf("SILAN_PADMUX_CTRL2----int=0x%x\n", value);
 
-	/////////////////////////////////////////////////////////
-	#if 1
-	value = REG32(KSEG1(SILAN_PADMUX_CTRL));
-	value &= ~(1 << SILAN_PADMUX_SDMMC);
-	REG32(KSEG1(SILAN_PADMUX_CTRL)) = value;
-
-	zhuque_bsp_gpio_set_mode(26, GPIO_OUT, PULLING_NONE);
-	zhuque_bsp_gpio_set_value(26, GPIO_VALUE_LOW);
-	#endif
-
-	///////////////////////////////////////////////////////
+	pa_mute_ctrl(true);
 
 	value = REG32(KSEG1(SILAN_PADMUX_CTRL));
+
+	//Debug UART2
 	value |= (1 << SILAN_PADMUX_UART2);
 
 	/////////////////////////////////////////
-	//IIS-------IN
+	//IIS-------IN  //IIS CLK  GPIO1_1 GPIO1_2
 	value |= (1 << SILAN_PADMUX_IISADC);
-	value |= (1 << SILAN_PADMUX_IISADC_FD0);
-	//value &=~ (1 << SILAN_PADMUX_IISADC_FD1);
-	// value &= ~(1 << SILAN_PADMUX_IISADC_FD2);
 
 	///II2----OUT
 	value |= (1 << SILAN_PADMUX_IISDAC_MCLK);
@@ -142,25 +129,19 @@ extern int ui_source_select;
 
 	///////////////////////////////////////////////////////
 
-	///////////////////////////////////////////////////////
-	value = REG32(KSEG1(SILAN_PADMUX_CTRL2));
-
-	value |= (1 << SILAN_PADMUX2_IISADC_FD1_CH2);
-	value |= (1 << SILAN_PADMUX2_IISADC_FD2_CH2);
-
-	REG32(KSEG1(SILAN_PADMUX_CTRL2)) = value;
-	//////////////////////////////////////////////////////
-
 	//////////////////////////////////////////////////////
 	value = REG32(KSEG1(SILAN_PADMUX_CTRL));
 	printf("SILAN_PADMUX_CTRL=0x%x\n", value);
 	value = REG32(KSEG1(SILAN_PADMUX_CTRL2));
 	printf("SILAN_PADMUX_CTRL2=0x%x\n", value);
 
-
-	zhuque_bsp_gpio_set_mode(MIC_DET_PIN, GPIO_IN, PULLING_DOWN);
-	zhuque_bsp_gpio_set_mode(PA_CLIP_OTW_PIN, GPIO_IN, PULLING_HIGH);
 	zhuque_bsp_gpio_set_mode(SL_HDMI_CEC_DET_PIN, GPIO_IN, PULLING_HIGH);
+
+	zhuque_bsp_gpio_set_mode(PA_MUTE_PIN, GPIO_OUT, PUSH_PULL);
+
+	zhuque_bsp_gpio_set_mode(SW1_4052_PIN, GPIO_OUT, PUSH_PULL);
+	zhuque_bsp_gpio_set_mode(SW2_4052_PIN, GPIO_OUT, PUSH_PULL);
+	
 
 #endif
 
@@ -178,6 +159,55 @@ void io_early_set(void)
     padmux_init();
     pa_mute_ctrl(true);
 }
+
+/****************************************************************************
+ * Name: switch_4052_function
+ *
+ * Description:
+ *    通过IO口控制4052切换声音输出
+ *
+ * Parameters:
+ *    function  switch_4052类型，指定要切换到AUX1、AUX2还是FM
+ *
+ * Returned Value:
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+void switch_4052_function(int function)
+{
+	//SW1:B SW2:A
+	int sw1, sw2;
+
+	switch (function)
+	{
+		case FM_4052:
+			sw1 = 0;
+			sw2 = 0;
+			printf("%s:choose FM.\n",__func__);
+			break;
+		case RCA_4052://RCA        SW1:B --- 0   SW2:A --- 1
+			sw1 = 0;
+			sw2 = 1;
+			printf("%s:choose RCA.\n",__func__);
+			break;
+		case AUX_4052://AUX        SW1:B --- 1    SW2:A --- 0
+			sw1 = 1;
+			sw2 = 0;
+			printf("%s:choose AUX.\n",__func__);
+			break;
+		case NONE_4052:
+			sw1 = 1;
+			sw2 = 1;
+			printf("%s:choose NO.\n",__func__);
+		default:
+			break;
+	}
+
+	zhuque_bsp_gpio_set_value(SW1_4052_PIN, sw1);
+	zhuque_bsp_gpio_set_value(SW2_4052_PIN, sw2);
+}
+
 
 
 
@@ -200,7 +230,7 @@ void pa_mute_ctrl(bool mute)
     const int pin = PA_MUTE_PIN;
     zhuque_bsp_gpio_set_mode(pin, GPIO_OUT, PUSH_PULL);
 
-#if(PA_MUTE_HIGH==1)
+#if(PA_MUTE_HIGH==0)
     zhuque_bsp_gpio_set_value(pin, mute?GPIO_VALUE_HIGH:GPIO_VALUE_LOW);
 #else
     zhuque_bsp_gpio_set_value(pin, mute?GPIO_VALUE_LOW:GPIO_VALUE_HIGH);
@@ -209,25 +239,6 @@ void pa_mute_ctrl(bool mute)
 }
 
 
-/****************************************************************************
- * Name: bt_mute_detect
- *
- * Description:
- *    蓝牙mute检测
- *
- * Parameters:
- *
- * Returned Value:
- *
- * Assumptions:
- *
- ****************************************************************************/
-void bt_power_crt(bool on_off)
-{
-    const int pin = BT_POWER_CRT_PIN;
-    zhuque_bsp_gpio_set_mode(pin, GPIO_OUT, PULLING_HIGH);
-    zhuque_bsp_gpio_set_value(pin, on_off?GPIO_VALUE_HIGH:GPIO_VALUE_LOW);
-}
 
 
 
@@ -253,25 +264,7 @@ void bt_power_crt(bool on_off)
 
 void sys_power_control(void)
 {
-	//printf("%s:hdmi power off\n", __func__);
-    const int pin = SYS_POWER_CON_PIN;
-    zhuque_bsp_gpio_set_mode(pin, GPIO_OUT, PULLING_NONE);
-    zhuque_bsp_gpio_set_value(pin, GPIO_VALUE_HIGH);
-	usleep(500000);
-	zhuque_bsp_gpio_set_value(pin, GPIO_VALUE_LOW);
-}
-
-
-/****************************************************************
-
-
-
-
-******************************************************************/
-void pa_io_ret_set(bool on_off)
-{
-    zhuque_bsp_gpio_set_mode(PA_RESET_PIN, GPIO_OUT, PULLING_HIGH);
-    zhuque_bsp_gpio_set_value(PA_RESET_PIN, on_off?GPIO_VALUE_HIGH:GPIO_VALUE_LOW);
+	
 }
 
 
@@ -289,9 +282,6 @@ void pa_static_check(void)
 	uint32_t value1,value2,value3;
 	ui_cmd_t cmd;
 
-	//zhuque_bsp_gpio_get_value(PA_FAULT_PIN, &value1);
-	zhuque_bsp_gpio_get_value(MIC_DET_PIN, &value1);
-	zhuque_bsp_gpio_get_value(PA_CLIP_OTW_PIN, &value2);
 	zhuque_bsp_gpio_get_value(SL_HDMI_CEC_DET_PIN, &value3);
 
 #if 1
@@ -349,13 +339,6 @@ void pa_static_check(void)
 		bt_wait_flag = true;
 	}
 
-#if 0
-	if(fm_manual_save_cnt == 100)
-	{
-		cmd.cmd = UI_CMD_ENTER;
-		send_cmd_2_ui(&cmd);
-	}
-#endif
 
 	if(usb_play_cnt == 50)
 	{
@@ -383,15 +366,15 @@ void pa_static_check(void)
 			fm_scan_end_flag = false;
 			cmd.cmd = UI_CMD_FM_SCAN_END;
 			send_cmd_2_ui(&cmd);
-		}
-		
+		}	
 	
 	}
 
-	enter_othermode_check();
+	//enter_othermode_check();
 
 #endif
 
+#if 0
 	if(value1==0)
 	{
 		count2=0;
@@ -423,7 +406,7 @@ void pa_static_check(void)
 		}
 	}
 	////////////////////////////////////////////////
-
+#endif
 #if 0
 	if(value2==0)
 	{
@@ -582,18 +565,9 @@ void change_mode_unmute(void)
 
 	unmute_count++;
 
-	if(unmute_count == 35)
-	{
-		//printf("%s:1.\n",__func__);
-	
-		cmd.cmd = UI_CMD_CHANGE_MODE_UNMUTE;
-		send_cmd_2_ui(&cmd);			
-	}
-
-	if(unmute_count == 45)
+	if(unmute_count == 30)
 	{
 		//printf("%s:2.\n",__func__);
-		
 		cmd.cmd = UI_CMD_CHANGE_MODE_VOL_REC;
 		send_cmd_2_ui(&cmd);
 		wd_cancel(wdtimer_change_mode_unmute);
@@ -628,39 +602,5 @@ void ui_hdmion_send(void)
 	printf("%s\n",__func__);
 #endif
 
-
-
 }
-
-
-
-/****************************************************************
-
-
-
-
-******************************************************************/
-void aux_fm_channel_choose(bool chan)///////0----fm,1-----aux
-{
-    const int pin = FM_AUX_CHANNEL_CRT_PIN;
-    zhuque_bsp_gpio_set_mode(pin, GPIO_OUT, PULLING_HIGH);
-    zhuque_bsp_gpio_set_value(pin, chan?GPIO_VALUE_HIGH:GPIO_VALUE_LOW);
-}
-
-
-
-
-/****************************************************************
-
-
-
-
-******************************************************************/
-void pcm1803_power_crt(bool on_off)
-{
-	const int pin = POWER_MIC_PIN;
-	zhuque_bsp_gpio_set_mode(pin, GPIO_OUT, PULLING_HIGH);
-	zhuque_bsp_gpio_set_value(pin, on_off?GPIO_VALUE_HIGH:GPIO_VALUE_LOW);
-}
-
 

@@ -315,6 +315,7 @@ void pa_static_check(void)
 	tre_bass_cnt   ++;
 	auto_input_cnt ++;
 	fm_scan_start_end_cnt++;
+	
 	if(tre_bass_cnt == 50)
 	{
 		enter_tre_set = false;
@@ -369,11 +370,13 @@ void pa_static_check(void)
 	}
 #endif
 
-	if(usb_play_cnt == 50)
+	
+	if(usb_play_cnt == 75)
 	{
-		cmd.cmd = UI_CMD_USB_PLAY_MUTE;
+		cmd.cmd = UI_CMD_USB_PLAY_UNMUTE;
 		send_cmd_2_ui(&cmd);
 	}
+	
 
 	if(folder_dis_cnt <= 20)
 	{

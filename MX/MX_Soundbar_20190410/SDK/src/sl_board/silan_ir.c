@@ -69,6 +69,7 @@ bool ir_long_flag=false;
 
 int save_ir_cnt = 100;
 
+
 extern bool next_folder_flag;
 extern bool prev_folder_flag;
 extern bool fm_scan_flag;
@@ -487,5 +488,5 @@ extern bool fm_manual_save_flag;
 	 return 0;
  }
  //éè???a?ú?′DDoìía?ì2é3?ê??ˉ3ìDò
- zhuque_device_init(sc6138_irinitialize);
+ //zhuque_device_init(sc6138_irinitialize);
 

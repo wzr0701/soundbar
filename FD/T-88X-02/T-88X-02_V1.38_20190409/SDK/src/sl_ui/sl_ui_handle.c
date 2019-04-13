@@ -1850,6 +1850,7 @@ void ui_handle_play_num(int num)
 		//printf("%s:get_file_total === %d\n", __func__,total);
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 		pa_mute_ctrl(true);
+		
         if( (total > 0)&&(num<=total))
         {
 			//printf("%s:num === %d\n", __func__,num);
@@ -1995,8 +1996,8 @@ void ui_handle_next(void)
 		
 		dis_other_mode=1;
 		
-		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
-		pa_mute_ctrl(true);
+		//player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+		//pa_mute_ctrl(true);
 
 		usb_prev_flag = false;
 		
@@ -2063,8 +2064,8 @@ void ui_handle_prev(void)
 
 		dis_other_mode=1;
 		
-		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
-		pa_mute_ctrl(true);
+		//player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+		//pa_mute_ctrl(true);
 		
         if (total > 0)
         {
@@ -2126,8 +2127,9 @@ void ui_handle_folder_next(void)
 		
 		dis_other_mode=1;
 		
-		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
-		pa_mute_ctrl(true);
+		//player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+		//pa_mute_ctrl(true);
+		
         //if (total > 0)
         {
 			if(folder_index_cnt < folder_total_num-1)
@@ -2195,8 +2197,9 @@ void ui_handle_folder_prev(void)
 
 		dis_other_mode=1;
 		
-		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
-		pa_mute_ctrl(true);
+		//player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+		//pa_mute_ctrl(true);
+		
         //if (total > 0)
         {
 			if(folder_index_cnt > 0)
@@ -2255,11 +2258,13 @@ void ui_handle_folder_prev(void)
  ****************************************************************************/
 void ui_handle_tone(int tone_num)
 {
+	#if 0
     if(TONE_START < tone_num && tone_num < TONE_MAX)
     {
         pa_mute_ctrl(false);
         em_player_tone(tone_num);
     }
+	#endif
 }
 
 /****************************************************************************

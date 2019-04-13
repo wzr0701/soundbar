@@ -6,7 +6,6 @@
 #define PA_MUTE_HIGH   0     //////1----¸ßmute£¬0------µÍmute
 
 #define BT_MUTE_DETECT_PIN   8
-#define BT_POWER_CRT_PIN    23
 
 #define SYS_POWER_CON_PIN    26
 
@@ -15,17 +14,23 @@
 #define SL_HDMI_CEC_DET_PIN  (25)
 #define SL_HDMI_CEC_PIN           (12)
 
-
 #define FM_AUX_CHANNEL_CRT_PIN  15
 
+#define PA_MUTE_PIN        12
 
-#define POWER_MIC_PIN  46
+#define SW1_4052_PIN 7
+#define SW2_4052_PIN 8
 
-#define MIC_DET_PIN 37
-#define PA_MUTE_PIN       7
-#define PA_CLIP_OTW_PIN        33
-#define PA_FAULT_PIN              34
-#define PA_RESET_PIN              35
+
+enum
+{
+    RCA_4052,
+    AUX_4052,
+    FM_4052,
+    NONE_4052
+} switch_4052;
+
+
 
 
 //////////////////////////////////////////////////
@@ -36,11 +41,6 @@ void enter_othermode_check(void);
 void change_mode_unmute(void);
 void pa_mute_ctrl(bool mute);
 //void bt_mute_detect(void);
-void pa_io_ret_set(bool on_off);
-void bt_power_crt(bool on_off);
-void aux_fm_channel_choose(bool chan);
-void touch_key_int(void);
-void pcm1803_power_crt(bool on_off);
 void ui_hdmion_send(void);
 void sys_power_control(void);
 

@@ -67,6 +67,7 @@ extern sem_t de_i2c_sem;
 ////////////////////////////////////////////////////
 static char num_seg[NUM_TOTAL][DIS_SEG_ADD_TOTAL]=
 {
+#if 0
 {HT_SEG_A,HT_SEG_B,HT_SEG_C,HT_SEG_D,HT_SEG_E,HT_SEG_F,HT_SEG_OFF,HT_SEG_OFF},///0
 {HT_SEG_B,HT_SEG_C,HT_SEG_OFF,HT_SEG_OFF,HT_SEG_OFF,HT_SEG_OFF,HT_SEG_OFF,HT_SEG_OFF},     ////////////1
 {HT_SEG_A,HT_SEG_B,HT_SEG_E,HT_SEG_D,HT_SEG_M5,HT_SEG_M6,HT_SEG_OFF,HT_SEG_OFF},//2      	////2
@@ -128,11 +129,12 @@ static char num_seg[NUM_TOTAL][DIS_SEG_ADD_TOTAL]=
 
 {HT_SEG_B,HT_SEG_C,HT_SEG_E,HT_SEG_F,HT_SEG_M7,HT_SEG_M8,HT_SEG_OFF,HT_SEG_OFF},//2 ////All vertical
 
-
+#endif
 };
 /////////////////////////////////////////////////////
 static char seg_add[HT_SEG_TOTAL][5][2]=
 {
+#if 0
 {{10,0},{10,2},{10,4},{10,6},{11,0}},////HT_SEG_A
 {{0,1},{0,3},{0,5},{0,7},{1,1}},////HT_SEG_b
 {{2,1},{2,3},{2,5},{2,7},{3,1}},////HT_SEG_C
@@ -147,12 +149,14 @@ static char seg_add[HT_SEG_TOTAL][5][2]=
 {{6,1},{6,3},{6,5},{6,7},{7,1}},////HT_SEG_M6
 {{12,0},{12,2},{12,4},{12,6},{13,0}},////HT_SEG_M7
 {{12,1},{12,3},{12,5},{12,7},{13,1}},////HT_SEG_M8
+#endif
 };
 
 ////////////////////////////////////////////////////
 
 static char icon[ICON_TOTAL][2]=
 {
+#if 0
 {14,0},/////usb
 {14,4},/////BT
 {14,2},/////AUX
@@ -166,7 +170,7 @@ static char icon[ICON_TOTAL][2]=
 {14,1},/////COLON1
 {14,5},/////COLON2
 {14,6},/////DOT
-
+#endif
 };
 
 /********************************************
@@ -176,7 +180,7 @@ static char icon[ICON_TOTAL][2]=
 *********************************************/
 void ht1633_set_icon(char ic_id,bool on_off)
 {
-
+#if 0
 	char buf_num, buf_bit;
 	if((ic_id>ICON_TOTAL)||(ic_id<0))
 	return;
@@ -190,11 +194,13 @@ void ht1633_set_icon(char ic_id,bool on_off)
 		ht1633_dis_bitbuf[buf_num]&=~(1<<buf_bit);
 
 	//printf("ht1633_icon_bitbuf[%d],con_bufbit=%d\r\n",buf_num,buf_bit);
+#endif
 }
 
 
 void ht1633_set_num_leter(char num_index,char num_id,bool on_off)//////num_index 0------4,left-----right
 {
+#if 0
 	char i;
 	char * num_seg_p;
 	char seg_value;
@@ -218,7 +224,7 @@ void ht1633_set_num_leter(char num_index,char num_id,bool on_off)//////num_index
 				ht1633_dis_bitbuf[buf_num]&=~(1<<buf_bit);
 		}
 	}
-
+#endif
 }
 
 
@@ -228,11 +234,13 @@ void ht1633_set_num_leter(char num_index,char num_id,bool on_off)//////num_index
 *******************************************/
 void ht1633_clear_disbuf(void)
 {
+#if 0
 	int i;
 	for(i=0;i<16;i++)
 	{
 		ht1633_dis_bitbuf[i]=0x00;
 	}
+#endif
 }
 /*********************************************
 
@@ -240,11 +248,13 @@ void ht1633_clear_disbuf(void)
 *******************************************/
 void ht1633_full_disbuf(void)
 {
+#if 0
 	int i;
 	for(i=0;i<16;i++)
 	{
 		ht1633_dis_bitbuf[i]=0xff;
 	}
+#endif
 }
 
 /****************************************************************************
@@ -255,14 +265,17 @@ void ht1633_full_disbuf(void)
 
 static bool ht1633_send_device_addr(bool w_r)
 {
+#if 0
     iic_send_byte(HT_I2C_ADD|(w_r?1:0), I2C_CLK_PIN, I2C_DATA_PIN);
     return iic_recv_ack(I2C_CLK_PIN, I2C_DATA_PIN);
+#endif
 }
 
 
 
 bool ht1633_write_byte(unsigned char byte)
 {
+#if 0
 	bool ret = false;
 	//发送开始信号
 	iic_start(I2C_CLK_PIN, I2C_DATA_PIN);
@@ -277,10 +290,12 @@ bool ht1633_write_byte(unsigned char byte)
 	//停止之前的操作
 	iic_stop(I2C_CLK_PIN, I2C_DATA_PIN);
 	return ret;
+#endif
 }
 
 char ht1633_write_nbyte(char com,char bye,char *p)
 {
+#if 0
 	int i;
 	bool ret = false;
 
@@ -317,12 +332,13 @@ char ht1633_write_nbyte(char com,char bye,char *p)
 	//停止之前的操作
 	iic_stop(I2C_CLK_PIN, I2C_DATA_PIN);
 	return ret;
-
+#endif
 }
 
 
 void ht1633_init(void)
 {
+#if 0
 	printf("ht1633_init\r\n");
 	ht1633_clear_disbuf();
 
@@ -344,6 +360,8 @@ void ht1633_init(void)
     sc6138_timer_start(4);
 #endif
 
+#endif
+
 }
 
 extern unsigned char soft_updata_flag;
@@ -354,12 +372,14 @@ extern unsigned char soft_updata_flag;
 ***************************************************/
 void ht1633_updata_display(void)
 {
+#if 0
 	if(soft_updata_flag)
 		return;
 	// sem_wait(&de_i2c_sem);
 	ht1633_write_nbyte(HT_LED_RAM_START,16,ht1633_dis_bitbuf);
 	ht1633_write_byte(HT_LED_ON);
 	// sem_post(&de_i2c_sem);
+#endif
  }
 
 
@@ -377,6 +397,7 @@ void ht1633_updata_display(void)
 
 void check_seg(void)
 {
+#if 0
 	static char seg_cout=0;
 	static char seg_num=0;
 	static int time_cout;
@@ -442,6 +463,6 @@ void check_seg(void)
 
 #endif
 
-
+#endif
 }
 

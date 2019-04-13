@@ -33,7 +33,7 @@
 
 
 
-#define FM_QN8035_EN
+#define FM_RDA5807_EN
 
 //#define WriteToDev
 
@@ -54,8 +54,8 @@ extern int ui_source_select;
 u8 Frequency_Save[MAX_CH_NUM];
 u8 Fre_Total_Num = 0;
 
-u16 fmFrequency;
-u8 Cur_Fre_Num;
+u16 fmFrequency = 875;
+u8 Cur_Fre_Num = 1;
 u8 volume=15;
 
 char fmFre_lev = 0;
@@ -89,7 +89,7 @@ unsigned char FM_Mode(void)
 {
 
 	u8 i;
-
+#if 0
 #ifndef WriteToDev
 	fmFrequency = at24c02_read_one_byte(MEM_FM_FREQUENCY);
 	fmFrequency += FM_MIN;
@@ -124,6 +124,7 @@ unsigned char FM_Mode(void)
 		fmFrequency = 900;
 	}
 	volume=15;
+#endif
 	fm_rx_init();
 	Delay5Ms(15);   //为了兼容5807P，在此加上延时
 	fm_rx_set_freq(fmFrequency);

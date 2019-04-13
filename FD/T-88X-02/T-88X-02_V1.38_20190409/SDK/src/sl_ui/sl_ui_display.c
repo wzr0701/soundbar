@@ -76,7 +76,7 @@ extern unsigned char bt_version_num;
 
 
 #define MCU_VER1 2
-#define MCU_VER2 6
+#define MCU_VER2 7
 
 #define BT_VER1 1
 #define BT_VER2 2

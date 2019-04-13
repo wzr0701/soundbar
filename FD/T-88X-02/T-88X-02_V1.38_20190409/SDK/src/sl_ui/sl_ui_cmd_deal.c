@@ -498,8 +498,9 @@ void dis_play_update(void)
 			if(folder_dis_flag == false)
 			{
 				usb_curtime_save = ui_update_music_time();
+				
 				if(ui_source_select == SOURCE_SELECT_USB)
-				{
+				{				
 					if(usb_dis_cnt < 5)
 					{
 						usb_dis_cnt++;
@@ -823,10 +824,6 @@ void enter_mode( int mode)
 	usleep(1000);
 	player_process_cmd(NP_CMD_STOP, NULL, 0, NULL, NULL);
 	usleep(1000);
-
-
-	pcm1803_power_crt(true);
-	usleep(100000);
 
 	display_ui_main_sys(ui_source_select);
 
@@ -1935,7 +1932,6 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					}
 					
 				}
-				player_process_cmd(NP_CMD_I2SIN_OPEN, NULL,0, NULL, NULL);///////adc0
 				break;
 
 			case UI_CMD_CHANGE_MODE_VOL_REC:
@@ -1953,27 +1949,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						usb_play_flag = false;
 					}
 					
-				}
-				if(mic_on_flag)
-				{
-					if(mic_detect_online)
-					{
-						mic_open(true);
-					}
-					else
-					{
-						mic_open(false);
-					}
-					//bt_cmd_mic_status(mic_on_flag);
-				}
-				else
-				{
-					mic_open(false);
-					//bt_cmd_mic_status(mic_on_flag);
-				}
-				
-				
-						
+				}						
 				break;
 
 			case UI_CMD_ENTER_TREBLE_SET:
@@ -2220,7 +2196,7 @@ void source_mode_usb(void)
 				ui_handle_folder_prev();
 				break;
 
-			case UI_CMD_USB_PLAY_MUTE:
+			case UI_CMD_USB_PLAY_UNMUTE:
 				if (mute_state == UNMUTE)
 				{
 					set_channel_mixvol_by_mode(ui_source_select);

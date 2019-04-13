@@ -3,101 +3,53 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
- #if 0
-#define NUM_0  0
-#define NUM_1  1
-#define NUM_2  2
-#define NUM_3  3
-#define NUM_4  4
-#define NUM_5  5
-#define NUM_6  6
-#define NUM_7  7
-#define NUM_8  8
-#define NUM_9  9
-#define NUM_A  10
-#define NUM_B  11
-#define NUM_C  12
-#define NUM_D  13
-#define NUM_E  14
-#define NUM_F  15
-#define NUM_G  16
-#define NUM_H  17
-#define NUM_I  18
-#define NUM_J  19
-#define NUM_K  20
-#define NUM_L  21
-#define NUM_M  22   //can't display
-#define NUM_N  23
-#define NUM_O  24
-#define NUM_P  25
-#define NUM_Q  26
-#define NUM_R  27
-#define NUM_S  28
-#define NUM_t  29
-#define NUM_T  29   //the same as 't'
-#define NUM_U  30
-#define NUM_V  31   //the same as U
-#define NUM_W  32   //can't display
-#define NUM_X  33   //can't display
-#define NUM_y  34
-#define NUM_Z  35
-#define NUM__  36
-#define NUM_OFF  37   //'-',žÃÐòÁÐ×îŽóÖµ£¬³¬³öŽËÖµ°ŽŽËŽŠÀí
-#define NUMBER_TOTAL 38
 
-#endif
-
-#define NUM_0  0
-#define NUM_1  1
-#define NUM_2  2
-#define NUM_3  3
-#define NUM_4  4
-#define NUM_5  5
-#define NUM_6  6
-#define NUM_7  7
-#define NUM_8  8
-#define NUM_9  9
-#define NUM_A  10
-#define NUM_B  11
-//#define NUM_C  12
-//#define NUM_D  13
-#define NUM_E  12
-//define NUM_F  15
-//#define NUM_G  16
-#define NUM_H  13
-//#define NUM_I  NUM_1
-//#define NUM_J  19
-//#define NUM_K  20
-#define NUM_L  14
-//#define NUM_M  22   //can't display
-//#define NUM_N  23
-//#define NUM_O  24
-#define NUM_P  15
-//#define NUM_Q  26
-//#define NUM_R  27
-//#define NUM_S  28
-//#define NUM_t  29
-//#define NUM_T  29   //the same as 't'
-#define NUM_U  16
-#define NUM_V  17   //the same as U
-#define NUM__  18   //can't display
-#define NUM_D  19   //can't display
-#define NUM_F  20
-#define NUM_N  21
-#define NUM_T  22
-#define NUM_OFF  (-1)   //'-',žÃÐòÁÐ×îŽóÖµ£¬³¬³öŽËÖµ°ŽŽËŽŠÀí
-#define NUMBER_TOTAL 23
+#define   ICON_USB        0
+#define   ICON_BT        1
+#define   ICON_AUX     2
+#define   ICON_FM       3
+#define   ICON_OPTI     4
+#define   ICON_COA 5
+#define   ICON_HDMI 6
+#define   ICON_EQ 7
+#define   ICON_REPEAT_ALL   8
+#define   ICON_REPEAT_ONE  9
+#define   ICON_FM_ST            10
+#define   ICON_VOL_MUTE          11
+#define   ICON_VOL_UMUTE 12
+#define   ICON_CLON_2          13
+#define   ICON_DOT          14
+#define   ICON_TOTAL        15
 
 
-
-
-
-
-
-
-
-
-
+#define NUM_0		0
+#define NUM_1		1
+#define NUM_2		2
+#define NUM_3		3
+#define NUM_4		4
+#define NUM_5		5
+#define NUM_6		6
+#define NUM_7		7
+#define NUM_8		8
+#define NUM_9		9
+#define NUM_A		10
+#define NUM_B		11
+#define NUM_E		12
+#define NUM_H		13
+#define NUM_L		14
+#define NUM_P		15
+#define NUM_U		16
+#define NUM_V		17
+#define NUM__		18
+#define NUM_D		19
+#define NUM_F		20
+#define NUM_N		21
+#define NUM_T		22
+#define NUM_LINE_DB	23  //二道划线
+#define NUM_LINE	24  //下划线
+#define NUM_C		25  //C
+#define NUM_OFF		(-1)
+#define NUMBER_TOTAL  26
 
 
  /****************************************************************************
@@ -210,16 +162,13 @@ void led7_set_display(int index, char disp);
 void led7_update_bitbuf(void);
 
 
-
-
+void led7_set_aux(bool disp);
 void led7_set_usb(bool disp);
-void led7_set_sd(bool disp);
-void led7_set_fm(bool disp);
-void led7_set_play_pause(bool disp);
-void led7_set_replay(bool disp);
-void led7_set_bat_level(char level);
-
-
+void led7_set_bt(bool disp);
+void led7_set_opt(bool disp);
+void led7_set_coa(bool disp);
+void led7_set_hdmi(bool disp);
+void led7_set_eq(bool disp);
 
 
 

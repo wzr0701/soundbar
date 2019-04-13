@@ -8,12 +8,24 @@
 #include "sl_ui_display.h"
 
 
-
+#if 0
 #define CMD_UI_PLAY              0
 #define CMD_UI_PWR               1
 #define CMD_UI_MODE              2
 #define CMD_UI_INC               3
 #define CMD_UI_DEC               4
+#endif
+
+#define CMD_UI_PLAY              0x60
+#define CMD_UI_INC               0x61
+#define CMD_UI_DEC               0x62
+#define CMD_UI_MUTE              0x63
+#define CMD_UI_EQ                0x64
+#define CMD_UI_PAIR              0x65
+#define CMD_UI_MODE              0x66
+
+
+
 
 
 #define CONFIG_AUTO_UPDATE
@@ -176,40 +188,36 @@ static void handle_ui_events_inner(struct input_event *event)
         case CODE_KEY_UP:
             if (event->value & 0xf00)
             {
-                int value = event->value & 0x1f;
-				if(value == CMD_UI_PLAY)
+                int value = event->value & 0x7f;
+				/*if(value == CMD_UI_INC)
 				{
-					cmd.cmd = UI_CMD_BT_PAIR;
-				}
-                else if(value == CMD_UI_INC)
-				{
-					cmd.cmd = UI_CMD_VOLUME_INC_UP;
+					cmd.cmd = UI_CMD_NEXT;
 				}
                 else if(value == CMD_UI_DEC)
 				{
-					cmd.cmd = UI_CMD_VOLUME_DEC_UP;
+					cmd.cmd = UI_CMD_PREV;
 				}
+				*/
 			}
             break;
         case CODE_KEY_DOWN:
             if (event->value & 0xf00)
-            {
-                int value = event->value & 0x1f;
-				/*
-				if(value == CMD_UI_PLAY)
+            {	
+                int value = event->value & 0x7f;
+				
+				if(value == CMD_UI_PAIR)
 				{
-					cmd.cmd = UI_CMD_BT_PAIR;
+					cmd.cmd = UI_CMD_WOOFER_PAIR;
 				}
-                else
-                */ 
-				if(value == CMD_UI_INC)
+				else if(value == CMD_UI_INC)
 				{
-					cmd.cmd = UI_CMD_VOLUME_INC_DOWN;
+					cmd.cmd = UI_CMD_NEXT;
 				}
                 else if(value == CMD_UI_DEC)
 				{
-					cmd.cmd = UI_CMD_VOLUME_DEC_DOWN;
+					cmd.cmd = UI_CMD_PREV;
 				}
+				
             }
             break;
         case CODE_KEY_CLICK:
@@ -483,8 +491,8 @@ static void handle_ui_events_inner(struct input_event *event)
 		}
 
 	}
-#else
-
+#endif
+#if 0
 	else if (EV_IR == event->type) {
 		switch (event->code) {
 			case CODE_IR_PRESS:
@@ -565,82 +573,42 @@ static ui_cmd_t ui_handle_click(int event_cmd)
 {
     ui_cmd_t cmd;
     cmd.cmd = UI_CMD_NULL;
-    switch (event_cmd & 0x1f)
+    switch (event_cmd & 0x7f)
     {
 		case CMD_UI_PLAY:
-			if(test_mode_flag == false)
-			{
-				playkey_count++;
-				enter_count = 0;
-				playkey_count1++;
-				enter_count1 = 0;
-				cmd.cmd = UI_CMD_PLAY_PAUSE;
-			}
-			else
-			{
-				cmd.cmd = UI_CMD_LED_TEST;
-			}
+			cmd.cmd = UI_CMD_PLAY_PAUSE;
 			break;
-		case CMD_UI_PWR:
-			if(test_mode_flag == false)
-			{
-				cmd.cmd = UI_CMD_POWER;
-			}
-	        else
-	        {
-				cmd.cmd = UI_CMD_LED_TEST;
-			}
+		
+		case CMD_UI_MUTE:	
+			cmd.cmd = UI_CMD_VOLUME_MUTE;			
 	        break;
+		
 	    case CMD_UI_MODE:
-			if(test_mode_flag == false)
-			{
-				//change_mode_cnt++;
-				if(change_mode_flag == true)
-				{
-					cmd.cmd = UI_CMD_MODE;
-				}
-			}
-	        else
-	        {
-				cmd.cmd = UI_CMD_LED_TEST;
-			}
+			cmd.cmd = UI_CMD_MODE;	
 	        break;
-	    case CMD_UI_INC:
-			if(test_mode_flag == false)
-			{
-				if(playkey_count1 == 5)
-				{
-					nextkey_count++;
-					enter_count1 = 0;
-				}
-				cmd.cmd = UI_CMD_VOLUME_INC;
-			}
-	        else
-	        {
-				cmd.cmd = UI_CMD_VOLUME_INC;
-			}
+			
+	    case CMD_UI_INC:		
+			cmd.cmd = UI_CMD_VOLUME_INC;	
 	        break;
-	    case CMD_UI_DEC:
-			if(test_mode_flag == false)
-			{
-				if(playkey_count == 3)
-				{
-					prevkey_count++;
-					enter_count = 0;
-				}
-				cmd.cmd = UI_CMD_VOLUME_DEC;
-			}
-			else
-			{
-				cmd.cmd = UI_CMD_VOLUME_DEC;
-			}
+		
+	    case CMD_UI_DEC:			
+			cmd.cmd = UI_CMD_VOLUME_DEC;
 	        break;
+
+		case CMD_UI_PAIR:
+			cmd.cmd = UI_CMD_BT_PAIR;
+			break;
+
+		case CMD_UI_EQ:
+			cmd.cmd = UI_CMD_EQ_SELECT;
+			break;
     }
     return cmd;
 }
 
 static ui_cmd_t ui_handle_ir_press(int event_cmd)
 {
+#if 0
     ui_cmd_t cmd;
     cmd.cmd = UI_CMD_NULL;
     switch (event_cmd)
@@ -841,10 +809,12 @@ static ui_cmd_t ui_handle_ir_press(int event_cmd)
 */
     }
     return cmd;
+#endif
 }
 
 static ui_cmd_t ui_handle_ir_longpress(int event_cmd)
 {
+#if 0
 	ui_cmd_t cmd;
     cmd.cmd = UI_CMD_NULL;
     switch (event_cmd)
@@ -983,6 +953,7 @@ static ui_cmd_t ui_handle_ir_longpress(int event_cmd)
 */
 	}
 	return cmd;
+#endif
 }
 
 

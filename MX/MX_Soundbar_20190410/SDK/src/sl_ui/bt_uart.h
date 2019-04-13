@@ -38,6 +38,7 @@ typedef enum {
     AT_OFF,                     //关机
     AT_GET_MODE,                //获取当前模式
     AT_GET_VOL,                 //获取当前音量值
+    AT_GET_EQ,                 //获取当前EQ模式
     AT_BT,                      //蓝牙模式
     AT_AUX,                     //AUX模式
     AT_D8836,                   //退出模式
@@ -60,6 +61,7 @@ typedef enum {
 	AT_MODE_BT,
 	AT_MODE_USB,
 	AT_MODE_AUX,
+	AT_MODE_RCA,
 	AT_MODE_OPT,
 	AT_PLAY_PAUSE,           //播放/暂停
     AT_PLAY_NEXT,              //下一曲
@@ -70,6 +72,7 @@ typedef enum {
     AT_MOVIE_OFF,
     AT_FMSCAN_START,	
     AT_FMSCAN_END,
+    AT_WOOFER_PAIR,
 	
     //带参数命令
     AT_SET_MODE,                //模式设置

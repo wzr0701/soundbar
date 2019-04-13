@@ -27,6 +27,14 @@
 
 #define INPUT_MAX   9999
 
+
+#define EQ_NORMAL 1
+#define EQ_NIGHT          2
+#define EQ_3D             3
+#define EQ_CLEAR          4
+
+void select_eq_mode(void);
+
 void hdmi_send_unmute(void);
 
 
@@ -38,8 +46,9 @@ void source_mode_usb(void);
 void source_mode_sd(void);
 void source_mode_fm(void);
 
-
 void source_mode_aux(void);
+void source_mode_rca(void);
+
 void source_mode_spdifin(void);
 
 void source_mode_hdmi(void);

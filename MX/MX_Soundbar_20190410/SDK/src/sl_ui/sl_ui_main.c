@@ -24,7 +24,6 @@
 #include <zhuque_bsp_gpio.h>
 #include "ht1633.h"
 #include "sl_ui_io_led.h"
-#include "sl_ui_touch_key.h"
 #include "sl_ui_cmd_deal.h"
 #include "sl_ui_fm.h"
 
@@ -92,7 +91,7 @@ unsigned char g_FMType_RX;
  * Public Function Prototypes
  ****************************************************************************/
 /*adckeyæŒ‰é”®åˆå§‹åŒ–åˆå§‹åŒ–*/
-extern int sc6138_adcinitialize(void);
+//extern int sc6138_adcinitialize(void);
 
 /****************************************************************************
  * Public Functions
@@ -128,11 +127,6 @@ static int sl_ui_thread(int argc, char **argv)
 	int ret = 0;
 	int handle_wd_delay;
 
-	///////////////////////////////////
-	padmux_init();
-	pa_mute_ctrl(true);
-	/////////////////////////////////////
-
 	//DSPåŒæ­¥
 	do
 	{
@@ -140,29 +134,19 @@ static int sl_ui_thread(int argc, char **argv)
 		usleep(1);
 	}
 	while(ret == -1);
-	ret = 0;
+		ret = 0;
 	//printf("DSP sync finish\n");
 	//å¼•è„šåŠŸèƒ½åˆå§‹åŒ–
 	//printf("#############################################20180929\n");
 #ifdef CONFIG_CEC
 	cec_entry();
 #endif
-	///////////////////////////////////
-	pa_io_ret_set(false);
-	bt_power_crt(false);
-	//aux_fm_channel_choose(true);
-	pcm1803_power_crt(true);
-	///////////////////////////////
-	touch_key_int();
-	sc6138_adcinitialize();
-	//////////////////////////////
-	ht1633_init();
+	
+	//led 7 æ®µå±åˆå§‹åŒ–
+    led7_init();//ht1633_init();
 	usleep(1000);
-	display_ui_power(1);
 
 	g_FMType_RX = fm_rx_ID();   //¸ù¾İIDÅĞ¶ÏFM½ÓÊÕĞ¾Æ¬ÀàĞÍ
-	PCM5242_Init();
-
 	//sem_init(&de_i2c_sem, 0, 1);
 
 	////////////////////////////////////////////////////
@@ -234,6 +218,10 @@ static int sl_ui_thread(int argc, char **argv)
 
 					case SOURCE_SELECT_LINEIN:
 						source_mode_aux();
+						break;
+
+					case SOURCE_SELECT_RCA:
+						source_mode_rca();
 						break;
 
 					case SOURCE_SELECT_SPDIFIN:

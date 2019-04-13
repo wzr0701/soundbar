@@ -33,29 +33,30 @@
 /*与蓝牙模块通信的字符串*/
 static const char * AT_CMDS[] = {
 	"ATPR\r\n",			//进入配对
-	"ATAC\r\n",            //连接最后配对的
-	"ATDC\r\n",            //断开连接
+	"AT+CC\r\n",            //连接最后配对的
+	"AT+CD\r\n",            //断开连接
 	"AT+CE\n",            //ACK
 	"AT+CF\n",            //拒接电话
 	"AT+CG\n",            //挂断电话
 	"AT+CH\n",            //重拨最后一个电
 	"AT+ADD\n",            //音量加
 	"AT+SUB\n",            //音量减
-	"ATCL\r\n",            //清除记忆列表
+	"AT+CZ\r\n",            //清除记忆列表
 	"AT+CO\n",            //
 	"AT+CV\n",            //语音拨号
 	"AT+CT\n",            //
-	"ATPA\r\n",            //播放/暂停
+	"AT+PA\r\n",            //播放/暂停
 	"ATPY\r\n",            //播放
 	"ATPU\r\n",            //暂停
-	"ATPN\r\n",            //下一曲
-	"ATPV\r\n",            //上一曲
+	"AT+PN\r\n",            //下一曲
+	"AT+PV\r\n",            //上一曲
 	"AT+PF\n",            //下一个动作
 	"AT+PH\n",            //倒带
-	"AT+ON\n",            //开机
-	"AT+OFF\n",           //关机
-	"AT+GET+MODE\n",      //获取当前模式
-	"AT+GET+VOL\n",       //获取当前音量值
+	"AT+PWRON\r\n",            //开机
+	"AT+PWROFF\r\n",           //关机
+	"AT+GET+MODE\r\n",      //获取当前模式
+	"AT+GET+VOL\r\n",       //获取当前音量值
+	"AT+GET+EQ\r\n",       //获取当前EQ模式
 	"AT+BT\n",			//蓝牙模式
 	"AT+AUX\n",           //AUX模式
 	"AT+D8836\n",         //退出模式
@@ -63,24 +64,25 @@ static const char * AT_CMDS[] = {
 	//蓝牙状态命令
 	//"ATCN\r\n",		    //设备连接成功
 	//"ATWC\r\n",            //设备断开连接
-	"CN\r\n",		    //设备连接成功
-	"WC\r\n",            //设备断开连接
-	"AT+MA\n",            //蓝牙播放暂停
-	"AT+MB\n",            //蓝牙开始播放
-	"ATCZ\r\n",            //查询蓝牙设备连接状态
+	"AT+C1\r\n",		    //设备连接成功
+	"AT+C0\r\n",            //设备断开连接
+	"AT+MA\r\n",            //蓝牙播放暂停
+	"AT+MB\r\n",            //蓝牙开始播放
+	"AT+CX\r\n",            //查询蓝牙设备连接状态
 	"AT+GET+AUX\n",       //AUX连接状态查询
 	"AT+AUX01\n",         //AUX连接
 	"AT+AUX00\n",         //AUX断开连接
 	"ATIS\r\n",            //复位I2S
 	"ATDS\r\n",            //关闭I2S
 	"ATVE\r\n",            //查看版本号
-	"MATCA\r\n",            //COA
-	"MATHI\r\n",           //HDMI
-	"MATFM\r\n",            //FM
-	"MATBT\r\n"  ,          //BT
-	"MATUB\r\n" ,           //USB
-	"MATAX\r\n" ,           //AUX
-	"MATOT\r\n",            //OPT
+	"AT+COA\r\n",            //COA
+	"AT+HDMI\r\n",           //HDMI
+	"AT+FM\r\n",            //FM
+	"AT+BT\r\n"  ,          //BT
+	"AT+USB\r\n" ,           //USB
+	"AT+AUX\r\n" ,           //AUX
+	"AT+RCA\r\n" ,           //AUX
+	"AT+OPT\r\n",            //OPT
 	"CATPA\r\n",            //播放/暂停
 	"CATPN\r\n",            //下一曲
 	"CATPV\r\n",            //上一曲
@@ -90,6 +92,7 @@ static const char * AT_CMDS[] = {
 	"MBMOVC", 
 	"ATSZ\r\n",            //开始搜台
 	"ATSF\r\n",           //搜台完成
+	"AT+SUBW\r\n",              //subwoofer配对
 	
 	//带参数命令
 	"AT+WM+",              //特定模式设置

@@ -34,6 +34,8 @@ void display_ui_bt(void);
 void display_ui_fm(unsigned char f_ch);
 
 void display_ui_aux(void);
+void display_ui_rca(void);
+
 void display_ui_op(void);
 
 void display_ui_hdmi(void);

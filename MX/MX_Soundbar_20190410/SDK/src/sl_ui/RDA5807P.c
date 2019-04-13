@@ -22,9 +22,9 @@
 
 #define DEVICE_RDA5807P_ADDR   0x20
 
-#define FM_I2C_CLK_PIN 32
+#define FM_I2C_CLK_PIN 45
 
-#define FM_I2C_DATA_PIN 27
+#define FM_I2C_DATA_PIN 42
 
 
 
@@ -483,7 +483,7 @@ void rda5807p_unmute(void)
 u8 rda5807p_online(void)
 {
     iic_init(FM_I2C_CLK_PIN, FM_I2C_DATA_PIN);
-   dat[0] = 0x00;
+   	dat[0] = 0x00;
     dat[1] = 0x02;
     FM_Write_2(2);
     //read ID

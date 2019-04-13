@@ -743,6 +743,10 @@ void bt_cmd_current_treble(int vol);
 void bt_cmd_current_bass(int vol);
 void bt_cmd_current_echo(void);
 void bt_cmd_current_micvol(void);
+void bt_cmd_eq_set(void);
+void bt_cmd_woofer_pair(void);
+
+
 
 void bt_cmd_source_select(int source);
 void bt_cmd_reset_iis(void);
