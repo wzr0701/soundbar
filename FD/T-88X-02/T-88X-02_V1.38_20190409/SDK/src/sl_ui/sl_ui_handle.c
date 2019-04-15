@@ -1731,8 +1731,17 @@ void ui_handle_file_load(int total_num, int folder_num, char * url)
 			file_index_temp = read_usb_num();
 			if(file_index_temp != -1)
 			{
-				usb_last_file_index = file_index_temp;
-				usb_playtime = 0;
+				if(file_index_temp < total_num)
+				{
+					usb_last_file_index = file_index_temp;
+					usb_playtime = 0;
+				}
+				else
+				{
+					usb_last_file_index = 0;
+	            	usb_playtime = 0;
+				}
+				
 			}
 			else
 			{
@@ -1750,7 +1759,7 @@ void ui_handle_file_load(int total_num, int folder_num, char * url)
 		}
         usb_last_total_num = total_num;
         usb_last_folder_num = folder_num;
-		dis_other_mode=1;
+		dis_other_mode = 1;
         handle_local_music_play(usb_last_file_index, usb_playtime);
     }
     else if(ui_source_select == SOURCE_SELECT_SD && strcmp(SEARCH_SD_NAME, url) == 0)

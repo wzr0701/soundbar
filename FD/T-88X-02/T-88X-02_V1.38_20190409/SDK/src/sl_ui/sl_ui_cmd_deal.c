@@ -292,6 +292,11 @@ void  save_usb_num(int file_index)
 	unsigned char temp[4];
 	int i;
 
+	if((file_index > 9999) || (file_index < 0))
+	{
+		return;
+	}
+
 	temp[0] = file_index/1000;
 	temp[1] = (file_index%1000)/100;
 	temp[2] = (file_index%100)/10;
@@ -322,13 +327,16 @@ int  read_usb_num(void)
 
 	for(i = 0;i < 4;i++)
 	{
-		if(temp[i] == 0xFF)
+		if(temp[i] > 9)
 		{
 			return -1;
-		}
-		temp[i]=at24c02_read_one_byte(MEM_USB_NUM+i);
+		}				
 	}
-	
+
+	for(i = 0;i < 4;i++)
+	{
+		temp[i]=at24c02_read_one_byte(MEM_USB_NUM+i);
+	}	
     file_index = temp[3]+temp[2]*10+temp[1]*100+temp[0]*1000;
 
 	return file_index;

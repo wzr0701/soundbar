@@ -862,36 +862,34 @@ enum ui_cmd_e bt_cmd_translate(AT_CMD cmd)
 }
 
 
-typedef struct app_value_s
+typedef struct ir_value_s
 {
-    char app_value[20];
+    char ir_value[20];
     enum ui_cmd_e cmd;
     enum ui_cmd_e cmd_dn;
     enum ui_cmd_e cmd_up;
-} APP_VALUE_S;
+} IR_VALUE_S;
 
-APP_VALUE_S APP_CMD[] =
+IR_VALUE_S IR_CMD[] =
 {
-	{"MBTBT\r\n",UI_CMD_GO_TO_BT},      //BT
-	{"MBTCA\r\n",UI_CMD_GO_TO_COA},      //COA
-	{"MBTHI\r\n",UI_CMD_GO_TO_HDMI},      //HDMI
-	{"MBTFM\r\n",UI_CMD_GO_TO_FM},      //FM
-	{"MBTUB\r\n",UI_CMD_GO_TO_USB},      //USB
-	{"MBTAX\r\n",UI_CMD_GO_TO_AUX},      //AUX
-	{"MBTOT\r\n",UI_CMD_GO_TO_SPDIF},      //OPT
-	{"MTMICO\r\n",UI_CMD_APP_MIC_ON},      //MIC ON 
-	{"MTMICC\r\n",UI_CMD_APP_MIC_OFF},      //MIC OFF
-	{"MTMOVO\r\n",UI_CMD_APP_MOVIE_ON},      //MOVIE ON
-	{"MTMOVC\r\n",UI_CMD_APP_MOVIE_OFF},      //MOVIE OFF
-	{"BTTUNEA\r\n",UI_CMD_FM_TUNE_ADD},      //TUNE +
-	{"BTTUNES\r\n",UI_CMD_FM_TUNE_SUB},      //TUNE -
-	{"BTSCAN\r\n",UI_CMD_FM_SCAN},      //FM SCAN
-	{"MTNEXT\r\n",UI_CMD_NEXT},      //NEXT
-	{"MTPREV\r\n",UI_CMD_PREV},      //PREV
-	{"MTPAUSE\r\n",UI_CMD_APP_PAUSE},      //PAUSE
-	{"MTPLAY\r\n",UI_CMD_APP_PLAY},      //PLAY
-	{"BTMEM\r\n",UI_CMD_FM_MANUAL_SAVE},      //MEM 
-	{"BTGUSB\r\n",UI_CMD_GET_USB_PLAY_STATUS},  //GET USB PLAY STATUS  
+#if 0
+	{"AT+IRed12ff00\r\n",UI_CMD_NULL}, 	 //开关机
+	{"AT+IRed12ff00+L\r\n",UI_CMD_NULL},	   //开关机
+	{"AT+IRf906ff00\r\n",UI_CMD_NEXT},		  //下一曲
+	{"AT+IRf906ff00+L\r\n",UI_CMD_NULL}, 	   //下一曲长按
+	{"AT+IRfb04ff00\r\n",UI_CMD_PREV},		  //上一曲
+	{"AT+IRfb04ff00+L\r\n",UI_CMD_NULL}, 	   //上一曲长按
+	{"AT+IRfd02ff00\r\n",UI_CMD_VOLUME_INC},  //音量加
+	{"AT+IRf708ff00\r\n",UI_CMD_VOLUME_DEC},  //音量减
+	{"AT+IRe11eff00\r\n",UI_CMD_MODE},		  //模式切换
+	{"AT+IRe51aff00\r\n",UI_CMD_VOLUME_MUTE}, //MUTE
+	{"AT+IRe01fff00\r\n",UI_CMD_FM_SCAN},	  //SCAN
+	{"AT+IRfa05ff00\r\n",UI_CMD_PLAY_PAUSE},  // 1
+	{"AT+IRf20dff00\r\n",UI_CMD_NULL},	// 3
+	{"AT+IRe41bff00\r\n",UI_CMD_BT_FUNC},  //5
+	{"AT+IRf50aff00\r\n",UI_CMD_GO_TO_BT},	 //pair
+	{"AT+IRf50aff00+L\r\n",UI_CMD_NULL},   //pair
+#endif
 };
 
 int str_cmp_80(char *str1,char *str2)
@@ -933,17 +931,17 @@ int str_cmp_80(char *str1,char *str2)
 	return 0;
 }
 
-enum ui_cmd_e app_cmd_translate(char *cmd)
+enum ui_cmd_e ir_cmd_translate(char *cmd)
 {
     int i;
 
-    for(i = 0; i< sizeof(APP_CMD)/sizeof(APP_CMD[0]); i++)
+    for(i = 0; i< sizeof(IR_CMD)/sizeof(IR_CMD[0]); i++)
     {
         //if(strstr(cmd,BT_CMD[i].bt_value) != NULL)
-        if(str_cmp_80(cmd,APP_CMD[i].app_value))
+        if(str_cmp_80(cmd,IR_CMD[i].ir_value))
         {
-			//printf("%s:cmd = %d\n",__func__,APP_CMD[i].cmd);
-			return APP_CMD[i].cmd;
+			//printf("%s:cmd = %d\n",__func__,IR_CMD[i].cmd);
+			return IR_CMD[i].cmd;
         }
     }
 
@@ -1057,9 +1055,9 @@ int bt_cmd_check(char *buf_recv)
 	return cmd.cmd;
 }
 
-int app_cmd_check(char *buf_recv)
+int ir_cmd_check(char *buf_recv)
 {
-    return app_cmd_translate(buf_recv);
+    return ir_cmd_translate(buf_recv);
 }
 
 
@@ -1099,7 +1097,7 @@ void bt_read_state(void)
                 int ui_cmd = bt_cmd_check(buf_recv);
                 if(ui_cmd == UI_CMD_NULL)
                 {
-                    ui_cmd = app_cmd_check(buf_recv);
+                    ui_cmd = ir_cmd_check(buf_recv);
 					if(ui_cmd != UI_CMD_NULL)
 	                {
 	                    cmd.cmd = ui_cmd;

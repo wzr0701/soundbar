@@ -833,8 +833,6 @@ void enter_mode( int mode)
 	//set_channel_vol_by_mode(ui_source_select);
 	//usleep(1000);
 
-	bt_cmd_source_select(ui_source_select);
-
 	switch(mode)
 	{
 		case SOURCE_SELECT_BT:
