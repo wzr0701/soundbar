@@ -274,7 +274,7 @@ void handle_local_music_play(int file_index, int playtime)
 	//printf("%s:file_index === %d\n", __func__,file_index);
 	if(play_list_get_file_byindex(&item, file_index) == 0)
 	{
-		//printf("%s:file_index === %d\n", __func__,file_index);
+		printf("%s:file_index === %d\n", __func__,file_index);
 		search_current_music_folder();
 		save_usb_num(file_index);
 		//printf("%s:folder_index_tab[%d][0] === %d----------folder_index_tab[%d][1] === %d\n", __func__,folder_index_cnt,folder_index_tab[folder_index_cnt][0],folder_index_cnt,folder_index_tab[folder_index_cnt][1]);
@@ -286,7 +286,9 @@ void handle_local_music_play(int file_index, int playtime)
 		{
 			file_rel_pos = file_index - folder_index_tab[folder_index_cnt][0];
 		}
+		
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+		pcm1803_power_crt(false);
 		pa_mute_ctrl(true);
 		usb_prev_flag = false;
 		//发送命令进行播放
@@ -298,12 +300,11 @@ void handle_local_music_play(int file_index, int playtime)
 			player_process_cmd(NP_CMD_SEEK, item.path, playtime * 1000, NULL, NULL);
 		}
 
-		usb_dis_cnt = 0;
-
 		if(!folder_dis_flag)
 		{
 			display_ui_usb_number(file_rel_pos);
-		}	
+		}
+		usb_dis_cnt = 0;
 		usb_play_cnt = 0;
 	}
 }

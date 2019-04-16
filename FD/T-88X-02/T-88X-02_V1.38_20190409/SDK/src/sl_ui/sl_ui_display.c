@@ -76,7 +76,7 @@ extern unsigned char bt_version_num;
 
 
 #define MCU_VER1 2
-#define MCU_VER2 7
+#define MCU_VER2 8
 
 #define BT_VER1 1
 #define BT_VER2 2
@@ -1176,9 +1176,17 @@ void display_ui_usb_folder(int loc)
 	char folder_buf1[5] = {NUM_U, 0,0,0,0};
 	char folder_buf2[5] = {NUM_U, NUM_0,NUM_0,NUM_0,NUM_1};
 
+
+	folder_buf1[1] = (folder_index_dis+1) / 1000;
+	folder_buf1[2] = ((folder_index_dis+1) %1000)/ 100;
+	folder_buf1[3] =((folder_index_dis+1)% 100)/10;
+	folder_buf1[4] = (folder_index_dis+1)%10;
+
+	/*
 	folder_buf1[2] = (folder_index_dis+1) / 100;
 	folder_buf1[3] =((folder_index_dis+1)% 100)/10;
 	folder_buf1[4] = (folder_index_dis+1)%10;
+	*/
 
 	if(ui_source_select == SOURCE_SELECT_USB )
 	{

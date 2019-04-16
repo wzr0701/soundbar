@@ -1729,9 +1729,10 @@ void ui_handle_file_load(int total_num, int folder_num, char * url)
 		if(usb_last_total_num == -1)
 		{
 			file_index_temp = read_usb_num();
+			//printf("%s:file_index_temp = %d.\n", __func__,file_index_temp);
 			if(file_index_temp != -1)
 			{
-				if(file_index_temp < total_num)
+				if(file_index_temp <= total_num)
 				{
 					usb_last_file_index = file_index_temp;
 					usb_playtime = 0;

@@ -304,6 +304,7 @@ void  save_usb_num(int file_index)
 
 	for(i = 0;i < 4;i++)
 	{
+		//printf("%s:temp[%d] = %d.\n", __func__,i,temp[i]);
 		at24c02_write_one_byte(MEM_USB_NUM+i ,temp[i]);
 		Delay5Ms(10);
 	}
@@ -327,16 +328,15 @@ int  read_usb_num(void)
 
 	for(i = 0;i < 4;i++)
 	{
+		temp[i] = at24c02_read_one_byte(MEM_USB_NUM+i);
+		Delay5Ms(10);
+		//printf("%s:temp[%d] = %d.\n", __func__,i,temp[i]);
 		if(temp[i] > 9)
 		{
 			return -1;
 		}				
 	}
-
-	for(i = 0;i < 4;i++)
-	{
-		temp[i]=at24c02_read_one_byte(MEM_USB_NUM+i);
-	}	
+	
     file_index = temp[3]+temp[2]*10+temp[1]*100+temp[0]*1000;
 
 	return file_index;
@@ -509,10 +509,10 @@ void dis_play_update(void)
 				
 				if(ui_source_select == SOURCE_SELECT_USB)
 				{				
-					if(usb_dis_cnt < 5)
+					if(usb_dis_cnt < 10)
 					{
 						usb_dis_cnt++;
-						if(usb_dis_cnt == 5)
+						if(usb_dis_cnt == 10)
 						{
 							//printf("usb_dis_cnt == 6.\r\n");
 							if(usb_curtime_save == 0)
@@ -799,6 +799,7 @@ void enter_mode( int mode)
 	set_adc_channel_vol(2,0);
 	set_adc_channel_vol(3,0);
 	player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+	pcm1803_power_crt(false);
 	pa_mute_ctrl(true);
 	usleep(100000);
 	
@@ -1260,19 +1261,18 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_USB_LOAD:
-				if(ui_source_select==SOURCE_SELECT_USB)
+				if(ui_source_select == SOURCE_SELECT_USB)
 				{
 					if(!usb_is_load)
 					{
 						handle_local(SEARCH_USB_NAME);
 					}						
-				}
-					
+				}	
 				break;
 
 
-			case UI_CMD_FILES_IS_LOAD:
-				ui_handle_file_load(arg1,arg2,arg3);
+			case UI_CMD_FILES_IS_LOAD:	
+				ui_handle_file_load(arg1,arg2,arg3);				
 				break;
 
 			case UI_CMD_PLAYER_FINISH:
@@ -1299,6 +1299,15 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_USB_OUT:
 				usb_is_load = false;
 				usb_online=0;
+			
+				if(ui_source_select==SOURCE_SELECT_USB)
+				{
+					player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+					pcm1803_power_crt(false);
+					pa_mute_ctrl(true);
+					usb_play_cnt = 35;
+				}
+				
 				ui_handle_usb_out();
 				break;
 
@@ -1957,7 +1966,8 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						usb_play_flag = false;
 					}
 					
-				}						
+				}
+				pcm1803_power_crt(true);
 				break;
 
 			case UI_CMD_ENTER_TREBLE_SET:
@@ -2210,7 +2220,8 @@ void source_mode_usb(void)
 					set_channel_mixvol_by_mode(ui_source_select);
 					pa_mute_ctrl(false);
 					//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
-				}			
+				}
+				pcm1803_power_crt(true);
 				break;
 
 			case UI_CMD_GET_USB_PLAY_STATUS:

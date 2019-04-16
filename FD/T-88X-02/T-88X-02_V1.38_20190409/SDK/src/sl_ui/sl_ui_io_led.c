@@ -371,7 +371,7 @@ void pa_static_check(void)
 #endif
 
 	
-	if(usb_play_cnt == 75)
+	if(usb_play_cnt == 60)//55
 	{
 		cmd.cmd = UI_CMD_USB_PLAY_UNMUTE;
 		send_cmd_2_ui(&cmd);
