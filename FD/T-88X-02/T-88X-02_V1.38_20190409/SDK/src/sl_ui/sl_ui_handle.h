@@ -698,7 +698,7 @@ void ui_handle_vol_set(int vol);
 void save_usb_play_time(void);
 
 
-
+void ui_handle_usbe_mu_timeout(void);
 
 
 void ui_handle_play_num(int num);

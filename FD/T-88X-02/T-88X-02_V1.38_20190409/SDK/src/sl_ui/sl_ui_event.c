@@ -278,6 +278,16 @@ static void handle_ui_events_inner(struct input_event *event)
 				break;
 		}
 	}
+	else if (EV_USB == event->type) {
+		switch (event->code) {
+			case CODE_USB_IO_RESET:
+				break;
+			case CODE_USB_EMU_TIMEOUT:
+				cmd.cmd = UI_CMD_USB_EMU_TIMEOUT;
+				printf("silan usb enumrate error!\n");
+				break;
+		}
+	}
 	else if (EV_UI == event->type) {
 		switch (event->code)  {
 			case CODE_UI_SD_LOAD:

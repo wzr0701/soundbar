@@ -186,8 +186,19 @@ bool check_is_playing_sd(void)
  ****************************************************************************/
 bool check_is_playing_usb(void)
 {
+	
     ui_info_t info = sc8836_get_all_play_info();
     return  (info.ui_media == MEDIA_USB);
+    
+   /* if (ui_source_select == SOURCE_SELECT_USB)
+	{
+		return 1;
+	}
+	else 
+	{
+		return 0;
+	}
+	*/
 }
 
 /****************************************************************************

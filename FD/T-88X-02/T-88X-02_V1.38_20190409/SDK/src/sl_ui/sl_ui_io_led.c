@@ -597,13 +597,13 @@ void change_mode_unmute(void)
 
 	unmute_count++;
 
-	if(unmute_count == 20)
+	if(unmute_count == 30)
 	{
 		cmd.cmd = UI_CMD_OPEN_IIS;
 		send_cmd_2_ui(&cmd);		
 	}
 
-	if(unmute_count == 30)
+	if(unmute_count == 38)
 	{
 		cmd.cmd = UI_CMD_SET_MICVOL;
 		send_cmd_2_ui(&cmd);		

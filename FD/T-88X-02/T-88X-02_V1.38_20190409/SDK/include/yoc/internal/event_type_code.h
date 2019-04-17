@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef YOC_EVENT_TYPE_CODE_API_H
+#if 0
+//#ifndef YOC_EVENT_TYPE_CODE_API_H
 #define YOC_EVENT_TYPE_CODE_API_H
 
 /** remote procedure call */

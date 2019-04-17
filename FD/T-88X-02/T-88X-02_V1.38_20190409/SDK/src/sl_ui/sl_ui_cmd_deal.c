@@ -1075,7 +1075,6 @@ void enter_mode( int mode)
 	}
 #endif
 #endif
-
 	unmute_count = 0;
 	change_mode_flag = true;
 	//usleep(100000);
@@ -1263,10 +1262,14 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_USB_LOAD:
 				if(ui_source_select == SOURCE_SELECT_USB)
 				{
+					handle_local(SEARCH_USB_NAME);
+					/*
 					if(!usb_is_load)
 					{
 						handle_local(SEARCH_USB_NAME);
-					}						
+						usb_is_load = true;
+					}	
+					*/
 				}	
 				break;
 
@@ -1297,9 +1300,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_USB_OUT:
-				usb_is_load = false;
+				//usb_is_load = false;
 				usb_online=0;
-			
+
 				if(ui_source_select==SOURCE_SELECT_USB)
 				{
 					player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
@@ -2068,6 +2071,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					mic_open(false);
 					//bt_cmd_mic_status(mic_on_flag);
 				}						
+				break;
+
+			case UI_CMD_USB_EMU_TIMEOUT:
+				
 				break;
 
 			case UI_CMD_HALF_SECOND:

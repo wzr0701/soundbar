@@ -243,7 +243,6 @@ void handle_local(const char* local_media)
 				}
 				else
 				{
-					usb_is_load = true;
 					usb_play_flag =      true;
 					printf("%s:detach thread success\n", __func__);
 				}

@@ -252,6 +252,8 @@ enum ui_cmd_e {
     UI_CMD_SET_MICVOL,//338
 
 	UI_CMD_PLAYER_PASS,//339
+
+	UI_CMD_USB_EMU_TIMEOUT,//340
 	
 	UI_CMD_MAX,
 };

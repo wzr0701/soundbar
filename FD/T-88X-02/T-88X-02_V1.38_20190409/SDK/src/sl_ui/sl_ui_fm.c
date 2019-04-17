@@ -260,7 +260,13 @@ unsigned char FM_Mode(void)
 			
 		if(fmFrequency == CurFrequency)     //Ò»¸öÑ­»·
 		{
-			//fm_rx_set_freq(fmFrequency);	
+			if(Fre_Total_Num == 0)
+			{
+				fm_rx_set_freq(fmFrequency);
+				fm_rx_set_vol(volume);
+				pa_mute_ctrl(false);
+			}			
+			fm_scan_start =      false;
 			fm_scan_end_flag = true;
 			break;
 		}

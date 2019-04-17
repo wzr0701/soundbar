@@ -559,6 +559,7 @@ void ui_handle_power(int power_on_off)
 		//////////////////////////////////////////////
 
 		handle_local(SEARCH_USB_NAME);
+		usleep(300000);
 		//  led7_open();
 		pa_io_ret_set(true);
 		pa_static_check();
@@ -1629,9 +1630,10 @@ void set_ui_media(int source)
 		case SOURCE_SELECT_LINEIN:
 			playerInfo.ui_media = MEDIA_LINEIN;
 			break;
+		case SOURCE_SELECT_COA:
 		case SOURCE_SELECT_SPDIFIN:
 			playerInfo.ui_media = MEDIA_SPDIF;
-			break;
+			break;	
 		case SOURCE_SELECT_HDMI:
 			playerInfo.ui_media = MEDIA_HDMI;
 			break;
@@ -3133,6 +3135,27 @@ void sl_ui_system_reset(void)
 	//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 	//display_set_source(ui_source_select);
 }
+
+
+
+/*****************************************************
+
+
+
+
+*****************************************************/
+
+void ui_handle_usbe_mu_timeout(void)
+{
+#ifdef CONFIG_SILAN_USBHS
+	printf("\n%s %d", __func__, __LINE__);
+	usb_manual_disconnect();
+	sysfs_usb_umount();
+	silan_usb_task_del();
+	silan_usb_initialize();
+#endif	
+}
+
 
 /*****************************************************
 
