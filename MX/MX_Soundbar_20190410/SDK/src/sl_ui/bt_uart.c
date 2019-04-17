@@ -490,7 +490,7 @@ int handle_bt_cmd(AT_CMD cmd, int value)
                 if(value >= 0 && value < 100)
                 {
                     sprintf(buf+len, "%02d\r\n" , value);
-					len = len +3;
+					len = len + 4;
                 }
                 else
                 {
