@@ -129,4 +129,9 @@ void reset_playlist(void);
  *
  ****************************************************************************/
 void time2str(int curtime, int totaltime, char *str);
+
+void get_curdir_name(void);
+
+void get_curmusic_name_by_index(int index);
+
 #endif

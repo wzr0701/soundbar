@@ -60,7 +60,11 @@
 #else
 #define ADC_CHANNEL 0x00
 #endif
-#define SC6138_ADCKEY_TIMEOUT   1    //10ms
+#define SC6138_ADCKEY_TIMEOUT   4    //10ms
+#define SC6138_ADCKEY_LOW_TIMEOUT   2    //10ms
+#define SC6138_ADCKEY_HIGH_TIMEOUT   15    //10ms
+
+
 #define KEY_RANGE(a, b) (((a > b - 100) && (a < b + 100))? 1 : 0)
 
 struct s_key {
@@ -502,7 +506,7 @@ static void key_detect_high_level(int argc, uint32_t irq_num, ...)
 	    //去抖动计时
 	    key_priv.level_detect_number++;
 
-	    if ((key_priv.level_value & 0xf) == 0xf)
+	    if ((key_priv.level_value & 0xf) == 0x3)
 	    {   //去抖动成功按键释放
 	        //设置事件类型
 	        key_event.type = EV_KEYDRV;
@@ -518,13 +522,13 @@ static void key_detect_high_level(int argc, uint32_t irq_num, ...)
 	        //按键检复位
 	        key_detect_reset();
 	        //启动按键低状态检测看门狗计时器
-	        wd_start(key_priv.wdog_id, SC6138_ADCKEY_TIMEOUT, key_detect_low_level, 1, 0);
+	        wd_start(key_priv.wdog_id, SC6138_ADCKEY_LOW_TIMEOUT, key_detect_low_level, 1, 0);
 	        return;
 	    }
 
 	}
 	 //启动按键高状态检测看门狗计时器
-	 wd_start(key_priv.wdog_id, SC6138_ADCKEY_TIMEOUT, key_detect_high_level, 1, 0);
+	 wd_start(key_priv.wdog_id, SC6138_ADCKEY_HIGH_TIMEOUT, key_detect_high_level, 1, 0);
 }
 
 /****************************************************************************
@@ -553,7 +557,7 @@ static void key_detect_low_level(int argc, uint32_t irq_num, ...)
         if (value == -1)
         {   //没有按键
             //启动看门继续检测低状态
-            wd_start(key_priv.wdog_id, SC6138_ADCKEY_TIMEOUT, key_detect_low_level, 1, 0);
+            wd_start(key_priv.wdog_id, SC6138_ADCKEY_LOW_TIMEOUT, key_detect_low_level, 1, 0);
             return;
         }
     }
@@ -570,11 +574,11 @@ static void key_detect_low_level(int argc, uint32_t irq_num, ...)
         //按键检测复位
         key_detect_reset();
         //继续检测按键低状态
-        wd_start(key_priv.wdog_id, SC6138_ADCKEY_TIMEOUT, key_detect_low_level, 1, 0);
+        wd_start(key_priv.wdog_id, SC6138_ADCKEY_LOW_TIMEOUT, key_detect_low_level, 1, 0);
         return;
     }
 
-    if ((key_priv.level_value & 0xf) == 0xf)
+    if ((key_priv.level_value & 0xf) == 0x03)
     {   //连接8次=8*2=16ms去抖动成功
         //复位检测状态
         key_priv.level_value = 0;
@@ -592,12 +596,12 @@ static void key_detect_low_level(int argc, uint32_t irq_num, ...)
         //发送按键按键下消息
         button_add_event(&key_event);
         //启动按键高状态检测看门狗计时器
-        wd_start(key_priv.wdog_id, SC6138_ADCKEY_TIMEOUT, key_detect_high_level, 1, 0);
+        wd_start(key_priv.wdog_id, SC6138_ADCKEY_HIGH_TIMEOUT, key_detect_high_level, 1, 0);
         return;
     }
 
     //去抖动还未成功，继续检测按键低状态
-    wd_start(key_priv.wdog_id, SC6138_ADCKEY_TIMEOUT, key_detect_low_level, 1, 0);
+    wd_start(key_priv.wdog_id, SC6138_ADCKEY_LOW_TIMEOUT, key_detect_low_level, 1, 0);
 }
 
 
@@ -638,7 +642,7 @@ static int adc_main(int argc, FAR char *argv[])
     silan_adc_ioctl(key_priv.fd, CMD_ADC_SET_CHANNEL, ADC_CHANNEL);
     key_detect_reset();
     key_priv.wdog_id = wd_create();
-    ret = wd_start(key_priv.wdog_id, SC6138_ADCKEY_TIMEOUT, key_detect_low_level, 1, 0);
+    ret = wd_start(key_priv.wdog_id, SC6138_ADCKEY_LOW_TIMEOUT, key_detect_low_level, 1, 0);
     while (1)
 		usleep(10000);
 

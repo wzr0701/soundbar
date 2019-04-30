@@ -15,6 +15,7 @@
 #include "silan_resources.h"
 #include "silan_addrspace.h"
 
+
 int hdmisend_count = 0;
 int hdmi_deinit_count = 0;
 bool hdmi_cec_online=false;
@@ -371,9 +372,15 @@ void pa_static_check(void)
 #endif
 
 	
-	if(usb_play_cnt == 60)//55
+	if(usb_play_cnt == 50)
 	{
 		cmd.cmd = UI_CMD_USB_PLAY_UNMUTE;
+		send_cmd_2_ui(&cmd);
+	}
+
+	if(usb_play_cnt == 100)
+	{
+		cmd.cmd = UI_CMD_USB_ECHO_ON;
 		send_cmd_2_ui(&cmd);
 	}
 	
@@ -597,32 +604,34 @@ void change_mode_unmute(void)
 
 	unmute_count++;
 
-	if(unmute_count == 30)
+	if(unmute_count == 20)
 	{
 		cmd.cmd = UI_CMD_OPEN_IIS;
 		send_cmd_2_ui(&cmd);		
 	}
 
-	if(unmute_count == 38)
-	{
-		cmd.cmd = UI_CMD_SET_MICVOL;
-		send_cmd_2_ui(&cmd);		
-	}
-
-	if(unmute_count == 40)
+	if(unmute_count == 30)
 	{
 		//printf("%s:1.\n",__func__);	
 		cmd.cmd = UI_CMD_CHANGE_MODE_UNMUTE;
 		send_cmd_2_ui(&cmd);			
 	}
 
-	if(unmute_count == 50)
+	if(unmute_count == 40)
 	{
 		//printf("%s:2.\n",__func__);	
 		cmd.cmd = UI_CMD_CHANGE_MODE_VOL_REC;
 		send_cmd_2_ui(&cmd);
+	}
+
+	if(unmute_count == 60)
+	{
+		cmd.cmd = UI_CMD_SET_MICVOL;
+		send_cmd_2_ui(&cmd);		
 		wd_cancel(wdtimer_change_mode_unmute);
 	}
+
+	
 
 	////////////////////////////////////
 }
@@ -645,12 +654,11 @@ void ui_hdmion_send(void)
 
 	if (swa_audio_check_playing())
 	{
-		printf("\n---------->>>>>>>>>>>>hdmi is playing ! cancel hdmi send\n");
+		printf("\n%s:>>>playing success<<<\n", __func__);
 		cmd.cmd = UI_CMD_HDMION_SEND;
 		send_cmd_2_ui(&cmd);
 		wd_cancel(wdtimer_hdmion_send);
 	}
-
 
 #ifdef SL_UI_DBG
 	printf("%s\n",__func__);

@@ -12,6 +12,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include "sl_ui_handle.h"
+#include "sl_ui_cmd_deal.h"
+
 
 
 /****************************************************************************
@@ -101,7 +103,8 @@ int file_load_thread(pthread_addr_t arg)
 	if (get_local_info(search_name, &total_num, &folder_num) < 0)
 	{	//搜索失败
 		printf("%s %d not find music:%s\n", __func__, __LINE__, search_name);
-
+		usb_is_load = false;
+		usb_play_flag =      false;
 		ret = -SL_UI_ERROR_REGISTER;
 	}
 	else
@@ -109,6 +112,8 @@ int file_load_thread(pthread_addr_t arg)
 		#ifdef SL_UI_DBG
 		printf("%s %d, total_num:%d, folder_num:%d\n", __func__, __LINE__, total_num, folder_num);
 		#endif
+		usb_is_load = true;
+		usb_play_flag =      true;
 
 		//向UI层发送消息
 		ui_cmd_t cmd;
@@ -213,6 +218,8 @@ void handle_local(const char* local_media)
 	if (NULL == local_dir)
 	{	//USB设备文件夹打开失败
 		printf("%s:open dir failed \n", __func__, __LINE__);
+		usb_is_load = false;
+		usb_play_flag =      false;
 	    //  power_on_usb_sd_auto_play=1;
 	}
 	else
@@ -243,7 +250,6 @@ void handle_local(const char* local_media)
 				}
 				else
 				{
-					usb_play_flag =      true;
 					printf("%s:detach thread success\n", __func__);
 				}
 			}
@@ -273,7 +279,8 @@ void handle_local_music_play(int file_index, int playtime)
 	//printf("%s:file_index === %d\n", __func__,file_index);
 	if(play_list_get_file_byindex(&item, file_index) == 0)
 	{
-		printf("%s:file_index === %d\n", __func__,file_index);
+		//printf("%s:file_index === %d\n", __func__,file_index);
+		get_curmusic_name_by_index(file_index);
 		search_current_music_folder();
 		save_usb_num(file_index);
 		//printf("%s:folder_index_tab[%d][0] === %d----------folder_index_tab[%d][1] === %d\n", __func__,folder_index_cnt,folder_index_tab[folder_index_cnt][0],folder_index_cnt,folder_index_tab[folder_index_cnt][1]);
@@ -285,7 +292,8 @@ void handle_local_music_play(int file_index, int playtime)
 		{
 			file_rel_pos = file_index - folder_index_tab[folder_index_cnt][0];
 		}
-		
+		set_adc_channel_vol(0,0);
+		//set_echo_vol(0);
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 		pcm1803_power_crt(false);
 		pa_mute_ctrl(true);
@@ -352,4 +360,19 @@ void time2str(int curtime, int totaltime, char *str)
 	tot_sec = totaltime%60;
 	sprintf(str, "%02d:%02d/%02d:%02d", cur_min, cur_sec, tot_min, tot_sec);
 }
+
+
+void get_curdir_name(void)
+{
+	dir_elmt_t *cur_folder = play_list_get_cur_direlm();
+	printf("dir %s,%d\n",cur_folder->path_name,cur_folder->dir_num);
+}
+
+void get_curmusic_name_by_index(int index)
+{
+	play_list_item_t  item;
+	play_list_get_file_byindex(&item,index);
+	printf("dir %s,name %s,index = %d\n",item.path,item.name,index);
+}
+
 

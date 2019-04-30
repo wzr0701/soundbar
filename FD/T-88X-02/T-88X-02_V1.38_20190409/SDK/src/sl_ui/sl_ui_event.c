@@ -63,7 +63,7 @@ bool ir_reset_flag =  false;
 bool ir_playpause_flag =  false;
 bool fm_manual_save_flag =  false;
 
-
+bool key_longpress_flag = false;
 
 static void handle_ui_events_inner(struct input_event *event);
 
@@ -204,15 +204,18 @@ static void handle_ui_events_inner(struct input_event *event)
                 */ 
 				if(value == CMD_UI_INC)
 				{
+					//key_longpress_flag = true;
 					cmd.cmd = UI_CMD_VOLUME_INC_DOWN;
 				}
                 else if(value == CMD_UI_DEC)
 				{
+					//key_longpress_flag = true;
 					cmd.cmd = UI_CMD_VOLUME_DEC_DOWN;
 				}
             }
             break;
         case CODE_KEY_CLICK:
+			//key_longpress_flag = false;
             cmd = ui_handle_click(event->value);
             break;
         }

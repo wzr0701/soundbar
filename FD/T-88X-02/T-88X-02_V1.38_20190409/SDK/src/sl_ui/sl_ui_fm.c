@@ -348,6 +348,9 @@ void fre_manual_save(void)
 			Delay5Ms(10);
 			at24c02_write_one_byte(MEM_CUR_FRE_NUM ,temp);
 			Delay5Ms(10);
+			temp=fmFrequency-FM_MIN;
+			at24c02_write_one_byte(MEM_FM_FREQUENCY ,temp);
+			Delay5Ms(10);
 		}
 		
 	}

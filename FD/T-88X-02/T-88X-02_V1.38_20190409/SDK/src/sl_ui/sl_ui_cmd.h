@@ -254,6 +254,8 @@ enum ui_cmd_e {
 	UI_CMD_PLAYER_PASS,//339
 
 	UI_CMD_USB_EMU_TIMEOUT,//340
+
+	UI_CMD_USB_ECHO_ON,//341
 	
 	UI_CMD_MAX,
 };

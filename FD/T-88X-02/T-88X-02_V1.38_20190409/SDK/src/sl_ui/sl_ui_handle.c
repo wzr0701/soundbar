@@ -186,6 +186,7 @@ extern int bt_wait_cnt;
 extern char mic_on_flag;
 extern bool mic_detect_online;
 
+extern bool key_longpress_flag;
 
 unsigned char power_on_usb_sd_auto_play;
 
@@ -483,7 +484,7 @@ void ui_handle_power(int power_on_off)
 	{
 #if (FREQ_SWITCH)
 		enter_dynamic();
-		printf("out of low power\n");
+		//printf("out of low power\n");
 #endif
 		//printf("POWERon%d\r\n");
 
@@ -662,7 +663,7 @@ void ui_handle_power(int power_on_off)
 			//pa_mute_ctrl(true);
 
 #if (FREQ_SWITCH)
-		printf("enter low power\n");
+		//printf("enter low power\n");
 		enter_dynamic();
 #endif
 	}
@@ -712,7 +713,7 @@ void ui_handle_mode(int source, bool notify)
             ui_source_select = source;
         }
 
-       printf("start_play_ui_source_select==%d\r\n",ui_source_select);
+       //printf("start_play_ui_source_select==%d\r\n",ui_source_select);
 
     }
 
@@ -1028,7 +1029,7 @@ int bt_cmd_check(char *buf_recv)
         {
 			//BT 版本号
 			bt_version_num = value;
-            printf("bt_version_num = %d\n", value);
+            //printf("bt_version_num = %d\n", value);
         }
 		else if(index == AT_SET_MAINVOL)
         {
@@ -1108,7 +1109,7 @@ void bt_read_state(void)
             ret = bt_read(ptr, buf_szie);
             if (ret > 0)
             {
-				printf("%s:%s",__func__,buf_recv);
+				//printf("%s:%s",__func__,buf_recv);
                 int ui_cmd = bt_cmd_check(buf_recv);
                 if(ui_cmd == UI_CMD_NULL)
                 {
@@ -1443,7 +1444,7 @@ void ui_bt_forward(void)
     fd = open(CONFIG_PM_DEV_PATH, O_RDWR);
     if (fd < 0)
     {
-        printf("%s:open /dev/pm error\n", __func__);
+        //printf("%s:open /dev/pm error\n", __func__);
     }
     else
     {
@@ -1451,19 +1452,19 @@ void ui_bt_forward(void)
         {
             cur_freq = 6000000;
             ret = ioctl(fd, PMIOC_DYNAMICFREQ, 6000000);
-            printf("%s:Switch to 6 MHz freq\n", __func__);
+            //printf("%s:Switch to 6 MHz freq\n", __func__);
         }
         else if (cur_freq == 6000000)
         {
             cur_freq = 204000000;
             ret = ioctl(fd, PMIOC_DYNAMICFREQ, 204000000);
-            printf("%s:Switch to 204 MHz freq\n", __func__);
+            //printf("%s:Switch to 204 MHz freq\n", __func__);
         }
 
         /* update time throld to 60s */
         if (ret != 0)
         {
-            printf("%s:Switch freq fail\n", __func__);
+            //printf("%s:Switch freq fail\n", __func__);
             pm_sync(STANDBY_DELAY_SEC);
         }
 
@@ -1802,7 +1803,7 @@ void ui_handle_load_sd(void)
         //加载USB文件列表
         handle_local(SEARCH_SD_NAME);
     }
-    printf("%s:load\n", __func__);
+    //printf("%s:load\n", __func__);
 }
 
 /****************************************************************************
@@ -1825,7 +1826,7 @@ void ui_handle_load_usb(void)
         //加载USB文件列表
         handle_local(SEARCH_USB_NAME);
     }
-    printf("%s:load\n", __func__);
+    //printf("%s:load\n", __func__);
 }
 
 
@@ -1861,6 +1862,7 @@ void ui_handle_play_num(int num)
         int total = get_file_total();
 		//printf("%s:get_file_total === %d\n", __func__,total);
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+		usleep(1000);
 		pa_mute_ctrl(true);
 		
         if( (total > 0)&&(num<=total))
@@ -1887,7 +1889,7 @@ void ui_handle_play_num(int num)
 		pa_mute_ctrl(false);
 		#endif
     }
-    printf("%s.\n", __func__);
+    //printf("%s.\n", __func__);
 }
 
 
@@ -2181,7 +2183,7 @@ void ui_handle_folder_next(void)
 		#endif
     }
 
-    printf("%s\n", __func__);
+    //printf("%s\n", __func__);
 }
 
 /****************************************************************************
@@ -2251,7 +2253,7 @@ void ui_handle_folder_prev(void)
 		#endif
     }
 
-    printf("%s\n", __func__);
+    //printf("%s\n", __func__);
 }
 
 /****************************************************************************
@@ -2331,7 +2333,7 @@ void ui_handle_sd_unload(void)
     if(ui_source_select == SOURCE_SELECT_SD)
     {
         player_process_cmd(NP_CMD_STOP, NULL, 0, NULL, NULL);
-        usleep(100);
+        usleep(1000);
 
         //通知USB拔出
         struct input_event ui_event;
@@ -2370,7 +2372,7 @@ void ui_handle_usb_out(void)
     if(ui_source_select == SOURCE_SELECT_USB)
     {
 		player_process_cmd(NP_CMD_STOP, NULL, 0, NULL, NULL);
-		usleep(100);
+		usleep(1000);
 
 		//通知USB拔出
 		struct input_event ui_event;
@@ -2407,7 +2409,7 @@ void ui_handle_usb_out(void)
 extern int mic_vol;
 void ui_handle_mute(void)
 {
-    printf("\n%s\n", __func__);
+    //printf("\n%s\n", __func__);
     if (mute_state == UNMUTE)
     {
 		#if 0
@@ -2417,7 +2419,9 @@ void ui_handle_mute(void)
 		set_adc_channel_vol(3,0);
 		#endif
         player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+		usleep(1000);
         mute_state = MUTE;
+		pcm1803_power_crt(false);
         pa_mute_ctrl(true);
 		if (ui_source_select == SOURCE_SELECT_HDMI)
 		{
@@ -2473,6 +2477,7 @@ void ui_handle_mute(void)
 		set_channel_mixvol_by_mode(ui_source_select);
         //player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
         mute_state = UNMUTE;
+		pcm1803_power_crt(true);
        	pa_mute_ctrl(false);
 		if (ui_source_select == SOURCE_SELECT_HDMI)
 		{
@@ -2495,6 +2500,8 @@ void ui_handle_mute(void)
 		if(take_micmute_flag ==        true)
 		{
 			take_micmute_flag = false;
+			mic_detect_switch();
+			/*
 			if(mic_on_flag)
 			{
 				if(mic_detect_online)
@@ -2510,6 +2517,7 @@ void ui_handle_mute(void)
 			{
 				mic_open(false);
 			}
+			*/
 		}
 		
 		
@@ -2554,7 +2562,7 @@ void ui_handle_vol_up(void)
     ui_process_vol_inc();
 
 #ifdef SL_UI_DBG
-    printf("%s, volume_up\n", __func__);
+    //printf("%s, volume_up\n", __func__);
 #endif
 }
 
@@ -2583,7 +2591,7 @@ void ui_handle_vol_down(void)
     ui_process_vol_dec();
 
 #ifdef SL_UI_DBG
-    printf("%s, volume down\n", __func__);
+    //printf("%s, volume down\n", __func__);
 #endif
 }
 
@@ -2614,7 +2622,7 @@ void ui_handle_vol_set(int vol)
 			ui_handle_mute();
 		}
 		
-		printf("set vol %d\n",vol);
+		//printf("set vol %d\n",vol);
 		bt_mix_vol = vol;
         //mix_vol = (float)vol * VOL_STEP;
         select_mixvol_table();
@@ -2733,7 +2741,22 @@ void ui_handle_vol_long_press_up(void)
     if (NULL != wdtimer_vol_longpress)
     { //???????????
         wd_cancel(wdtimer_vol_longpress);
+		#if 0
+		if(key_longpress_flag == true)
+		{
+			key_longpress_flag = false;
+			if(ui_source_select == SOURCE_SELECT_HDMI)
+			{
+				sc8836_action_hdmi_soundbar_adj_tv_vol();
+			}
+		}
+		#endif
     }
+	
+	if(ui_source_select == SOURCE_SELECT_HDMI)
+	{
+		sc8836_action_hdmi_soundbar_adj_tv_vol();
+	}
 }
 
 
@@ -2828,11 +2851,15 @@ static void ui_process_vol_dec(void)
 		/*直接调channel音量，会导致功率过早到达额定功率，所以固定channel音量，调节总音量*/
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 #endif
-
-		if(ui_source_select == SOURCE_SELECT_HDMI)
+		/*
+		if(key_longpress_flag == false)
 		{
-			sc8836_action_hdmi_soundbar_adj_tv_vol();
+			if(ui_source_select == SOURCE_SELECT_HDMI)
+			{
+				sc8836_action_hdmi_soundbar_adj_tv_vol();
+			}
 		}
+		*/
 		
 		//printf("%s:mix_vol = %d\n", __func__, mix_vol);
 
@@ -2967,7 +2994,8 @@ static void ui_process_vol_inc(void)
 		if(take_micmute_flag ==        true)
 		{
 			take_micmute_flag = false;
-			if(mic_on_flag)
+			mic_detect_switch();
+			/*if(mic_on_flag)
 			{
 				if(mic_detect_online)
 				{
@@ -2982,12 +3010,18 @@ static void ui_process_vol_inc(void)
 			{
 				mic_open(false);
 			}
+			*/
 		}
-		
-		if(ui_source_select == SOURCE_SELECT_HDMI)
+
+		/*
+		if(key_longpress_flag == false)
 		{
-			sc8836_action_hdmi_soundbar_adj_tv_vol();
+			if(ui_source_select == SOURCE_SELECT_HDMI)
+			{
+				sc8836_action_hdmi_soundbar_adj_tv_vol();
+			}
 		}
+		*/
 
 		//printf("%s:mix_vol = %d\n", __func__, mix_vol);
 
@@ -3148,7 +3182,7 @@ void sl_ui_system_reset(void)
 void ui_handle_usbe_mu_timeout(void)
 {
 #ifdef CONFIG_SILAN_USBHS
-	printf("\n%s %d", __func__, __LINE__);
+	//printf("\n%s %d", __func__, __LINE__);
 	usb_manual_disconnect();
 	sysfs_usb_umount();
 	silan_usb_task_del();
