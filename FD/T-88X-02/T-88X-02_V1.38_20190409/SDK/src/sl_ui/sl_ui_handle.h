@@ -728,11 +728,12 @@ int sc8836_action_hdmi_poweron(void);
 
 #endif
 
+#if 0
 void ui_handle_eq_music(void);
 void ui_handle_eq_movie(void);
 void ui_handle_eq_dialog(void);
 void ui_handle_unload_eq(void);
-
+#endif
 
 void bt_read_state(void);
 void bt_cmd_fmscan_start(void);

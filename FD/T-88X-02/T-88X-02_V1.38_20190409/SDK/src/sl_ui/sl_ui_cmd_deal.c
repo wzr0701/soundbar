@@ -174,6 +174,8 @@ extern int usb_last_file_index;
 
 extern char usb_dis_cnt;
 
+extern bool frist_usb_flag;
+
 extern int folder_index_cnt;
 extern int folder_index_tab[255][2];
 
@@ -955,7 +957,9 @@ void enter_mode( int mode)
 			sl_ui_set_reqrate();
 			usleep(1000);	
 			handle_local(SEARCH_USB_NAME);
-			wd_start(wdtimer_hdmion_send, 900, ui_hdmion_send, 0);
+			//usleep(200000);	
+			//frist_usb_flag = false;
+			//wd_start(wdtimer_hdmion_send, 900, ui_hdmion_send, 0);
 			break;
 
 		case SOURCE_SELECT_SD:
@@ -1157,6 +1161,7 @@ void exit_mode( int mode)
 		case SOURCE_SELECT_USB:
 			usb_is_load = false;
 			usb_play_flag =      false;
+			frist_usb_flag = false;
 			break;
 
 		case SOURCE_SELECT_SD:
@@ -1285,17 +1290,19 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_USB_LOAD:
-				if(ui_source_select == SOURCE_SELECT_USB)
+				if((ui_source_select == SOURCE_SELECT_USB)&&(frist_usb_flag == false))
 				{
-					player_process_cmd(NP_CMD_I2SIN_CLOSE, NULL, 1, NULL, NULL);
-					usleep(1000);
+					//player_process_cmd(NP_CMD_I2SIN_CLOSE, NULL, 1, NULL, NULL);
+					//usleep(10000);
 					handle_local(SEARCH_USB_NAME);
-					wd_start(wdtimer_hdmion_send, 900, ui_hdmion_send, 0);
+					//wd_start(wdtimer_hdmion_send, 900, ui_hdmion_send, 0);
 				}	
 				break;
 
 
 			case UI_CMD_FILES_IS_LOAD:	
+				frist_usb_flag = false;
+				wd_start(wdtimer_hdmion_send, 900, ui_hdmion_send, 0);
 				ui_handle_file_load(arg1,arg2,arg3);				
 				break;
 
@@ -2018,34 +2025,38 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 				
 			case UI_CMD_APP_MOVIE_ON:
+				display_ui_movie(true);
 				if(!movie_on_flag)
 				{
 					movie_on_flag^=0xff;
-					ui_handle_eq_movie();
-				}
-				display_ui_movie(true);
+					PCM5242_MovieMode_Init();
+					//ui_handle_eq_movie();
+				}				
 				break;
 
 			case UI_CMD_APP_MOVIE_OFF:
+				display_ui_movie(false);
 				if(movie_on_flag)
 				{
 					movie_on_flag^=0xff;
-					ui_handle_unload_eq();
+					//ui_handle_unload_eq();
+					PCM5242_NormalMode_Init();
 				}
-				display_ui_movie(false);
 				break;
 
 			case UI_CMD_MOVIE_ON:
 				movie_on_flag^=0xff;
 				if(movie_on_flag)
 				{
-					ui_handle_eq_movie();
+					//ui_handle_eq_movie();
 					display_ui_movie(true);
+					PCM5242_MovieMode_Init();
 				}
 				else
 				{
-					ui_handle_unload_eq();
+					//ui_handle_unload_eq();
 					display_ui_movie(false);
+					PCM5242_NormalMode_Init();
 				}
 
 				bt_cmd_movie_status(movie_on_flag);

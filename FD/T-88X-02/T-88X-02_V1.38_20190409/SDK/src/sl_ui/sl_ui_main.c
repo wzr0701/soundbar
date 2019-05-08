@@ -76,6 +76,7 @@ struct ui_s *Ui = NULL;
 /*输入声源选择*/
 int ui_source_select = -1;
 
+bool frist_usb_flag = false;
 
 //外部变量
 /*声音显示延迟显示看们狗ID*/
@@ -147,6 +148,7 @@ static int sl_ui_thread(int argc, char **argv)
 #ifdef CONFIG_CEC
 	cec_entry();
 #endif
+	frist_usb_flag = true;
 	///////////////////////////////////
 	pa_io_ret_set(false);
 	bt_power_crt(false);

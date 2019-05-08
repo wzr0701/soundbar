@@ -217,7 +217,7 @@ static void ui_process_vol_dec(void);
 static void ui_process_vol_inc(void);
 
 
-
+#if 0
 #define eq_set_ch		6 
 
 //music
@@ -299,6 +299,7 @@ void ui_handle_unload_eq(void)
 	swa_audio_audproc_unload(AUDPROC_LIST_MIX, AUDPROC_EQ);
 	usleep(100);
 }
+#endif
 /******************************************
 
 
@@ -559,15 +560,15 @@ void ui_handle_power(int power_on_off)
 
 		//////////////////////////////////////////////
 
-		handle_local(SEARCH_USB_NAME);
-		usleep(300000);
+		//handle_local(SEARCH_USB_NAME);
+		//usleep(500000);
 		//  led7_open();
 		pa_io_ret_set(true);
 		pa_static_check();
 		//sl_func_add();
 		dis_play_update();
 		enter_othermode_check();
-		change_mode_unmute();
+		//change_mode_unmute();
 
 		read_player_info();
 		read_mix_vol();
@@ -575,11 +576,14 @@ void ui_handle_power(int power_on_off)
 		read_trebass_level(TREBLE_MODE);	
 		set_bass_treble_vol(BASS_MODE,bass_vol,0);
 		set_bass_treble_vol(TREBLE_MODE,treble_vol,0);
-		//ui_source_select = SOURCE_SELECT_START;
-		ui_handle_mode(ui_source_select, false);
+
 		bt_cmd_source_select(ui_source_select);
 		bt_cmd_current_bass(bass_vol); //bass
 		bt_cmd_current_treble(treble_vol); //treble
+		
+		//ui_source_select = SOURCE_SELECT_START;
+		ui_handle_mode(ui_source_select, false);
+	
 
 #if 0
 		usleep(500000);

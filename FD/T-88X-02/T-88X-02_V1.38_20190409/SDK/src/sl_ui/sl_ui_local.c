@@ -40,6 +40,7 @@ extern int folder_index_cnt;
 extern bool usb_is_load;
 extern bool folder_dis_flag;
 extern bool usb_play_flag;
+extern bool frist_usb_flag;
 
 int folder_index_tab[255][2];
 int folder_total_num = 0;
@@ -105,6 +106,7 @@ int file_load_thread(pthread_addr_t arg)
 		printf("%s %d not find music:%s\n", __func__, __LINE__, search_name);
 		usb_is_load = false;
 		usb_play_flag =      false;
+		frist_usb_flag = false;
 		ret = -SL_UI_ERROR_REGISTER;
 	}
 	else
@@ -213,6 +215,9 @@ void handle_local(const char* local_media)
 {
 	DIR *local_dir = NULL;
 
+	usb_is_load = false;
+	usb_play_flag =      false;
+		
 	//测试USB设备文件夹是否能够打开
 	local_dir = opendir(local_media);
 	if (NULL == local_dir)
@@ -220,10 +225,12 @@ void handle_local(const char* local_media)
 		printf("%s:open dir failed \n", __func__, __LINE__);
 		usb_is_load = false;
 		usb_play_flag =      false;
-	    //  power_on_usb_sd_auto_play=1;
+		frist_usb_flag = false;
+	    //power_on_usb_sd_auto_play=1;
 	}
 	else
-	{	//USB设备文件夹打开成功
+	{	
+		//USB设备文件夹打开成功
 		//关闭文件夹
 		closedir(local_dir);
 
