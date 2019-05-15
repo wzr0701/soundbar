@@ -1691,6 +1691,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 
 			case UI_CMD_VOLUME_SET:
 				ui_handle_vol_set(cmd->arg2);
+				if (ui_source_select == SOURCE_SELECT_USB)
+				{
+					save_usb_play_time();
+				}
 				break;
 
 			case UI_CMD_TREBLE_SET:
@@ -1698,6 +1702,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				set_bass_treble_vol(TREBLE_MODE,treble_vol,1);
 				save_trebass_level(TREBLE_MODE);
 				//display_ui_bass_vol(TREBLE_MODE,treble_vol);
+				if (ui_source_select == SOURCE_SELECT_USB)
+				{
+					save_usb_play_time();
+				}
 				break;
 
 			case UI_CMD_BASS_SET:
@@ -1705,6 +1713,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				set_bass_treble_vol(BASS_MODE,bass_vol,1);
 				save_trebass_level(BASS_MODE);
 				//display_ui_bass_vol(BASS_MODE,bass_vol);
+				if (ui_source_select == SOURCE_SELECT_USB)
+				{
+					save_usb_play_time();
+				}
 				break;
 
 			case UI_CMD_ECHO_SET:
@@ -1717,6 +1729,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					echo_vol_lev = 15;
 				display_mic_vol(echo_vol_lev);
 				set_echo_vol(cmd->arg2);
+				if (ui_source_select == SOURCE_SELECT_USB)
+				{
+					save_usb_play_time();
+				}
 				break;
 
 			case UI_CMD_MICVOL_SET:
@@ -1729,6 +1745,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					mic_vol_lev = 30;
 				display_mic_vol(mic_vol_lev);
 				set_micvol_level(cmd->arg2);
+				if (ui_source_select == SOURCE_SELECT_USB)
+				{
+					save_usb_play_time();
+				}
 				break;
 
 			case UI_CMD_VOLUME_INC_DOWN:
@@ -1816,8 +1836,11 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						mic_open(false);
 					}				
 				}
-
 				display_ui_mic(true);
+				if(ui_source_select == SOURCE_SELECT_USB)
+				{
+					save_usb_play_time();
+				}
 				break;
 
 			case UI_CMD_APP_MIC_OFF:
@@ -1831,6 +1854,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				}
 					
 				display_ui_mic(false);
+				if(ui_source_select == SOURCE_SELECT_USB)
+				{
+					save_usb_play_time();
+				}
 				//bt_cmd_mic_status(mic_on_flag);
 				break;
 				
@@ -1863,7 +1890,11 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					display_ui_mic(false);
 					//bt_cmd_mic_status(mic_on_flag);
 				}
-
+				
+				if(ui_source_select == SOURCE_SELECT_USB)
+				{
+					save_usb_play_time();
+				}
 				bt_cmd_mic_status(mic_on_flag);
 			break;
 
@@ -1930,6 +1961,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						set_echo_vol(echo_vol_lev);
 						bt_cmd_current_echo();
 						display_mic_vol(echo_vol_lev);
+						if(ui_source_select == SOURCE_SELECT_USB)
+						{
+							save_usb_play_time();
+						}
 						//printf("mic_echo_add\n");
 					}
 					break;
@@ -1950,6 +1985,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						set_echo_vol(echo_vol_lev);
 						bt_cmd_current_echo();
 						display_mic_vol(echo_vol_lev);
+						if(ui_source_select == SOURCE_SELECT_USB)
+						{
+							save_usb_play_time();
+						}
 						//printf("mic_echo_sub\n");
 					}
 					break;
