@@ -41,6 +41,7 @@ extern bool usb_is_load;
 extern bool folder_dis_flag;
 extern bool usb_play_flag;
 extern bool frist_usb_flag;
+extern bool echo_on_flag;
 
 int folder_index_tab[255][2];
 int folder_total_num = 0;
@@ -177,7 +178,7 @@ static int get_local_info(char *local_name, int *total_num, int *folder_num)
 			folder_index_tab[j][0] = total_file_index;
 			total_file_index += file_num;
 			folder_index_tab[j][1] = total_file_index - 1;
-			//printf("%s-------- folder_index_tab[j][1]: %d \n",__func__,folder_index_tab[j][1]);
+			//printf("%s-------- folder_index_tab[%d][1]: %d \n",__func__,j,folder_index_tab[j][1]);
 			/*printf("%s-------- path:%s--no.: %d--parent:%d--child:%d---index:%d--num:%d--dir:%d--folder_index_tab[%d][0]:%d--folder_index_tab[%d][1]:%d \n",
 			__func__,dir_elm->path_name, i, dir_elm->parent_index, dir_elm->child_index, dir_elm->file_index,
 			dir_elm->file_num, dir_elm->dir_num,j, folder_index_tab[j][0],j, folder_index_tab[j][1]);*/
@@ -304,6 +305,7 @@ void handle_local_music_play(int file_index, int playtime)
 		player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 		pcm1803_power_crt(false);
 		pa_mute_ctrl(true);
+		echo_on_flag = true; 
 		usb_prev_flag = false;
 		//发送命令进行播放
 		player_process_cmd(NP_CMD_PLAY, item.path, 0, NULL, NULL);

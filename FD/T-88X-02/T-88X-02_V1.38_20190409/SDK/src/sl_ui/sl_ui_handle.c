@@ -77,6 +77,8 @@ extern void sl_ui_set_samp(void);
 extern int  bass_vol;
 extern int treble_vol;
 
+extern bool echo_on_flag;
+
 int folder_index_cnt=0;
 bool folder_dis_flag = false;
 int folder_dis_cnt = 100;
@@ -1736,10 +1738,10 @@ void ui_handle_file_load(int total_num, int folder_num, char * url)
 		if(usb_last_total_num == -1)
 		{
 			file_index_temp = read_usb_num();
-			//printf("%s:file_index_temp = %d.\n", __func__,file_index_temp);
+			//printf("%s:file_index_temp = %d.---total_num = %d.---folder_index_tab[folder_total_num-1][1] = %d.\n", __func__,file_index_temp,total_num,folder_index_tab[folder_total_num-1][1]);
 			if(file_index_temp != -1)
 			{
-				if(file_index_temp <= total_num)
+				if(file_index_temp <= folder_index_tab[folder_total_num-1][1])
 				{
 					usb_last_file_index = file_index_temp;
 					usb_playtime = 0;
@@ -2422,10 +2424,10 @@ void ui_handle_mute(void)
 		set_adc_channel_vol(2,0);
 		set_adc_channel_vol(3,0);
 		#endif
-        player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
-		usleep(1000);
-        mute_state = MUTE;
-		pcm1803_power_crt(false);
+		mute_state = MUTE;
+        //player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
+		//usleep(1000);
+		//pcm1803_power_crt(false);
         pa_mute_ctrl(true);
 		if (ui_source_select == SOURCE_SELECT_HDMI)
 		{
@@ -2434,10 +2436,10 @@ void ui_handle_mute(void)
 			sc8836_action_hdmi_soundbar_adj_tv_vol();
 		}
 		
-		if (ui_source_select == SOURCE_SELECT_USB)
-		{
-			save_usb_play_time();
-		}
+		//if (ui_source_select == SOURCE_SELECT_USB)
+		//{
+		//	save_usb_play_time();
+		//}
 		
 		if ((ui_source_select == SOURCE_SELECT_FM)&&(app_mute_flag == false))
 		{
@@ -2478,9 +2480,9 @@ void ui_handle_mute(void)
 			set_adc_channel_vol(1,(int)mix_vol);
 		}
 		#endif
+		mute_state = UNMUTE;
 		set_channel_mixvol_by_mode(ui_source_select);
         //player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
-        mute_state = UNMUTE;
 		pcm1803_power_crt(true);
        	pa_mute_ctrl(false);
 		if (ui_source_select == SOURCE_SELECT_HDMI)
@@ -3095,9 +3097,12 @@ void set_adc_channel_vol(int ch, int vol)
 	switch(ch)
 	{
 		case 0://adc 0
-				swa_audio_audproc_load(AUDPROC_LIST_ADC0, AUDPROC_VOLUMECTL);
-				swa_audio_audproc_vol(AUDPROC_LIST_ADC0, 0, val);
-				swa_audio_audproc_set(AUDPROC_LIST_ADC0, AUDPROC_VOLUMECTL);
+				if(echo_on_flag == false)
+				{
+					swa_audio_audproc_load(AUDPROC_LIST_ADC0, AUDPROC_VOLUMECTL);
+					swa_audio_audproc_vol(AUDPROC_LIST_ADC0, 0, val);
+					swa_audio_audproc_set(AUDPROC_LIST_ADC0, AUDPROC_VOLUMECTL);
+				}				
 			break;
 		case 1://adc 1
 				swa_audio_audproc_load(AUDPROC_LIST_ADC1, AUDPROC_VOLUMECTL);

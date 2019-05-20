@@ -82,7 +82,7 @@ static const int mic_auxvol_table[31]={
 	69, 72,75,78,80
 };
 
-
+bool echo_on_flag = false;
 
 char mic_vol_flag = false;
 char mic_echo_flag = false;
@@ -495,7 +495,9 @@ void dis_play_update(void)
 		{
 			if(bt_wait_flag == false)
 			{
-				display_ui_bt();
+				cmd.cmd = UI_CMD_DISPLAY_BT;
+				send_cmd_2_ui(&cmd);
+				//display_ui_bt();
 			}
 			else
 			{
@@ -503,7 +505,9 @@ void dis_play_update(void)
 				if(wait_count==2)
 				{
 					wait_count=0;
-					display_ui_bt();
+					cmd.cmd = UI_CMD_DISPLAY_BT;
+					send_cmd_2_ui(&cmd);
+					//display_ui_bt();
 				}
 			}
 			if(folder_dis_flag == false)
@@ -546,7 +550,9 @@ void dis_play_update(void)
 
 		if(dis_other_mode<4)
 		{
-			display_ui_mute();
+			cmd.cmd = UI_CMD_DISPLAY_MUTE;
+			send_cmd_2_ui(&cmd);
+			//display_ui_mute();
 		}
 
 		if((0<dis_other_mode)&&(dis_other_mode<3))
@@ -574,58 +580,70 @@ void dis_play_update(void)
 void mic_open(bool on_off)
 {
 	char * mic_str;
-	if(on_off)
+	if(echo_on_flag == false)
 	{
-		usleep(1000);
-		mic_vol = mic_vol_table[mic_vol_lev];
-		set_adc_channel_vol(0,mic_vol);
-		bt_cmd_current_micvol();
+		if(on_off)
+		{
+			usleep(1000);
+			mic_vol = mic_vol_table[mic_vol_lev];
+			set_adc_channel_vol(0,mic_vol);
+			//usleep(1000);
+		}
+		else
+		{
+			usleep(1000);
+			set_adc_channel_vol(0,0);
+			usleep(1000);
+		}
 		//usleep(1000);
 	}
-	else
+	
+	if(on_off)
 	{
-		usleep(1000);
-		set_adc_channel_vol(0,0);
-		usleep(1000);
-	}
-	//usleep(1000);
-
+		bt_cmd_current_micvol();
+	}	
 }
 
 void set_echo_vol(int vol)
-{
+{	
 	char parg[256] = {0};
 	//int *echovol = &vol;
-	
-	if(vol == 0)
+	if(echo_on_flag == false)
 	{
-		parameter_echo[ECHO_DELAY] = 0;
-	}
-	else
-	{
-		parameter_echo[ECHO_DELAY] = 200;
+		if(vol == 0)
+		{
+			parameter_echo[ECHO_DELAY] = 0;
+		}
+		else
+		{
+			parameter_echo[ECHO_DELAY] = 200;
+		}
+		
+		if(vol == 15)
+		{
+			vol = 14;
+		}
+
+		//echo_vol_lev = *echovol;
+		
+		parameter_echo[ECHO_GAIN] =- (3000-(vol*200));
+
+		player_process_cmd(NP_CMD_UNLOAD_MIC_ECHO, NULL, 0, NULL, NULL);
+		//usleep(10000);
+
+		sprintf(parg, "%d %d %d %d %d %d", \
+				parameter_echo[ECHO_TYPE], parameter_echo[ECHO_GAIN], \
+				parameter_echo[ECHO_DELAY], parameter_echo[ECHO_STYPE], \
+				parameter_echo[ECHO_SHIFT], parameter_echo[ECHO_NUMBER]);
+
+		//printf("echo param :%s\r\n", parg);
+
+		player_process_cmd(NP_CMD_LOAD_MIC_ECHO, NULL, 0, NULL, NULL);
+		//usleep(10000);
+		player_process_cmd(NP_CMD_SET_MIC_ECHO, parg, 0, NULL, NULL);
+		//usleep(10000);
 	}
 	
-	if(vol == 15)
-	{
-		vol = 14;
-	}
-
-	//echo_vol_lev = *echovol;
-	
-	parameter_echo[ECHO_GAIN] =- (3000-(vol*200));
-
-	player_process_cmd(NP_CMD_UNLOAD_MIC_ECHO, NULL, 0, NULL, NULL);
-
-	sprintf(parg, "%d %d %d %d %d %d", \
-			parameter_echo[ECHO_TYPE], parameter_echo[ECHO_GAIN], \
-			parameter_echo[ECHO_DELAY], parameter_echo[ECHO_STYPE], \
-			parameter_echo[ECHO_SHIFT], parameter_echo[ECHO_NUMBER]);
-
-	//printf("echo param :%s\r\n", parg);
-
-	player_process_cmd(NP_CMD_LOAD_MIC_ECHO, NULL, 0, NULL, NULL);
-	player_process_cmd(NP_CMD_SET_MIC_ECHO, parg, 0, NULL, NULL);
 
 }
 
@@ -663,21 +681,23 @@ void set_micvol_level(int vol)
 		}
 		*/
 		int *micvol = &vol;
-
-		mic_vol = mic_vol_table[mic_vol_lev];
-
-		mic_vol_lev = *micvol;
 		
-		if(mic_detect_online)
+		if(echo_on_flag == false)
 		{
-			set_adc_channel_vol(0,mic_vol);
-		}
+			mic_vol = mic_vol_table[mic_vol_lev];
 
-		
+			mic_vol_lev = *micvol;
+			
+			if(mic_detect_online)
+			{
+				set_adc_channel_vol(0,mic_vol);
+			}
+		}		
 }
 
 void mic_detect_switch(void)
 {
+	//printf("%s:mic_on_flag = %d.\n", __func__,mic_on_flag);
 	if(mic_on_flag)
 	{
 		if(mic_detect_online)
@@ -826,6 +846,7 @@ void enter_mode( int mode)
 	player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 	pcm1803_power_crt(false);
 	pa_mute_ctrl(true);
+	echo_on_flag = true;
 	usleep(100000);
 	
 	select_mixvol_table();
@@ -1226,8 +1247,8 @@ void exit_mode( int mode)
 ****************************************************************/
 unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 {
-	if(cmd->cmd!=UI_CMD_NULL)
-	printf("\n %s:cmd:%d \n", __func__, cmd->cmd);
+	//if(cmd->cmd!=UI_CMD_NULL)
+	//printf("\n %s:cmd:%d \n", __func__, cmd->cmd);
 	unsigned char ret=0;
 	
 	int arg1 = cmd->arg2;
@@ -1307,6 +1328,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_PLAYER_FINISH:
+				save_usb_play_time();
 				if(usb_playtime > 0)
 				{
 					save_usb_play_time();
@@ -1728,7 +1750,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				else
 					echo_vol_lev = 15;
 				display_mic_vol(echo_vol_lev);
+			
 				set_echo_vol(cmd->arg2);
+								
 				if (ui_source_select == SOURCE_SELECT_USB)
 				{
 					save_usb_play_time();
@@ -1828,7 +1852,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					if(mic_detect_online)
 					{
 						mic_open(true);
+						
 						set_echo_vol(echo_vol_lev);
+												
 						bt_cmd_current_echo();
 					}
 					else
@@ -1870,7 +1896,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					if(mic_detect_online)
 					{
 						mic_open(true);
+						
 						set_echo_vol(echo_vol_lev);
+										
 						bt_cmd_current_echo();
 					}
 					else
@@ -1958,7 +1986,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						{
 							echo_vol_lev += 1;
 						}
+							
 						set_echo_vol(echo_vol_lev);
+						
 						bt_cmd_current_echo();
 						display_mic_vol(echo_vol_lev);
 						if(ui_source_select == SOURCE_SELECT_USB)
@@ -1982,7 +2012,9 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 						{
 							echo_vol_lev -= 1;
 						}
+						
 						set_echo_vol(echo_vol_lev);
+						
 						bt_cmd_current_echo();
 						display_mic_vol(echo_vol_lev);
 						if(ui_source_select == SOURCE_SELECT_USB)
@@ -2131,6 +2163,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_SET_MICVOL:
 				if((ui_source_select != SOURCE_SELECT_USB)||(usb_is_load == false))
 				{
+					echo_on_flag = false;
 					//mic_detect_switch();
 					if(mic_on_flag)
 					{
@@ -2139,6 +2172,8 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 							usleep(1000);
 							mic_vol = mic_vol_table[mic_vol_lev];
 							set_adc_channel_vol(0,mic_vol);
+							usleep(1000);
+							set_echo_vol(echo_vol_lev);
 						}
 						else
 						{
@@ -2155,6 +2190,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					}
 				}				
 				
+				break;
+
+			case UI_CMD_DISPLAY_MUTE:
+				display_ui_mute();
 				break;
 
 			case UI_CMD_USB_EMU_TIMEOUT:
@@ -2234,6 +2273,10 @@ void source_mode_bt(void)
 
 			case UI_CMD_PREV:
 				bt_cmd_prev_song();
+				break;
+
+			case UI_CMD_DISPLAY_BT:
+				display_ui_bt();
 				break;
 
 			default:
@@ -2319,7 +2362,8 @@ void source_mode_usb(void)
 			case UI_CMD_USB_ECHO_ON:
 				//printf("\n %s:cmd:%d \n", __func__, cmd.cmd);
 				//set_echo_vol(echo_vol_lev);
-				//mic_detect_switch();
+				//mic_detect_switch();		
+				echo_on_flag = false;
 				if(mic_on_flag)
 				{
 					if(mic_detect_online)
@@ -2327,6 +2371,8 @@ void source_mode_usb(void)
 						usleep(1000);
 						mic_vol = mic_vol_table[mic_vol_lev];
 						set_adc_channel_vol(0,mic_vol);
+						usleep(1000);
+						set_echo_vol(echo_vol_lev);
 					}
 					else
 					{
