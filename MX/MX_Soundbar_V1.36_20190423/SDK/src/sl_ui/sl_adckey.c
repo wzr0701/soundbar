@@ -203,6 +203,7 @@ static int key_find_channel(void)
     int i, j, k, m;
     unsigned short buf[ADC_MAX_CH_NUM];
     char *p = (char *)buf;
+	//static int count = 0;
     //初始化缓存区
     memset(p, 0xff, ADC_MAX_CH_NUM * 2);
     //读取当前ADC通道值
@@ -214,7 +215,13 @@ static int key_find_channel(void)
         if (j)
         {   //找到对应的ADC通道
             //检查当前ADC值是否在某个设定的值的范围内
-			//printf("ADC_Value:0x%x\n", buf[i]);
+            //count++;
+			//if(count == 200)
+			//{
+			//	printf("ADC_Value:0x%x\n", buf[i]);
+			//	count = 0;
+			//}
+			
             for (k = 0; k < ADC_MAX_CH_VAL; k++)
             {
                 m = KEY_RANGE(buf[i], key_value_tbl[k]);

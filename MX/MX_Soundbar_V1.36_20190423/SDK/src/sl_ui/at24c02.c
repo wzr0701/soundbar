@@ -20,9 +20,9 @@
 /*周期计数值*/
 #define CLK_CNT (0x10000000)
 /*时钟引脚*/
-#define AT24C02_CLK_PIN (32)
+#define AT24C02_CLK_PIN (23)
 /*数据引脚*/
-#define AT24C02_DATA_PIN (27)
+#define AT24C02_DATA_PIN (25)
 /*EEPROM的大小*/
 #define EEPROM_PAGE_SIZE (8)
 /*EEPROM的页数*/

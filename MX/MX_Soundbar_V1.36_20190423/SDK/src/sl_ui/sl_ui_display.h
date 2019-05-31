@@ -24,7 +24,7 @@ void display_ui_device(char wm_mode);
 
 void display_ui_power(char on_off);
 void display_ui_vol(int vol);
-void display_ui_maxmin_vol(void);
+void display_ui_maxmin_vol(int vol);
 
 void display_mic_vol(int vol);
 

@@ -1,3 +1,0 @@
-ifeq ($(CONFIG_EXAMPLES_IPERF),y)
-CONFIGURED_APPS += examples/iperf
-endif

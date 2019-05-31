@@ -573,11 +573,13 @@ void ui_handle_power(int power_on_off)
 		//change_mode_unmute();
 
 		read_player_info();
-		read_mix_vol();
+		//read_mix_vol();
 		read_trebass_level(BASS_MODE);
 		read_trebass_level(TREBLE_MODE);	
 		set_bass_treble_vol(BASS_MODE,bass_vol,0);
+		usleep(100000);
 		set_bass_treble_vol(TREBLE_MODE,treble_vol,0);
+		usleep(100000);
 
 		bt_cmd_source_select(ui_source_select);
 		bt_cmd_current_bass(bass_vol); //bass
@@ -2653,7 +2655,7 @@ void ui_handle_vol_set(int vol)
         //player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
         //显示音量信息
 		display_ui_vol(vol);
-		save_mix_vol();
+		//save_mix_vol();
     }
 }
 
@@ -2872,7 +2874,7 @@ static void ui_process_vol_dec(void)
 
 		display_ui_vol(bt_mix_vol);
 
-		save_mix_vol();
+		//save_mix_vol();
 
 	    #if BYPASS_MODE
 	    bypass_in_vol -= BYPASS_VOL_IN_STEP;
@@ -3033,7 +3035,7 @@ static void ui_process_vol_inc(void)
 
 		display_ui_vol(bt_mix_vol);
 
-		save_mix_vol();
+		//save_mix_vol();
 
 	    #if BYPASS_MODE
 	    if(bypass_in_vol == BYPASS_VOL_IN_MIN)
@@ -3152,7 +3154,7 @@ void sl_ui_system_reset(void)
 
 	fm_clear();
 
-	save_mix_vol();
+	//save_mix_vol();
 
 	//player_process_cmd(NP_CMD_VOLUME_SET, NULL, 0, NULL, NULL);
 
@@ -3295,6 +3297,8 @@ int sc8836_ui_handle_cec_inactive_source( void)
 #endif
 	//set_sl_ui_cmd(NP_CMD_STOP, NULL, 0);
 	sc8836_action_hdmi_off();
+	usleep(1000);
+	zhuque_bsp_gpio_unregister_interrupt(12);
 	sys_power_control();
 	return 	-SL_UI_ERROR_NO_DIALOG;
 }

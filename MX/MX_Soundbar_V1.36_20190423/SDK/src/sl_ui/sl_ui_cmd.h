@@ -294,6 +294,8 @@ enum ui_cmd_e {
 	UI_CMD_EQ_SELECT,//338
 
 	UI_CMD_GO_TO_AUX2,//339
+
+	UI_CMD_DISPLAY_VER,//340
 	
 	UI_CMD_MAX,
 };

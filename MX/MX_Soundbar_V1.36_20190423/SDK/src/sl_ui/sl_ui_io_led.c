@@ -198,10 +198,10 @@ void switch_4052_function(int function)
 			sw2 = 0;
 			printf("%s:choose RCA.\n",__func__);
 			break;
-		case NONE_4052:
+		case SPDF_4052:
 			sw1 = 0;
 			sw2 = 0;
-			printf("%s:choose NO.\n",__func__);
+			printf("%s:choose SPDIFIN.\n",__func__);
 		default:
 			break;
 	}
@@ -232,7 +232,7 @@ void pa_mute_ctrl(bool mute)
     const int pin = PA_MUTE_PIN;
     zhuque_bsp_gpio_set_mode(pin, GPIO_OUT, PUSH_PULL);
 
-#if(PA_MUTE_HIGH==0)
+#if(PA_MUTE_HIGH==1)
     zhuque_bsp_gpio_set_value(pin, mute?GPIO_VALUE_HIGH:GPIO_VALUE_LOW);
 #else
     zhuque_bsp_gpio_set_value(pin, mute?GPIO_VALUE_LOW:GPIO_VALUE_HIGH);
@@ -401,7 +401,7 @@ void pa_static_check(void)
 	
 	}
 
-	//enter_othermode_check();
+	enter_othermode_check();
 
 #endif
 
@@ -534,19 +534,19 @@ void enter_othermode_check(void)
 	if(enter_count1 >= 40)
 	{
 		enter_count1 = 0;
-		if(playkey_count1 < 5)
+		if(playkey_count1 < 3)
 		{
 			playkey_count1 = 0;
 		}
 		else
 		{
-			if(nextkey_count < 5)
+			if(nextkey_count < 3)
 			{
 				playkey_count1 = 0;
 			}
 		}
 
-		if(nextkey_count < 5)
+		if(nextkey_count < 3)
 		{
 			nextkey_count = 0;
 		}
@@ -556,16 +556,17 @@ void enter_othermode_check(void)
 	{
 		prevkey_count = 0;
 		playkey_count = 0;
-		test_mode_flag = true;
-		cmd.cmd = UI_CMD_GO_TO_TEST;
+		cmd.cmd = UI_CMD_DISPLAY_VER;
+		cmd.arg2 = DIS_BT_VER;
 		send_cmd_2_ui(&cmd);
 	}
 
-	if(nextkey_count >= 5)
+	if(nextkey_count >= 3)
 	{
 		nextkey_count = 0;
 		playkey_count1 = 0;
-		cmd.cmd = UI_CMD_EQ_POWER_TEST;
+		cmd.cmd = UI_CMD_DISPLAY_VER;
+		cmd.arg2 = DIS_MCU_VER;
 		send_cmd_2_ui(&cmd);
 	}
 

@@ -74,7 +74,7 @@ static const char * AT_CMDS[] = {
 	"AT+AUX00\n",         //AUX断开连接
 	"ATIS\r\n",            //复位I2S
 	"ATDS\r\n",            //关闭I2S
-	"ATVE\r\n",            //查看版本号
+	"AT+VE\r\n",            //查看版本号
 	"AT+COA\r\n",            //COA
 	"AT+HDMI\r\n",           //HDMI
 	"AT+FM\r\n",            //FM
@@ -99,7 +99,7 @@ static const char * AT_CMDS[] = {
 	
 	//带参数命令
 	"AT+WM+",              //特定模式设置
-	"ATVER",              //版本号
+	"AT+VER+",              //版本号
 	"VBTVOL",
 	"VBTTRE",
 	"VBTBAS",

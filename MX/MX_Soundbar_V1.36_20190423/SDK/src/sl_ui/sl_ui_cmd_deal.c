@@ -84,6 +84,9 @@ static const int mic_auxvol_table[31]={
 	69, 72,75,78,80
 };
 
+#define SPDIFIN_ADC_CHANNEL              3
+#define SPDIFIN_ADC_VALUE                20
+
 
 
 char mic_vol_flag = false;
@@ -182,6 +185,8 @@ extern int folder_index_cnt;
 extern int folder_index_tab[255][2];
 
 extern int file_rel_pos;
+
+extern bool maxmin_vol_flag;
 
 extern ui_cmd_t get_mq_msg(void);
 extern void mq_msg_clear(void);
@@ -378,7 +383,7 @@ int  read_usb_num(void)
 ******************************************/
 void  save_mix_vol(void)
 {
-#if 0
+#if 1
 	unsigned char temp;
 
 	if(bt_mix_vol <= MIX_LEV_CNT)
@@ -389,7 +394,7 @@ void  save_mix_vol(void)
 		Delay5Ms(10);
 	}
 
-	//printf("save-mix_vol = %d\r\n",temp);
+	printf("save-mix_vol = %d\r\n",temp);
 #endif
 }
 
@@ -403,25 +408,25 @@ void  save_mix_vol(void)
 ******************************************/
 void  read_mix_vol(void)
 {
-#if 0
+#if 1
 	unsigned char temp;
 	temp=at24c02_read_one_byte(MEM_MIX_VOL);
 
 	if(temp <= MIX_LEV_CNT)
 	{
 		bt_mix_vol = temp;
-		select_mixvol_table();
-		bt_cmd_current_mainvol();
+		//select_mixvol_table();
+		//bt_cmd_current_mainvol();
 	}
 	else
 	{
 		bt_mix_vol = Frist_MIX_LEV;
-		select_mixvol_table();
-		bt_cmd_current_mainvol();
+		//select_mixvol_table();
+		//bt_cmd_current_mainvol();
 	}
 
 
-	//printf("read-mix_vol = %d\r\n",temp);
+	printf("read-mix_vol = %d\r\n",temp);
 #endif
 }
 
@@ -435,15 +440,18 @@ void  read_mix_vol(void)
 ******************************************/
 void  save_player_info(void)
 {
-#if 0
+#if 1
 	unsigned char temp;
 
 	temp= (unsigned char)ui_source_select;
+	
 	if(temp>=0)
+	{
 		at24c02_write_one_byte(MEM_WORK_MODE ,temp);
-	Delay5Ms(10);
-
-	//printf("save-ui_source_select=%d\r\n",temp);
+		Delay5Ms(10);
+	}
+	
+	printf("save-ui_source_select=%d\r\n",temp);
 #endif
 }
 
@@ -457,16 +465,20 @@ void  save_player_info(void)
 ******************************************/
 void  read_player_info(void)
 {
-#if 0
+#if 1
 	unsigned char temp;
 	temp=at24c02_read_one_byte(MEM_WORK_MODE);
+	
 	if(temp>=SOURCE_SELECT_END)
+	{
 		temp=SOURCE_SELECT_BT;
+	}
+		
 	ui_source_select=temp;
 
 	//ui_source_select=SOURCE_SELECT_HDMI;
 
-	//printf("ui_source_select=%d\r\n",temp);
+	printf("ui_source_select=%d\r\n",temp);
 #endif
 }
 
@@ -542,7 +554,8 @@ void dis_play_update(void)
 		
 		if(dis_other_mode == 100)
 		{
-			display_ui_maxmin_vol();
+			//printf("dis_other_mode == %d.\n",dis_other_mode);
+			display_ui_maxmin_vol(bt_mix_vol);
 		}
 
 
@@ -843,7 +856,10 @@ void enter_mode( int mode)
 	usleep(1000);
 
 	display_ui_main_sys(ui_source_select);
-	
+
+
+	save_player_info();
+	save_mix_vol();
 	
 	//if(ui_source_select != SOURCE_SELECT_USB)
 	//{
@@ -852,12 +868,12 @@ void enter_mode( int mode)
 
 	set_ui_media(ui_source_select);
 
-	/*
+	
 	if(bt_version_num == 0)
 	{
 		bt_cmd_get_version();
 	}
-	*/
+	
 	
 	////////////////////////////////////
 	usleep(1000);
@@ -918,6 +934,9 @@ void enter_mode( int mode)
 			usleep(50000);
 			player_process_cmd(NP_CMD_SPDIFIN_START, NULL, 0, NULL, NULL);
 			usleep(50000);
+			set_adc_channel_vol(SPDIFIN_ADC_CHANNEL,SPDIFIN_ADC_VALUE);
+			usleep(10000);
+			switch_4052_function(SPDF_4052);
 			break;
 
 		case SOURCE_SELECT_HDMI:
@@ -932,8 +951,10 @@ void enter_mode( int mode)
 			usleep(50000);
 			player_process_cmd(NP_CMD_SPDIFIN_START, NULL, 0, NULL, NULL);
 			usleep(50000);
+			set_adc_channel_vol(SPDIFIN_ADC_CHANNEL,SPDIFIN_ADC_VALUE);
+			usleep(10000);
+			switch_4052_function(SPDF_4052);			
 			wd_start(wdtimer_hdmion_send, 900, ui_hdmion_send, 0);
-
 			break;
 
 		case SOURCE_SELECT_COA:
@@ -944,7 +965,9 @@ void enter_mode( int mode)
 			usleep(50000);
 			player_process_cmd(NP_CMD_SPDIFIN_START, NULL, 0, NULL, NULL);
 			usleep(50000);
-
+			set_adc_channel_vol(SPDIFIN_ADC_CHANNEL,SPDIFIN_ADC_VALUE);
+			usleep(10000);
+			switch_4052_function(SPDF_4052);
 			break;
 
 		case SOURCE_SELECT_TEST:
@@ -1000,20 +1023,15 @@ void exit_mode( int mode)
 			break;
 
 		case SOURCE_SELECT_FM:
-			switch_4052_function(NONE_4052);
 			usleep(1000);
 			fm_rx_off();
 			usleep(1000);
 			break;
 
 		case SOURCE_SELECT_LINEIN:
-			switch_4052_function(NONE_4052);
-			usleep(1000);
 			break;
 
 		case SOURCE_SELECT_RCA:
-			switch_4052_function(NONE_4052);
-			usleep(1000);
 			break;
 
 		case SOURCE_SELECT_SPDIFIN:
@@ -1878,6 +1896,12 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_SET_SOURCE:
+				
+				if(ui_source_select == SOURCE_SELECT_USB)
+				{
+					save_usb_play_time();
+				}
+				
 				display_set_source(ui_source_select);
 			break;
 
@@ -1903,6 +1927,10 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 			case UI_CMD_WOOFER_PAIR:
 				dis_other_mode = 5;
 				bt_cmd_woofer_pair();
+				break;
+
+			case UI_CMD_DISPLAY_VER:
+				display_ui_version(cmd->arg2);
 				break;
 
 			case UI_CMD_HALF_SECOND:
@@ -2153,7 +2181,7 @@ void source_mode_fm(void)
 		switch(cmd.cmd)
 		{
 			case UI_CMD_PLAY_PAUSE:
-				FmScan(1,1);
+				//FmScan(1,1);
 				break;
 
 			case UI_CMD_FM_TUNE_ADD:
@@ -2524,6 +2552,7 @@ void source_mode_coaxial(void)
 **********************************************************/
 void source_mode_test(void)
 {
+#if 0
 	ui_cmd_t cmd;
 	unsigned char ret=0;
 
@@ -2648,6 +2677,7 @@ void source_mode_test(void)
 			}
 		}
 	}
+#endif
 }
 
 

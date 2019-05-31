@@ -82,8 +82,8 @@ extern int folder_index_dis;
 extern unsigned char bt_version_num;
 
 
-#define MCU_VER1 2
-#define MCU_VER2 5
+#define MCU_VER1 1
+#define MCU_VER2 0
 
 #define BT_VER1 1
 #define BT_VER2 2
@@ -98,7 +98,7 @@ bool mute_dis_flag = false;
 
 int ui_display_select = -1;
 
-
+bool maxmin_vol_flag = false;
 /**************************************
 
 
@@ -387,23 +387,25 @@ void display_ui_device(char wm_mode)
 		wd_cancel(wdtimer_goback_mode);
 	}
 
-	dis_other_mode=0;
-
-	if(input_flag)
+	if(maxmin_vol_flag == false)
 	{
-		cmd.cmd = UI_CMD_ENTER;
-		send_cmd_2_ui(&cmd);
-		input_flag=0;
+		dis_other_mode=0;
+
+		if(input_flag)
+		{
+			cmd.cmd = UI_CMD_ENTER;
+			send_cmd_2_ui(&cmd);
+			input_flag=0;
+		}
+
+		if(!mute_state)
+		{
+			cmd.cmd = UI_CMD_SET_SOURCE;
+			send_cmd_2_ui(&cmd);
+			//display_set_source(ui_source_select);
+		}
 	}
-
-	if(!mute_state)
-	{
-		cmd.cmd = UI_CMD_SET_SOURCE;
-		send_cmd_2_ui(&cmd);
-		//display_set_source(ui_source_select);
-	}
-
-
+	
 }
 
 /****************************************************************************
@@ -451,7 +453,7 @@ void display_ui_vol(int vol)
 {
 	//int vol_i =(int)(vol / VOL_STEP);
 
-	char volume[4] = {0, -1, 0, 0};
+	char volume[4] = {0, NUM_OFF, 0, 0};
 
 	volume[0]  = NUM_U;
 	volume[2] = vol / 10;
@@ -463,10 +465,12 @@ void display_ui_vol(int vol)
 	if((vol > 0)&&(vol < 30) )
 	{
 		dis_other_mode = 1;
+		maxmin_vol_flag = false;
 	}
 	else
 	{
 		dis_other_mode = 100;
+		maxmin_vol_flag = true;
 	}
 	
 }
@@ -477,7 +481,7 @@ void display_ui_vol(int vol)
 
 
 ****************************************************/
-void display_ui_maxmin_vol(void)
+void display_ui_maxmin_vol(int vol)
 {
 
 	static bool is_Disp = true;
@@ -485,7 +489,11 @@ void display_ui_maxmin_vol(void)
 
 	char volume[4] = {0, NUM_OFF, 0, 0};
 
-	if(++dis_count < 6)
+	volume[0]  = NUM_U;
+	volume[2] = vol / 10;
+	volume[3] =  vol % 10;
+
+	if(++dis_count <= 7)
 	{
 		if(!is_Disp)
 		{
@@ -504,7 +512,9 @@ void display_ui_maxmin_vol(void)
 	{
 		dis_count = 0;
 		is_Disp = true;
+		maxmin_vol_flag = false;
 		display_set_source(ui_source_select);
+		dis_other_mode = 0;
 	}
 	
 }
@@ -1053,6 +1063,8 @@ void dis_ui_updata_program(char on_off)
 		display_str(dis_buf1);
 	else
 		display_str(dis_buf2);
+
+	dis_other_mode = 200;
 	//ht1633_updata_display();
 }
 
@@ -1063,6 +1075,7 @@ void display_ui_version(int ver)
 	char dis_buf2[4]={NUM_OFF,NUM_U,0,0};
 
 	display_ui_clear();
+	display_ui_icon(ICON_DOT,1);
 	if(ver==0)
 	{
 		dis_buf1[2] = MCU_VER1;
@@ -1075,7 +1088,6 @@ void display_ui_version(int ver)
 		dis_buf2[3] = bt_version_num%10;
 		display_str(dis_buf2);
 	}
-	display_ui_icon(ICON_DOT,1);
 
 	//ht1633_updata_display();
 }

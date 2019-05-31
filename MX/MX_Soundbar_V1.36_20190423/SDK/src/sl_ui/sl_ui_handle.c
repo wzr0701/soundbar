@@ -572,13 +572,16 @@ void ui_handle_power(int power_on_off)
 		//enter_othermode_check();
 		//change_mode_unmute();
 
+		read_player_info();
+		read_mix_vol();
+
 		//set_bass_treble_vol(BASS_MODE,bass_vol,0);
 		//set_bass_treble_vol(TREBLE_MODE,treble_vol,0);
+		bt_cmd_source_select(ui_source_select);
 		
-		ui_source_select = SOURCE_SELECT_BT;
+		//ui_source_select = SOURCE_SELECT_BT;
 		ui_handle_mode(ui_source_select, false);
 		
-		//bt_cmd_source_select(ui_source_select);
 		//bt_cmd_current_bass(bass_vol); //bass
 		//bt_cmd_current_treble(treble_vol); //treble
 
@@ -1040,6 +1043,13 @@ ui_cmd_t bt_cmd_check(char *buf_recv)
 		else if(index == AT_OK)
         {
 			bt_ok_flag = true;
+			cmd.cmd = UI_CMD_SET_SOURCE;
+        }
+		else if(index == AT_VERSION)
+        {
+			//BT 版本号
+			bt_version_num = value;
+            printf("bt_version_num = %d\n", bt_version_num);
         }
     }
 	return cmd;
@@ -2603,6 +2613,7 @@ void ui_handle_vol_set(int vol)
 		bt_mix_vol = vol;
 
 		display_ui_vol(vol);
+		save_mix_vol();
 #if 0
 		if (mute_state == MUTE)
 		{
@@ -2775,6 +2786,7 @@ static void ui_process_vol_dec(void)
 
 
 	display_ui_vol(bt_mix_vol);
+	save_mix_vol();
 
 	if (ui_source_select == SOURCE_SELECT_USB)
 	{
@@ -2819,6 +2831,7 @@ static void ui_process_vol_inc(void)
 	printf("%s:mix_vol = %d\n", __func__, mix_vol);
 
 	display_ui_vol(bt_mix_vol);
+	save_mix_vol();
 	
 	if (ui_source_select == SOURCE_SELECT_USB)
 	{
@@ -2885,6 +2898,7 @@ void sl_ui_set_reqrate(void)
 
 void sl_ui_system_reset(void)
 {
+#if 0
 	char reset_clear_str[] = {NUM_OFF,NUM_OFF, NUM_OFF, NUM_OFF, NUM_OFF};
 
 	display_ui_clear();
@@ -2928,6 +2942,7 @@ void sl_ui_system_reset(void)
 	//set_channel_mixvol_by_mode(ui_source_select);
 	//player_process_cmd(NP_CMD_VOLUME_SET, NULL, mix_vol, NULL, NULL);
 	//display_set_source(ui_source_select);
+#endif
 }
 
 /*****************************************************

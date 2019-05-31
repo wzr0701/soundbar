@@ -111,6 +111,7 @@ bool enter_tre_set = false;
 bool enter_bass_set = false;
 
 bool change_mode_flag = false;
+bool hdmi_detect_flag = false;
 
 bool usb_is_load=false;
 
@@ -358,7 +359,7 @@ int  read_usb_num(void)
 ******************************************/
 void  save_mix_vol(void)
 {
-#if 1
+#if 0
 	unsigned char temp;
 
 	if(bt_mix_vol <= MIX_LEV_CNT)
@@ -383,7 +384,7 @@ void  save_mix_vol(void)
 ******************************************/
 void  read_mix_vol(void)
 {
-#if 1
+#if 0
 	unsigned char temp;
 	temp=at24c02_read_one_byte(MEM_MIX_VOL);
 
@@ -463,6 +464,7 @@ void hdmi_send_unmute(void)
 	usleep(100000);
 	sc8836_action_hdmi_soundbar_adj_tv_vol();
 	usleep(100000);
+	hdmi_detect_flag = false;
 	if (mute_state == UNMUTE)
 	{
 		//player_process_cmd(NP_CMD_VOLUME_SET, NULL, (int)mix_vol, NULL, NULL);
@@ -838,6 +840,7 @@ void enter_mode( int mode)
 	char *vol_str;
 
 	change_mode_flag = false;
+	hdmi_detect_flag = true;
 
 	set_adc_channel_vol(1,0);
 	set_adc_channel_vol(2,0);
@@ -895,7 +898,7 @@ void enter_mode( int mode)
 	}
 	
 	save_player_info();
-	save_mix_vol();
+	//save_mix_vol();
 	////////////////////////////////////
 	usleep(1000);
 	set_channel_vol_by_mode(ui_source_select);
@@ -1220,6 +1223,7 @@ void exit_mode( int mode)
 		case SOURCE_SELECT_HDMI:
 			sc8836_action_hdmi_off();
 			usleep(1000);
+			zhuque_bsp_gpio_unregister_interrupt(12);
 			break;
 
 		case SOURCE_SELECT_COA:
@@ -1269,6 +1273,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 					hdmi_cec_online = false;
 					sc8836_action_hdmi_off();
 					usleep(1000);
+					zhuque_bsp_gpio_unregister_interrupt(12);
 				}
 				pa_mute_ctrl(true);
 				wd_cancel(wdtimer_goback_mode);
@@ -1681,7 +1686,7 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				break;
 
 			case UI_CMD_HDMI_CONNECT:
-				//if(ui_source_select == SOURCE_SELECT_HDMI)
+				if((ui_source_select == SOURCE_SELECT_HDMI)&&(hdmi_detect_flag == false))
 				{
 					ui_handle_mode(SOURCE_SELECT_HDMI,0);
 					bt_cmd_source_select(ui_source_select);
@@ -1694,6 +1699,8 @@ unsigned char ui_handle_cmd_com(ui_cmd_t *cmd)
 				if(ui_source_select == SOURCE_SELECT_HDMI)
 				{
 					sc8836_action_hdmi_off();
+					usleep(1000);
+					zhuque_bsp_gpio_unregister_interrupt(12);
 				}
 				//printf(">>>>>>>>>>>HDMI is disconnect!>>>>>>>>>>\n");
 				//player_process_cmd(NP_CMD_VOLUME_SET, NULL,0, NULL, NULL);
@@ -2830,7 +2837,7 @@ void source_mode_test(void)
     bt_mix_vol = Frist_MIX_LEV;
 	select_mixvol_table();	
 	usleep(10000);	
-	save_mix_vol();
+	//save_mix_vol();
 	usleep(10000);
 	display_ui_init();
 	ht1633_updata_display();

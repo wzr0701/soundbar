@@ -17,8 +17,8 @@
 #endif
 
 #define CMD_UI_PLAY              0x60
-#define CMD_UI_INC               0x61
-#define CMD_UI_DEC               0x62
+#define CMD_UI_INC               0x62
+#define CMD_UI_DEC               0x61
 #define CMD_UI_MUTE              0x63
 #define CMD_UI_EQ                0x64
 #define CMD_UI_PAIR              0x65
@@ -207,6 +207,10 @@ static void handle_ui_events_inner(struct input_event *event)
 	                else if(value == CMD_UI_DEC)
 					{
 						cmd.cmd = UI_CMD_PREV;
+					}
+					else if(value == CMD_UI_PLAY)
+					{
+						cmd.cmd = UI_CMD_FM_SCAN;
 					}
 					
 	            }
@@ -566,6 +570,10 @@ static ui_cmd_t ui_handle_click(int event_cmd)
     switch (event_cmd & 0x7f)
     {
 		case CMD_UI_PLAY:
+			playkey_count++;
+			enter_count = 0;
+			playkey_count1++;
+			enter_count1 = 0;
 			cmd.cmd = UI_CMD_PLAY_PAUSE;
 			break;
 		
@@ -578,10 +586,20 @@ static ui_cmd_t ui_handle_click(int event_cmd)
 	        break;
 			
 	    case CMD_UI_INC:		
+			if(playkey_count1 == 3)
+			{
+				nextkey_count++;
+				enter_count1 = 0;
+			}		
 			cmd.cmd = UI_CMD_VOLUME_INC;	
 	        break;
 		
-	    case CMD_UI_DEC:			
+	    case CMD_UI_DEC:				
+			if(playkey_count == 3)
+			{
+				prevkey_count++;
+				enter_count = 0;
+			}			
 			cmd.cmd = UI_CMD_VOLUME_DEC;
 	        break;
 

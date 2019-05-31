@@ -24,11 +24,16 @@
 #define PT2386_CTL_PIN          26
 
 
+#define DIS_MCU_VER 0
+#define DIS_BT_VER 1
+
+
 enum
 {
     RCA_4052,
     AUX_4052,
     FM_4052,
+    SPDF_4052,
     NONE_4052
 } switch_4052;
 

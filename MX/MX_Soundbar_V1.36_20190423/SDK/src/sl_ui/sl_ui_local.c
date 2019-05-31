@@ -37,6 +37,7 @@ extern  bool usb_prev_flag;
 extern int folder_index_cnt;
 extern bool usb_is_load;
 extern bool folder_dis_flag;
+extern bool bt_ok_flag;
 
 int folder_index_tab[255][2];
 int folder_total_num = 0;
@@ -297,7 +298,7 @@ void handle_local_music_play(int file_index, int playtime)
 			player_process_cmd(NP_CMD_SEEK, item.path, playtime * 1000, NULL, NULL);
 		}
 
-		if(!folder_dis_flag)
+		if((!folder_dis_flag)&&(bt_ok_flag))
 		{
 			display_ui_usb_number(file_rel_pos);
 		}	
